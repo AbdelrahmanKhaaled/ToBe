@@ -5,8 +5,10 @@ import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
+import { useTranslation } from 'react-i18next';
 
 export function Faqs() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -114,10 +116,10 @@ export function Faqs() {
     try {
       if (editing) {
         await FaqService.update(editing.id, buildFormData());
-        toast.success('FAQ updated');
+        toast.success(t('faqs.toasts.updated', 'FAQ updated'));
       } else {
         await FaqService.create(buildFormData());
-        toast.success('FAQ created');
+        toast.success(t('faqs.toasts.created', 'FAQ created'));
       }
       setModalOpen(false);
       fetchData();
@@ -131,15 +133,15 @@ export function Faqs() {
   const handleDelete = async (row) => {
     const q = row.question ?? row.translations?.ar?.question ?? row.translations?.en?.question ?? 'this';
     const ok = await confirm({
-      title: 'Delete FAQ',
-      message: `Delete "${q}"?`,
-      confirmLabel: 'Delete',
+      title: t('faqs.deleteTitle'),
+      message: t('faqs.deleteMessage', { question: q }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await FaqService.remove(row.id);
-      toast.success('FAQ deleted');
+      toast.success(t('faqs.toasts.deleted', 'FAQ deleted'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -157,42 +159,82 @@ export function Faqs() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">FAQs</h1>
-        <Button onClick={openCreate}>Add FAQ</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('faqs.title')}</h1>
+        <Button onClick={openCreate}>{t('faqs.add')}</Button>
       </div>
       <DataTable
         columns={[
-          { key: 'question', header: 'Question', render: (r) => getQuestion(r).slice(0, 60) + (getQuestion(r).length > 60 ? '...' : '') },
-          { key: 'answer', header: 'Answer', render: (r) => getAnswer(r).slice(0, 50) + '...' },
+          {
+            key: 'question',
+            header: t('faqs.columns.question'),
+            render: (r) => getQuestion(r).slice(0, 60) + (getQuestion(r).length > 60 ? '...' : ''),
+          },
+          {
+            key: 'answer',
+            header: t('faqs.columns.answer'),
+            render: (r) => getAnswer(r).slice(0, 50) + '...',
+          },
         ]}
         data={data}
         meta={meta ?? undefined}
         onPageChange={(pageNum, linkUrl) => (linkUrl ? fetchByUrl(linkUrl) : setPage(pageNum))}
         search={search}
         onSearchChange={(v) => { setSearch(v); setPage(1); }}
-        emptyMessage="No FAQs yet"
+        emptyMessage={t('faqs.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
             <Link to={`/faqs/${row.id}`}>
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View">
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('common.view')}
+                aria-label={t('common.view')}
+              >
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button
+              variant="ghost"
+              className="!p-2 min-w-0"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
+              onClick={() => openEdit(row)}
+            >
               <IconEdit />
             </Button>
-            <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
+            <Button
+              variant="danger"
+              className="!p-2 min-w-0"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
+              onClick={() => handleDelete(row)}
+            >
               <IconTrash />
             </Button>
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit FAQ' : 'Create FAQ'}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? t('faqs.modalEdit') : t('faqs.modalCreate')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Question (Arabic)" value={formQuestionAr} onChange={(e) => setFormQuestionAr(e.target.value)} />
-          <Input label="Question (English)" value={formQuestionEn} onChange={(e) => setFormQuestionEn(e.target.value)} required />
+          <Input
+            label={t('faqs.questionAr')}
+            value={formQuestionAr}
+            onChange={(e) => setFormQuestionAr(e.target.value)}
+          />
+          <Input
+            label={t('faqs.questionEn')}
+            value={formQuestionEn}
+            onChange={(e) => setFormQuestionEn(e.target.value)}
+            required
+          />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Answer (Arabic)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('faqs.answerAr')}
+            </label>
             <textarea
               value={formAnswerAr}
               onChange={(e) => setFormAnswerAr(e.target.value)}
@@ -202,7 +244,9 @@ export function Faqs() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Answer (English)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('faqs.answerEn')}
+            </label>
             <textarea
               value={formAnswerEn}
               onChange={(e) => setFormAnswerEn(e.target.value)}
@@ -213,10 +257,10 @@ export function Faqs() {
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>

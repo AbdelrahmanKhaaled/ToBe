@@ -5,8 +5,10 @@ import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
+import { useTranslation } from 'react-i18next';
 
 export function Levels() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -116,10 +118,10 @@ export function Levels() {
     try {
       if (editing) {
         await LevelService.update(editing.id, buildFormData());
-        toast.success('Level updated');
+        toast.success(t('levels.updated', 'Level updated'));
       } else {
         await LevelService.create(buildFormData());
-        toast.success('Level created');
+        toast.success(t('levels.created', 'Level created'));
       }
       setModalOpen(false);
       fetchData();
@@ -131,17 +133,17 @@ export function Levels() {
   };
 
   const handleDelete = async (row) => {
-    const name = row.name ?? row.name_ar ?? row.name_en ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? 'this';
+    const name = row.name ?? row.name_ar ?? row.name_en ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? t('common.thisItem', 'this');
     const ok = await confirm({
-      title: 'Delete level',
-      message: `Delete "${name}"?`,
-      confirmLabel: 'Delete',
+      title: t('levels.deleteTitle'),
+      message: t('levels.deleteMessage', { name }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await LevelService.remove(row.id);
-      toast.success('Level deleted');
+      toast.success(t('levels.deleted', 'Level deleted'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -156,11 +158,11 @@ export function Levels() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">Levels</h1>
-        <Button onClick={openCreate}>Add level</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('levels.title')}</h1>
+        <Button onClick={openCreate}>{t('levels.add')}</Button>
       </div>
       <DataTable
-        columns={[{ key: 'name', header: 'Name', render: (r) => getDisplayName(r) }]}
+        columns={[{ key: 'name', header: t('levels.name'), render: (r) => getDisplayName(r) }]}
         data={data}
         meta={meta ?? undefined}
         onPageChange={(pageNum, linkUrl) => (linkUrl ? fetchByUrl(linkUrl) : setPage(pageNum))}
@@ -169,7 +171,7 @@ export function Levels() {
           setSearch(v);
           setPage(1);
         }}
-        emptyMessage="No levels yet"
+        emptyMessage={t('levels.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
             <Link to={`/levels/${row.id}`}>
@@ -186,12 +188,12 @@ export function Levels() {
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit level' : 'Create level'}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('levels.modalEdit') : t('levels.modalCreate')}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Name (Arabic) *" value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
-          <Input label="Name (English) *" value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
+          <Input label={t('levels.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
+          <Input label={t('levels.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (Arabic)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.descAr')}</label>
             <textarea
               value={formDescAr}
               onChange={(e) => setFormDescAr(e.target.value)}
@@ -200,7 +202,7 @@ export function Levels() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (English)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.descEn')}</label>
             <textarea
               value={formDescEn}
               onChange={(e) => setFormDescEn(e.target.value)}
@@ -209,7 +211,7 @@ export function Levels() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Image (optional)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.image')}</label>
             <input
               type="file"
               accept="image/*"
@@ -219,10 +221,10 @@ export function Levels() {
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>

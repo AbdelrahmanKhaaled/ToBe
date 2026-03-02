@@ -6,8 +6,10 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { getStoredMentorPhone, setStoredMentorPhone } from '@/utils/mentorPhoneStorage';
+import { useTranslation } from 'react-i18next';
 
 export function Mentors() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -193,9 +195,9 @@ export function Mentors() {
 
   const handleDelete = async (row) => {
     const ok = await confirm({
-      title: 'Delete mentor',
-      message: `Delete "${row.name}"?`,
-      confirmLabel: 'Delete',
+      title: t('mentors.deleteTitle'),
+      message: t('mentors.deleteMessage', { name: row.name }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -213,48 +215,64 @@ export function Mentors() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">Mentors</h1>
-        <Button onClick={openCreate}>Add mentor</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('mentors.title')}</h1>
+        <Button onClick={openCreate}>{t('mentors.add')}</Button>
       </div>
       <DataTable
         columns={[
-          { key: 'name', header: 'Name' },
-          { key: 'email', header: 'Email' },
-          { key: 'phone', header: 'Phone', render: (row) => getMentorPhone(row) || '—' },
+          { key: 'name', header: t('mentors.name'), render: (row) => row.name ?? row.name_ar ?? row.name_en ?? '—' },
+          { key: 'email', header: t('mentors.email') },
+          { key: 'phone', header: t('mentors.phone'), render: (row) => getMentorPhone(row) || '—' },
         ]}
         data={data}
         meta={meta ?? undefined}
         onPageChange={(pageNum, linkUrl) => (linkUrl ? fetchByUrl(linkUrl) : setPage(pageNum))}
         search={search}
         onSearchChange={(v) => { setSearch(v); setPage(1); }}
-        emptyMessage="No mentors yet"
+        emptyMessage={t('mentors.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
             <Link to={`/mentors/${row.id}`}>
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View">
+              <Button variant="ghost" className="!p-2 min-w-0" title={t('common.view')} aria-label={t('common.view')}>
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button
+              variant="ghost"
+              className="!p-2 min-w-0"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
+              onClick={() => openEdit(row)}
+            >
               <IconEdit />
             </Button>
-            <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
+            <Button
+              variant="danger"
+              className="!p-2 min-w-0"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
+              onClick={() => handleDelete(row)}
+            >
               <IconTrash />
             </Button>
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit mentor' : 'Create mentor'}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? t('mentors.modalEdit') : t('mentors.modalCreate')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Name"
+            label={t('mentors.name')}
             value={formName}
             onChange={(e) => { setFormName(e.target.value); setFieldErrors((prev) => ({ ...prev, name: undefined })); }}
             error={fieldErrors.name?.[0] || fieldErrors.name}
             required
           />
           <Input
-            label="Email"
+            label={t('mentors.email')}
             type="email"
             value={formEmail}
             onChange={(e) => { setFormEmail(e.target.value); setFieldErrors((prev) => ({ ...prev, email: undefined })); }}
@@ -262,13 +280,13 @@ export function Mentors() {
             required
           />
           <Input
-            label="Phone"
+            label={t('mentors.phone')}
             value={formPhone}
             onChange={(e) => { setFormPhone(e.target.value); setFieldErrors((prev) => ({ ...prev, phone: undefined, phone_number: undefined })); }}
             error={fieldErrors.phone?.[0] || fieldErrors.phone || fieldErrors.phone_number?.[0] || fieldErrors.phone_number}
           />
           <Input
-            label={editing ? 'New password (leave blank to keep)' : 'Password'}
+            label={editing ? t('mentors.newPassword') : t('mentors.password')}
             type="password"
             value={formPassword}
             onChange={(e) => setFormPassword(e.target.value)}
@@ -276,10 +294,10 @@ export function Mentors() {
           />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>

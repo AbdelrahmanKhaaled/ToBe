@@ -5,8 +5,10 @@ import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 export function Banners() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -167,9 +169,9 @@ export function Banners() {
       row.translations?.en?.name ??
       'this';
     const ok = await confirm({
-      title: 'Delete banner',
-      message: `Delete "${name}"?`,
-      confirmLabel: 'Delete',
+      title: t('bannersPage.deleteTitle'),
+      message: t('bannersPage.deleteMessage', { name }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -204,19 +206,19 @@ export function Banners() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">Banners</h1>
-        <Button onClick={openCreate}>Add banner</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('bannersPage.title')}</h1>
+        <Button onClick={openCreate}>{t('bannersPage.add')}</Button>
       </div>
       <DataTable
         columns={[
-          { key: 'title', header: 'Title', render: (r) => getDisplayName(r) },
-          { key: 'description', header: 'Description', render: (r) => getDisplayDesc(r) },
+          { key: 'title', header: t('bannersPage.name'), render: (r) => getDisplayName(r) },
+          { key: 'description', header: t('bannersPage.description'), render: (r) => getDisplayDesc(r) },
           {
             key: 'button_text',
-            header: 'Button text',
+            header: t('bannersPage.buttonText'),
             render: (r) => r.button_text ?? r.button_text_en ?? r.button_text_ar ?? '',
           },
-          { key: 'url', header: 'URL', render: (r) => r.button_url ?? '' },
+          { key: 'url', header: t('bannersPage.url'), render: (r) => r.button_url ?? '' },
         ]}
         data={data}
         meta={meta ?? undefined}
@@ -226,19 +228,25 @@ export function Banners() {
           setSearch(v);
           setPage(1);
         }}
-        emptyMessage="No banners yet"
+        emptyMessage={t('bannersPage.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
             <Link to="#" aria-disabled="true">
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View" disabled>
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('common.view')}
+                aria-label={t('common.view')}
+                disabled
+              >
                 <IconView />
               </Button>
             </Link>
             <Button
               variant="ghost"
               className="!p-2 min-w-0"
-              title="Edit"
-              aria-label="Edit"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
               onClick={() => openEdit(row)}
             >
               <IconEdit />
@@ -246,8 +254,8 @@ export function Banners() {
             <Button
               variant="danger"
               className="!p-2 min-w-0"
-              title="Delete"
-              aria-label="Delete"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
               onClick={() => handleDelete(row)}
             >
               <IconTrash />
@@ -255,22 +263,26 @@ export function Banners() {
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit banner' : 'Create banner'}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? t('bannersPage.modalEdit') : t('bannersPage.modalCreate')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Name (Arabic) *"
+            label={t('bannersPage.nameAr')}
             value={formNameAr}
             onChange={(e) => setFormNameAr(e.target.value)}
             required
           />
           <Input
-            label="Name (English) *"
+            label={t('bannersPage.nameEn')}
             value={formNameEn}
             onChange={(e) => setFormNameEn(e.target.value)}
             required
           />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (Arabic)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('bannersPage.descAr')}</label>
             <textarea
               value={formDescAr}
               onChange={(e) => setFormDescAr(e.target.value)}
@@ -279,7 +291,7 @@ export function Banners() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (English)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('bannersPage.descEn')}</label>
             <textarea
               value={formDescEn}
               onChange={(e) => setFormDescEn(e.target.value)}
@@ -288,23 +300,23 @@ export function Banners() {
             />
           </div>
           <Input
-            label="Button text (Arabic)"
+            label={t('bannersPage.buttonTextAr')}
             value={formButtonTextAr}
             onChange={(e) => setFormButtonTextAr(e.target.value)}
           />
           <Input
-            label="Button text (English)"
+            label={t('bannersPage.buttonTextEn')}
             value={formButtonTextEn}
             onChange={(e) => setFormButtonTextEn(e.target.value)}
           />
           <Input
-            label="Button URL"
+            label={t('bannersPage.buttonUrl')}
             value={formButtonUrl}
             onChange={(e) => setFormButtonUrl(e.target.value)}
             type="url"
           />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Image</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('bannersPage.image')}</label>
             <input
               type="file"
               accept="image/*"
@@ -314,10 +326,10 @@ export function Banners() {
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>

@@ -3,8 +3,10 @@ import { AccessControlService } from '@/api';
 import { Button, Loading } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { toast } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 export function RolesPermissions() {
+  const { t } = useTranslation();
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [userId, setUserId] = useState('');
@@ -78,11 +80,12 @@ export function RolesPermissions() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-[var(--color-primary)]">Roles &amp; Permissions</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('rolesPage.title')}</h1>
+      {/* Lists */}
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="p-4 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)]">
-          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-3">Roles</h2>
+          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-3">{t('rolesPage.roles')}</h2>
           <ul className="space-y-1 max-h-72 overflow-auto text-sm">
             {roles.map((role) => (
               <li key={role.id ?? role.name} className="flex items-center justify-between gap-2">
@@ -94,12 +97,12 @@ export function RolesPermissions() {
                 )}
               </li>
             ))}
-            {!roles.length && <li className="text-gray-500">No roles defined.</li>}
+            {!roles.length && <li className="text-gray-500">{t('rolesPage.noRoles')}</li>}
           </ul>
         </div>
 
         <div className="p-4 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)]">
-          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-3">Permissions</h2>
+          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-3">{t('rolesPage.permissions')}</h2>
           <ul className="space-y-1 max-h-72 overflow-auto text-sm">
             {permissions.map((perm) => (
               <li key={perm.id ?? perm.name} className="flex items-center justify-between gap-2">
@@ -111,24 +114,26 @@ export function RolesPermissions() {
                 )}
               </li>
             ))}
-            {!permissions.length && <li className="text-gray-500">No permissions defined.</li>}
+            {!permissions.length && <li className="text-gray-500">{t('rolesPage.noPermissions')}</li>}
           </ul>
         </div>
       </section>
 
       <section className="p-4 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)]">
-        <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-4">Manage user roles</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-4">
+          {t('rolesPage.manageUserRoles')}
+        </h2>
         <div className="flex flex-col md:flex-row gap-3 items-end mb-4">
           <div className="flex-1">
             <Input
-              label="User ID"
+              label={t('rolesPage.userId')}
               type="number"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             />
           </div>
           <Button type="button" onClick={handleFetchUser} loading={updating}>
-            Load user roles
+            {t('rolesPage.loadUserRoles')}
           </Button>
         </div>
 
@@ -136,13 +141,13 @@ export function RolesPermissions() {
           <div className="space-y-4">
             {userInfo.user && (
               <div className="text-sm text-gray-700">
-                <span className="font-medium">User:</span>{' '}
+                <span className="font-medium">{t('rolesPage.userLabel')}</span>{' '}
                 {userInfo.user.name ?? userInfo.user.email ?? userInfo.user.id}
               </div>
             )}
             <div>
               <p className="text-sm font-medium text-[var(--color-primary)] mb-2">
-                Select roles for this user
+                {t('rolesPage.selectRolesForUser')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {roles.map((role) => {
@@ -163,12 +168,16 @@ export function RolesPermissions() {
                     </button>
                   );
                 })}
-                {!roles.length && <span className="text-sm text-gray-500">No roles to assign.</span>}
+                {!roles.length && (
+                  <span className="text-sm text-gray-500">
+                    {t('rolesPage.noRolesToAssign')}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex justify-end">
               <Button type="button" onClick={handleSyncRoles} loading={updating}>
-                Save roles
+                {t('rolesPage.saveRoles')}
               </Button>
             </div>
           </div>

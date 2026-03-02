@@ -5,6 +5,7 @@ import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconC
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
+import { useTranslation } from 'react-i18next';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -17,6 +18,7 @@ function toFormValue(val) {
 }
 
 export function Articles() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -183,17 +185,17 @@ export function Articles() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!editing && !formCourseId) {
-      toast.error('Please select a course.');
+      toast.error(t('common.pleaseSelectCourse'));
       return;
     }
     setSubmitting(true);
     try {
       if (editing) {
         await ArticleService.update(editing.id, buildFormData());
-        toast.success('Article updated');
+        toast.success(t('articles.toasts.updated', 'Article updated'));
       } else {
         await ArticleService.create(buildFormData());
-        toast.success('Article created');
+        toast.success(t('articles.toasts.created', 'Article created'));
       }
       setModalOpen(false);
       fetchData();
@@ -207,7 +209,7 @@ export function Articles() {
   const handlePublish = async (row) => {
     try {
       await ArticleService.publish(row.id);
-      toast.success('Article published');
+      toast.success(t('articles.toasts.published', 'Article published'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -217,7 +219,7 @@ export function Articles() {
   const handleUnpublish = async (row) => {
     try {
       await ArticleService.unpublish(row.id);
-      toast.success('Article unpublished');
+      toast.success(t('articles.toasts.unpublished', 'Article unpublished'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -227,7 +229,7 @@ export function Articles() {
   const handleAccept = async (row) => {
     try {
       await ArticleService.accept(row.id);
-      toast.success('Article accepted');
+      toast.success(t('articles.toasts.accepted', 'Article accepted'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -237,16 +239,16 @@ export function Articles() {
   const handleReject = async (row) => {
     const title = getTitle(row);
     const ok = await confirm({
-      title: 'Reject and delete article',
-      message: `Reject and permanently delete "${title}"? This cannot be undone.`,
-      confirmLabel: 'Reject & Delete',
+      title: t('articles.rejectDeleteTitle'),
+      message: t('articles.rejectDeleteMessage', { title }),
+      confirmLabel: t('courses.reject', 'Reject'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await ArticleService.reject(row.id);
       await ArticleService.remove(row.id);
-      toast.success('Article rejected and deleted');
+      toast.success(t('articles.toasts.rejectedDeleted', 'Article rejected and deleted'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -256,15 +258,15 @@ export function Articles() {
   const handleDelete = async (row) => {
     const title = row.title ?? row.title_ar ?? row.title_en ?? row.searchable_title ?? row.translations?.ar?.title ?? row.translations?.en?.title ?? 'this';
     const ok = await confirm({
-      title: 'Delete article',
-      message: `Delete "${title}"?`,
-      confirmLabel: 'Delete',
+      title: t('articles.deleteTitle'),
+      message: t('articles.deleteMessage', { title }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await ArticleService.remove(row.id);
-      toast.success('Article deleted');
+      toast.success(t('articles.toasts.deleted', 'Article deleted'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -296,8 +298,8 @@ export function Articles() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">Articles</h1>
-        <Button onClick={openCreate}>Add article</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('articles.title')}</h1>
+        <Button onClick={openCreate}>{t('articles.add')}</Button>
       </div>
       <div className="flex flex-wrap gap-3 mb-4">
         <select
@@ -305,26 +307,26 @@ export function Articles() {
           onChange={(e) => { setFilterPublished(e.target.value); setPage(1); }}
           className="px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm"
         >
-          <option value="">All (published)</option>
-          <option value="1">Published</option>
-          <option value="0">Draft</option>
+          <option value="">{t('articles.filters.allPublished')}</option>
+          <option value="1">{t('articles.filters.published')}</option>
+          <option value="0">{t('articles.filters.draft')}</option>
         </select>
         <select
           value={filterAccepted}
           onChange={(e) => { setFilterAccepted(e.target.value); setPage(1); }}
           className="px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm"
         >
-          <option value="">All (accepted)</option>
-          <option value="1">Accepted</option>
-          <option value="0">Pending</option>
+          <option value="">{t('articles.filters.allAccepted')}</option>
+          <option value="1">{t('articles.filters.accepted')}</option>
+          <option value="0">{t('articles.filters.pending')}</option>
         </select>
       </div>
       <DataTable
         columns={[
-          { key: 'title', header: 'Title', render: (r) => getTitle(r) || '—' },
-          { key: 'course', header: 'Course', render: (r) => r.course?.name ?? '—' },
-          { key: 'user', header: 'User', render: (r) => r.user?.name ?? '—' },
-          { key: 'status', header: 'Status', render: (r) => getStatusBadge(r) },
+          { key: 'title', header: t('articles.columns.title'), render: (r) => getTitle(r) || '—' },
+          { key: 'course', header: t('articles.columns.course'), render: (r) => r.course?.name ?? '—' },
+          { key: 'user', header: t('articles.columns.user'), render: (r) => r.user?.name ?? '—' },
+          { key: 'status', header: t('articles.columns.status'), render: (r) => getStatusBadge(r) },
         ]}
         data={data}
         meta={meta ?? undefined}
@@ -334,49 +336,106 @@ export function Articles() {
           setSearch(v);
           setPage(1);
         }}
-        emptyMessage="No articles yet"
+        emptyMessage={t('articles.empty')}
         actions={(row) => (
           <div className="flex flex-wrap gap-1 justify-end">
             <Link to={`/articles/${row.id}`}>
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View">
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('common.view')}
+                aria-label={t('common.view')}
+              >
                 <IconView />
               </Button>
             </Link>
             {(row.is_published !== true && row.is_published !== 1) && (
-              <Button variant="ghost" className="!p-2 min-w-0" title="Publish" aria-label="Publish" onClick={() => handlePublish(row)}>
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('articles.publish')}
+                aria-label={t('articles.publish')}
+                onClick={() => handlePublish(row)}
+              >
                 <IconPublish />
               </Button>
             )}
             {(row.is_published === true || row.is_published === 1) && (
-              <Button variant="ghost" className="!p-2 min-w-0" title="Unpublish" aria-label="Unpublish" onClick={() => handleUnpublish(row)}>
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('articles.unpublish')}
+                aria-label={t('articles.unpublish')}
+                onClick={() => handleUnpublish(row)}
+              >
                 <IconUnpublish />
               </Button>
             )}
             {(row.accepted !== true && row.accepted !== 1) && (
               <>
-                <Button variant="ghost" className="!p-2 min-w-0" title="Accept" aria-label="Accept" onClick={() => handleAccept(row)}>
+                <Button
+                  variant="ghost"
+                  className="!p-2 min-w-0"
+                  title={t('courses.accept', 'Accept')}
+                  aria-label={t('courses.accept', 'Accept')}
+                  onClick={() => handleAccept(row)}
+                >
                   <IconCheck />
                 </Button>
-                <Button variant="ghost" className="!p-2 min-w-0" title="Reject" aria-label="Reject" onClick={() => handleReject(row)}>
+                <Button
+                  variant="ghost"
+                  className="!p-2 min-w-0"
+                  title={t('courses.reject', 'Reject')}
+                  aria-label={t('courses.reject', 'Reject')}
+                  onClick={() => handleReject(row)}
+                >
                   <IconX />
                 </Button>
               </>
             )}
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button
+              variant="ghost"
+              className="!p-2 min-w-0"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
+              onClick={() => openEdit(row)}
+            >
               <IconEdit />
             </Button>
-            <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
+            <Button
+              variant="danger"
+              className="!p-2 min-w-0"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
+              onClick={() => handleDelete(row)}
+            >
               <IconTrash />
             </Button>
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit article' : 'Create article'}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? t('articles.modalEdit') : t('articles.modalCreate')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Title (Arabic) *" value={formTitleAr} onChange={(e) => setFormTitleAr(e.target.value)} required />
-          <Input label="Title (English) *" value={formTitleEn} onChange={(e) => setFormTitleEn(e.target.value)} required />
+          <Input
+            label={t('articles.titleAr')}
+            value={formTitleAr}
+            onChange={(e) => setFormTitleAr(e.target.value)}
+            required
+          />
+          <Input
+            label={t('articles.titleEn')}
+            value={formTitleEn}
+            onChange={(e) => setFormTitleEn(e.target.value)}
+            required
+          />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Content (Arabic)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('articles.contentAr')}
+            </label>
             <textarea
               value={formContentAr}
               onChange={(e) => setFormContentAr(e.target.value)}
@@ -385,7 +444,9 @@ export function Articles() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Content (English)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('articles.contentEn')}
+            </label>
             <textarea
               value={formContentEn}
               onChange={(e) => setFormContentEn(e.target.value)}
@@ -394,14 +455,16 @@ export function Articles() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Course *</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('articles.course')}
+            </label>
             <select
               value={formCourseId}
               onChange={(e) => setFormCourseId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required={!editing}
             >
-              <option value="">Select course</option>
+              <option value="">{t('articles.selectCourse')}</option>
               {courses.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name ?? c.title ?? `Course ${c.id}`}
@@ -410,7 +473,9 @@ export function Articles() {
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Image (optional)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('articles.image')}
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -422,7 +487,7 @@ export function Articles() {
             <Input
               type="number"
               min="0"
-              label="Earning points"
+              label={t('articles.earningPoints')}
               value={formEarningPoints}
               onChange={(e) => setFormEarningPoints(e.target.value)}
             />
@@ -436,15 +501,15 @@ export function Articles() {
               className="rounded border-[var(--color-border)]"
             />
             <label htmlFor="form-is-published" className="text-sm font-medium text-[var(--color-primary)]">
-              Published
+              {t('articles.publishedFlag')}
             </label>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>

@@ -5,6 +5,7 @@ import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconC
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
+import { useTranslation } from 'react-i18next';
 
 function getItemName(item) {
   if (!item) return '—';
@@ -28,6 +29,7 @@ function toFormValue(val) {
 }
 
 export function Courses() {
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -265,9 +267,9 @@ export function Courses() {
   const handleReject = async (row) => {
     const courseName = getCourseName(row);
     const ok = await confirm({
-      title: 'Reject and delete course',
-      message: `Reject and permanently delete "${courseName}"? This cannot be undone.`,
-      confirmLabel: 'Reject & Delete',
+      title: t('courses.rejectDeleteTitle'),
+      message: t('courses.rejectDeleteMessage', { name: courseName }),
+      confirmLabel: t('courses.reject', 'Reject'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -289,9 +291,9 @@ export function Courses() {
   const handleDelete = async (row) => {
     const courseName = getCourseName(row);
     const ok = await confirm({
-      title: 'Delete course',
-      message: `Delete "${courseName}"? This cannot be undone.`,
-      confirmLabel: 'Delete',
+      title: t('courses.deleteTitle'),
+      message: t('courses.deleteMessage', { name: courseName }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -310,8 +312,10 @@ export function Courses() {
 
   const getAcceptedBadge = (row) => {
     const accepted = row.accepted;
-    if (accepted === true || accepted === 1) return <span className="text-green-600 text-xs font-medium">Accepted</span>;
-    if (accepted === false || accepted === 0) return <span className="text-amber-600 text-xs font-medium">Pending</span>;
+    if (accepted === true || accepted === 1)
+      return <span className="text-green-600 text-xs font-medium">{t('courses.filters.accepted')}</span>;
+    if (accepted === false || accepted === 0)
+      return <span className="text-amber-600 text-xs font-medium">{t('courses.filters.pending')}</span>;
     return <span className="text-gray-500 text-xs">—</span>;
   };
 
@@ -320,8 +324,8 @@ export function Courses() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">Courses</h1>
-        <Button onClick={openCreate}>Add course</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('courses.title')}</h1>
+        <Button onClick={openCreate}>{t('courses.add')}</Button>
       </div>
       <div className="flex flex-wrap gap-3 mb-4">
         <select
@@ -329,7 +333,7 @@ export function Courses() {
           onChange={(e) => { setFilterCategoryId(e.target.value); setPage(1); }}
           className="px-3 py-2 min-w-[140px] rounded-[var(--radius)] border border-[var(--color-border)] text-sm bg-[var(--color-surface)]"
         >
-          <option value="">All categories</option>
+          <option value="">{t('courses.filters.allCategories')}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {getItemName(c)}
@@ -341,7 +345,7 @@ export function Courses() {
           onChange={(e) => { setFilterLevelId(e.target.value); setPage(1); }}
           className="px-3 py-2 min-w-[140px] rounded-[var(--radius)] border border-[var(--color-border)] text-sm bg-[var(--color-surface)]"
         >
-          <option value="">All levels</option>
+          <option value="">{t('courses.filters.allLevels')}</option>
           {levels.map((l) => (
             <option key={l.id} value={l.id}>
               {getItemName(l)}
@@ -353,7 +357,7 @@ export function Courses() {
           onChange={(e) => { setFilterMentorId(e.target.value); setPage(1); }}
           className="px-3 py-2 min-w-[140px] rounded-[var(--radius)] border border-[var(--color-border)] text-sm bg-[var(--color-surface)]"
         >
-          <option value="">All mentors</option>
+          <option value="">{t('courses.filters.allMentors')}</option>
           {mentors.map((m) => (
             <option key={m.id} value={m.id}>
               {getItemName(m)}
@@ -365,28 +369,28 @@ export function Courses() {
           onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
           className="px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm"
         >
-          <option value="">All types</option>
-          <option value="live">Live</option>
-          <option value="offline">Offline</option>
-          <option value="recorded">Recorded</option>
+          <option value="">{t('courses.filters.allTypes')}</option>
+          <option value="live">{t('courses.filters.live')}</option>
+          <option value="offline">{t('courses.filters.offline')}</option>
+          <option value="recorded">{t('courses.filters.recorded')}</option>
         </select>
         <select
           value={filterAccepted}
           onChange={(e) => { setFilterAccepted(e.target.value); setPage(1); }}
           className="px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm"
         >
-          <option value="">All status</option>
-          <option value="1">Accepted</option>
-          <option value="0">Pending</option>
+          <option value="">{t('courses.filters.allStatus')}</option>
+          <option value="1">{t('courses.filters.accepted')}</option>
+          <option value="0">{t('courses.filters.pending')}</option>
         </select>
       </div>
       <DataTable
         columns={[
-          { key: 'name', header: 'Name', render: (r) => getCourseName(r) },
-          { key: 'accepted', header: 'Status', render: (r) => getAcceptedBadge(r) },
+          { key: 'name', header: t('courses.name'), render: (r) => getCourseName(r) },
+          { key: 'accepted', header: t('courses.status'), render: (r) => getAcceptedBadge(r) },
           {
             key: 'description',
-            header: 'Description',
+            header: t('courses.description'),
             render: (r) => {
               const d = r.description ?? r.translations?.ar?.description ?? r.translations?.en?.description ?? '';
               return d.slice(0, 50) + (d.length > 50 ? '...' : '');
@@ -401,39 +405,82 @@ export function Courses() {
           setSearch(v);
           setPage(1);
         }}
-        emptyMessage="No courses yet"
+        emptyMessage={t('courses.empty')}
         actions={(row) => (
           <div className="flex flex-wrap gap-1 justify-end">
             <Link to={`/courses/${row.id}`}>
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View">
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('common.view')}
+                aria-label={t('common.view')}
+              >
                 <IconView />
               </Button>
             </Link>
             {(row.accepted !== true && row.accepted !== 1) && (
               <>
-                <Button variant="ghost" className="!p-2 min-w-0" title="Accept" aria-label="Accept" onClick={() => handleAccept(row)}>
+                <Button
+                  variant="ghost"
+                  className="!p-2 min-w-0"
+                  title={t('courses.accept', 'Accept')}
+                  aria-label={t('courses.accept', 'Accept')}
+                  onClick={() => handleAccept(row)}
+                >
                   <IconCheck />
                 </Button>
-                <Button variant="ghost" className="!p-2 min-w-0" title="Reject" aria-label="Reject" onClick={() => handleReject(row)}>
+                <Button
+                  variant="ghost"
+                  className="!p-2 min-w-0"
+                  title={t('courses.reject', 'Reject')}
+                  aria-label={t('courses.reject', 'Reject')}
+                  onClick={() => handleReject(row)}
+                >
                   <IconX />
                 </Button>
               </>
             )}
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button
+              variant="ghost"
+              className="!p-2 min-w-0"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
+              onClick={() => openEdit(row)}
+            >
               <IconEdit />
             </Button>
-            <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
+            <Button
+              variant="danger"
+              className="!p-2 min-w-0"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
+              onClick={() => handleDelete(row)}
+            >
               <IconTrash />
             </Button>
           </div>
         )}
       />
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit course' : 'Create course'}>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? t('courses.modalEdit') : t('courses.modalCreate')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Name (Arabic) *" value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
-          <Input label="Name (English) *" value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
+          <Input
+            label={t('courses.nameAr')}
+            value={formNameAr}
+            onChange={(e) => setFormNameAr(e.target.value)}
+            required
+          />
+          <Input
+            label={t('courses.nameEn')}
+            value={formNameEn}
+            onChange={(e) => setFormNameEn(e.target.value)}
+            required
+          />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (Arabic)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.descAr')}</label>
             <textarea
               value={formDescAr}
               onChange={(e) => setFormDescAr(e.target.value)}
@@ -442,7 +489,7 @@ export function Courses() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Description (English)</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.descEn')}</label>
             <textarea
               value={formDescEn}
               onChange={(e) => setFormDescEn(e.target.value)}
@@ -451,7 +498,7 @@ export function Courses() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Image</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.image')}</label>
             <input
               type="file"
               accept="image/*"
@@ -461,78 +508,94 @@ export function Courses() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Type *</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.type')}</label>
             <select
               value={formType}
               onChange={(e) => setFormType(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required
             >
-              <option value="live">Live</option>
-              <option value="offline">Offline</option>
-              <option value="recorded">Recorded</option>
+              <option value="live">{t('courses.filters.live')}</option>
+              <option value="offline">{t('courses.filters.offline')}</option>
+              <option value="recorded">{t('courses.filters.recorded')}</option>
             </select>
           </div>
-          <Input type="number" min="0" step="any" label="Price" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} />
+          <Input
+            type="number"
+            min="0"
+            step="any"
+            label={t('courses.price')}
+            value={formPrice}
+            onChange={(e) => setFormPrice(e.target.value)}
+          />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">URL {formType === 'recorded' && '(required for Recorded)'}</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('courses.url')}{' '}
+              {formType === 'recorded' && `(${t('courses.urlRequiredRecorded')})`}
+            </label>
             <input
               type="url"
               value={formUrl}
               onChange={(e) => setFormUrl(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              placeholder={formType === 'recorded' ? 'Required' : 'Optional'}
+              placeholder=""
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Category *</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.category')}</label>
             <select
               value={formCategoryId}
               onChange={(e) => setFormCategoryId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required
             >
-              <option value="">Select category</option>
+              <option value="">{t('courses.selectCategory')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{getItemName(c)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Level *</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.level')}</label>
             <select
               value={formLevelId}
               onChange={(e) => setFormLevelId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required
             >
-              <option value="">Select level</option>
+              <option value="">{t('courses.selectLevel')}</option>
               {levels.map((l) => (
                 <option key={l.id} value={l.id}>{getItemName(l)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">Mentor *</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.mentor')}</label>
             <select
               value={formMentorId}
               onChange={(e) => setFormMentorId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required
             >
-              <option value="">Select mentor</option>
+              <option value="">{t('courses.selectMentor')}</option>
               {mentors.map((m) => (
                 <option key={m.id} value={getMentorValue(m)}>{getItemName(m)}</option>
               ))}
             </select>
           </div>
-          <Input type="number" min="0" label="Earning points" value={formEarningPoints} onChange={(e) => setFormEarningPoints(e.target.value)} />
+          <Input
+            type="number"
+            min="0"
+            label={t('courses.earningPoints')}
+            value={formEarningPoints}
+            onChange={(e) => setFormEarningPoints(e.target.value)}
+          />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
         </form>
