@@ -1,0 +1,869 @@
+{
+  "info": {
+    "_postman_id": "4abe4f96-f051-456f-8c9b-42b311af74f8",
+    "name": "ToBe",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41528386"
+  },
+  "item": [
+    {
+      "name": "About page",
+      "item": [
+        {
+          "name": "get about-us page Copy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "about_us_ar",
+                  "value": "testing for new page ar",
+                  "type": "text"
+                },
+                {
+                  "key": "about_us_en",
+                  "value": "testing for new page en",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/about-us/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "about-us",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get about-us page",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/about-us",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "about-us"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "get all categories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/categories?page=4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update category",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Language",
+                "value": "ar",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_en\": \"tesing\",\n    \"name_ar\": \"tesing\",\n    \"description_en\": \"tesing\",\n    \"description_ar\": \"tesing\",\n    \"type_slug\": \"tesing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/categories/45",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "categories",
+                "45"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create category",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Language",
+                "value": "ar",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name_en\": \"tesing\",\n    \"name_ar\": \"tesing\",\n    \"description_en\": \"tesing\",\n    \"description_ar\": \"tesing\",\n    \"type_slug\": \"tesing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Banners",
+      "item": [
+        {
+          "name": "create banner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/home/ahmed/Pictures/test.jpeg"
+                },
+                {
+                  "key": "name_en",
+                  "value": "name en",
+                  "type": "text"
+                },
+                {
+                  "key": "name_ar",
+                  "value": "name ar",
+                  "type": "text"
+                },
+                {
+                  "key": "description_en",
+                  "value": "description en",
+                  "type": "text"
+                },
+                {
+                  "key": "description_ar",
+                  "value": "description ar",
+                  "type": "text"
+                },
+                {
+                  "key": "button_text_en",
+                  "value": "button_text_en",
+                  "type": "text"
+                },
+                {
+                  "key": "button_url",
+                  "value": "description_en",
+                  "type": "text"
+                },
+                {
+                  "key": "button_text_ar",
+                  "value": "button_text_en",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/banners",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "banners"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update banner image",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/home/ahmed/Pictures/pexels-justin-shaifer-501272-1222271.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/banners/1/update-img",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "banners",
+                "1",
+                "update-img"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update banner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_en\": \"Home Page Banner\",\n  \"name_ar\": \"بانر الصفحة الرئيسية\",\n  \"description_en\": \"This banner is used on the home page to promote services.\",\n  \"description_ar\": \"يتم استخدام هذا البانر في الصفحة الرئيسية للترويج للخدمات.\",\n  \"button_text_en\": \"Booking now\",\n  \"button_text_ar\": \"احجز الآن\",\n  \"button_url\": \"https://example.com/booking\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/banners/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "banners",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete banner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/banners/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "banners",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get banner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "en",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/banners",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "banners"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Roles & Permissions",
+      "item": [
+        {
+          "name": "list all roles",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "43|tDYUqnexx3YmITvACLJ1smNZOsvLcpDwyKR1YUjX97f5a533",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "show role",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "43|tDYUqnexx3YmITvACLJ1smNZOsvLcpDwyKR1YUjX97f5a533",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/roles/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "roles",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "list permissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/permissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "see roles + permissions of user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/users/1/roles-permissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "users",
+                "1",
+                "roles-permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "assigne roles for user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "43|tDYUqnexx3YmITvACLJ1smNZOsvLcpDwyKR1YUjX97f5a533",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"roles\": [\"admin\", \"mentor\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/users/1/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "users",
+                "1",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "remove roles for user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"roles\": [\"admin\", \"mentor\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/users/1/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "users",
+                "1",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update roles for user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "44|fS3LA55cYR0GfUeRpAM4Hb2S8sgPS17WIQOghiHe2a6d8015",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"roles\": [\"admin\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/dashboard/users/1/roles/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "users",
+                "1",
+                "roles",
+                "sync"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "email",
+              "value": "abdo@tobe.com",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "password",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/dashboard/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "dashboard",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

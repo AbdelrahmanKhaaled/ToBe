@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #231F20;
+  --color-accent: #FF8000;
+  --color-bg-light: #F8F9FA;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-shadow: rgba(35, 31, 32, 0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 2px 8px var(--color-shadow);
+  --shadow-md: 0 4px 16px var(--color-shadow);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--color-bg-light);
+  color: var(--color-primary);
+  line-height: 1.5;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

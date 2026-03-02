@@ -1,0 +1,3194 @@
+{
+  "info": {
+    "_postman_id": "b0893965-83d7-4443-999c-98a03e3f5b81",
+    "name": "To Be",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37944355"
+  },
+  "item": [
+    {
+      "name": "Mobile APIs",
+      "item": []
+    },
+    {
+      "name": "Dashboard APIs",
+      "item": [
+        {
+          "name": "Admin and Super admin",
+          "item": [
+            {
+              "name": "Auth",
+              "item": [
+                {
+                  "name": "login",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "key": "email",
+                          "value": "gisf@dkj.cdf",
+                          "type": "text"
+                        },
+                        {
+                          "key": "password",
+                          "value": "password",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/login",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "login"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "logout",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "3|fXIDxSPmjGLIHPJOWvJIQBD3AZgqSG1UxN3QzTyi5c4cc61f",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/logout",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "logout from all devices",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "4|8OgIS2PuAABO1s3NGSKX8WTzeFn1h1MJ9sCstPFCea2b8fcb",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/logout-all-devices",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "logout-all-devices"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/profile",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update-profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "key": "name",
+                          "value": "updated ",
+                          "type": "text"
+                        },
+                        {
+                          "key": "email",
+                          "value": "gisf@dkj.cdf",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/user?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "user"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Categories",
+              "item": [
+                {
+                  "name": "all categories",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/categories?search",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "categories"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": null,
+                          "description": "nullable"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single category",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/categories/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "categories",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },  
+                {
+                  "name": "delete a category",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/categories/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "categories",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "21"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a category",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name_ar",
+                          "value": "فئة جديدة",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "name_en",
+                          "value": "NEW CATEGORY",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_ar",
+                          "value": "ينلسععثق",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_en",
+                          "value": "SDGJBD",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "image",
+                          "description": "nullable",
+                          "type": "file",
+                          "src": "/C:/Users/user/Downloads/Frame-1984078796.png"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/categories",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "categories"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a category",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name_ar",
+                          "value": "فئة جديدة updatedewffwe",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "name_en",
+                          "value": "NEW CATEGORY updatedwergf",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_ar",
+                          "value": "ينلسععثق",
+                          "description": "nullable",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "description_en",
+                          "value": "SDGJBDefer",
+                          "description": "nullable",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "image",
+                          "description": "nullable",
+                          "type": "file",
+                          "src": "/C:/Users/user/Downloads/c9394be9-d800-4aa4-9850-b237e2485471.jpg",
+                          "disabled": true
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/categories/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "categories",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Levels",
+              "item": [
+                {
+                  "name": "all levels",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/levels?search",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "levels"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": null,
+                          "description": "nullable"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single level",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/levels/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "levels",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete a level",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/levels/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "levels",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "21"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a level",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name_ar",
+                          "value": "فئة جديدة",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "name_en",
+                          "value": "NEW CATEGORY",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_ar",
+                          "value": "ينلسععثق",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_en",
+                          "value": "SDGJBD",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "image",
+                          "description": "nullable",
+                          "type": "file",
+                          "src": "/C:/Users/user/Downloads/c9394be9-d800-4aa4-9850-b237e2485471.jpg"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/levels",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "levels"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a level",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name_ar",
+                          "value": "فئة جديدة updatedewffwe",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "name_en",
+                          "value": "NEW CATEGORY updatedwergf",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_ar",
+                          "value": "ينلسععثق",
+                          "description": "nullable",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "description_en",
+                          "value": "SDGJBDefer",
+                          "description": "nullable",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "image",
+                          "description": "nullable",
+                          "type": "file",
+                          "src": "/C:/Users/user/Downloads/2025-12-24-694bfb768f13c.png"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/levels/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "levels",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "FAQs",
+              "item": [
+                {
+                  "name": "all faqs paginated",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/faqs?search",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "faqs"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": null,
+                          "description": "nullable"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single faq",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/faqs/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "faqs",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete a faq",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/faqs/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "faqs",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a faq",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "question_ar",
+                          "value": "dlsaighf ? ",
+                          "description": "required ",
+                          "type": "text"
+                        },
+                        {
+                          "key": "question_en",
+                          "value": "fugdfv?",
+                          "description": "required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "answer_ar",
+                          "value": "gjsgvsd sakdfg sdgf esf ",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "answer_en",
+                          "value": "dhfgs daziuf sdi ",
+                          "description": "req",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/faqs",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "faqs"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a faq",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "5|Atvi1AGcuYP9CBDLeNzLnlOQ2xtkHmQ9Pb8yuSHM86a636b0",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "key": "question_ar",
+                          "value": "dlsaighf ? ",
+                          "description": "required ",
+                          "type": "text"
+                        },
+                        {
+                          "key": "question_en",
+                          "value": "fugdfv?",
+                          "description": "required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "answer_ar",
+                          "value": "gjsgvsd sakdfg sdgf esf ",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "answer_en",
+                          "value": "dhfgs daziuf sdi ",
+                          "description": "req",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/faqs/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "faqs",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Mentors",
+              "item": [
+                {
+                  "name": "All Mentors",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "1|7WKynxhiAU3ZSMfXXpBk7np7zneG87uDNxVGSM1B63623bdf",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": "a",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single mentor",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "1|7WKynxhiAU3ZSMfXXpBk7np7zneG87uDNxVGSM1B63623bdf",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "100"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete a mentor",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "21"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a mentor",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name",
+                          "value": "jdsgfsduv",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "email",
+                          "value": "fgevc@dkdf.dsgd",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "phone",
+                          "value": "01159175049",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "password",
+                          "value": "165164615",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a mentor",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "key": "name",
+                          "value": "jdsgfsduv",
+                          "description": "sometimes req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "email",
+                          "value": "updated-mentor@email.com",
+                          "description": "sometimes req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "phone",
+                          "value": "01159175049",
+                          "description": "sometimes nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "password",
+                          "value": "165164615",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "100",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Courses",
+              "item": [
+                {
+                  "name": "All courses",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": "at",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "category_id",
+                          "value": "10",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "level_id",
+                          "value": "5",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "mentor_id",
+                          "value": "5",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "type",
+                          "value": "live",
+                          "description": "nullbale , in:live\noffline\nrecorded",
+                          "disabled": true
+                        },
+                        {
+                          "key": "accepted",
+                          "value": "1",
+                          "description": "nullbale | boolean",
+                          "disabled": true
+                        },
+                        {
+                          "key": "min_price",
+                          "value": "400",
+                          "description": "nullabke",
+                          "disabled": true
+                        },
+                        {
+                          "key": "max_price",
+                          "value": "100",
+                          "description": "nullbale",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "1|7WKynxhiAU3ZSMfXXpBk7np7zneG87uDNxVGSM1B63623bdf",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single course edit",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses/:id/edit",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses",
+                        ":id",
+                        "edit"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete a mentor",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/mentors/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "mentors",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "21"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "name_ar",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "name_en",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_ar",
+                          "value": "sfrfvcs",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "description_en",
+                          "value": "dfevcsgv",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "image",
+                          "description": "image",
+                          "type": "file",
+                          "src": "/home/khaled/Downloads/qeema G logo 1200-630.png"
+                        },
+                        {
+                          "key": "type",
+                          "value": "live",
+                          "description": "required | live,offline,recorded",
+                          "type": "text"
+                        },
+                        {
+                          "key": "price",
+                          "value": "200",
+                          "type": "text"
+                        },
+                        {
+                          "key": "url",
+                          "value": "",
+                          "description": "nullble , required with recorded",
+                          "type": "text"
+                        },
+                        {
+                          "key": "category_id",
+                          "value": "1",
+                          "type": "text"
+                        },
+                        {
+                          "key": "level_id",
+                          "value": "10",
+                          "type": "text"
+                        },
+                        {
+                          "key": "mentor_id",
+                          "value": "10",
+                          "type": "text"
+                        },
+                        {
+                          "key": "earning_points",
+                          "value": "10",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": []
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "100",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "accept course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses/:id/accept?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses",
+                        ":id",
+                        "accept"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "100",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "reject course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/courses/:id/reject?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "courses",
+                        ":id",
+                        "reject"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "100",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "lessons",
+              "item": [
+                {
+                  "name": "All lessons",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": "at32465",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "2",
+                          "type": "text",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single lesson",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single lesson edit",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons/:id/edit",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons",
+                        ":id",
+                        "edit"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete a lesson",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "21"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create a lesson",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "title_ar",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "title_en",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_ar",
+                          "value": "sfrfvcs",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_en",
+                          "value": "dfevcsgv",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "video_url",
+                          "value": "https://www.youtube.com/watch?v=6Iidg_WxnnY",
+                          "description": "required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "1",
+                          "type": "text",
+                          "uuid": "a3952844-cb7d-47ce-b8e2-c5f05327d019"
+                        },
+                        {
+                          "key": "order",
+                          "value": "3",
+                          "description": "required integer",
+                          "type": "text",
+                          "uuid": "5d107741-0226-4956-bfc2-4b3d05bc5a97"
+                        },
+                        {
+                          "key": "duration",
+                          "value": "3",
+                          "type": "text",
+                          "uuid": "63ea8c31-b949-4077-b738-b7d8fc9917b0"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "next lesson order",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons/:course_id/next-order",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons",
+                        ":course_id",
+                        "next-order"
+                      ],
+                      "variable": [
+                        {
+                          "key": "course_id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update a course",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [
+                        {
+                          "key": "title_ar",
+                          "value": "new course updated",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "title_en",
+                          "value": "new course updated",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_ar",
+                          "value": "sfrfvcs",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_en",
+                          "value": "dfevcsgv",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "video_url",
+                          "value": "https://www.youtube.com/watch?v=6Iidg_WxnnY",
+                          "description": "required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "1",
+                          "type": "text",
+                          "uuid": "a3952844-cb7d-47ce-b8e2-c5f05327d019"
+                        },
+                        {
+                          "key": "order",
+                          "value": "4",
+                          "description": "required integer",
+                          "type": "text",
+                          "uuid": "5d107741-0226-4956-bfc2-4b3d05bc5a97"
+                        },
+                        {
+                          "key": "duration",
+                          "value": "3",
+                          "type": "text",
+                          "uuid": "63ea8c31-b949-4077-b738-b7d8fc9917b0"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/lessons/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "lessons",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Articles",
+              "item": [
+                {
+                  "name": "All Articles",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles"
+                      ],
+                      "query": [
+                        {
+                          "key": "search",
+                          "value": "Ali",
+                          "description": "nullable",
+                          "disabled": true
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "2",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "per_page",
+                          "value": "20",
+                          "description": "default 10",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "user_id",
+                          "value": "383",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "is_published",
+                          "value": "1",
+                          "type": "text",
+                          "disabled": true
+                        },
+                        {
+                          "key": "accepted",
+                          "value": "1",
+                          "type": "text",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single article",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "mark as published",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id/publish?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id",
+                        "publish"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT",
+                          "type": "text"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "mark as unpublished",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id/unpublish?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id",
+                        "unpublish"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "mark as accepted",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id/unpublish?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id",
+                        "unpublish"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "mark as rejected",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id/unpublish?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id",
+                        "unpublish"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "single article edit",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text",
+                        "disabled": true
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id/edit",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id",
+                        "edit"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "59"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "delete an article",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Accept-Language",
+                        "value": "ar",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "create an article",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "title_ar",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "title_en",
+                          "value": "new course",
+                          "description": "req",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_ar",
+                          "value": "sfrfvcs",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_en",
+                          "value": "dfevcsgv",
+                          "description": "nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "1",
+                          "type": "text",
+                          "uuid": "a3952844-cb7d-47ce-b8e2-c5f05327d019"
+                        },
+                        {
+                          "key": "image",
+                          "description": "nullable image",
+                          "type": "file",
+                          "uuid": "f08094f8-ffef-462e-85ec-2e97feb66675",
+                          "src": "/C:/Users/user/Downloads/Frame-1984078796.png"
+                        },
+                        {
+                          "key": "earning_points",
+                          "value": "10",
+                          "description": "nullable default 0",
+                          "type": "text",
+                          "uuid": "ba7627a2-8dcc-4bc4-983b-317ec29b07e0"
+                        },
+                        {
+                          "key": "is_published",
+                          "value": "1",
+                          "description": "boolean default is false",
+                          "type": "text",
+                          "uuid": "2697110c-9ef5-4e07-b0b8-d24e6e48348e"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "update an article",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{token}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "title_ar",
+                          "value": "new course",
+                          "description": "sometimes required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "title_en",
+                          "value": "new course",
+                          "description": "sometimes required",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_ar",
+                          "value": "sfrfvcs",
+                          "description": "sometimes nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "content_en",
+                          "value": "dfevcsgv",
+                          "description": "sometimes nullable",
+                          "type": "text"
+                        },
+                        {
+                          "key": "course_id",
+                          "value": "1",
+                          "type": "text",
+                          "uuid": "a3952844-cb7d-47ce-b8e2-c5f05327d019",
+                          "description": "sometimes reqiured"
+                        },
+                        {
+                          "key": "image",
+                          "description": "sometimes nullable image",
+                          "type": "file",
+                          "uuid": "f08094f8-ffef-462e-85ec-2e97feb66675",
+                          "src": "/C:/Users/user/Downloads/Frame-1984078796.png"
+                        },
+                        {
+                          "key": "earning_points",
+                          "value": "10",
+                          "description": "sometimes nullable default 0",
+                          "type": "text",
+                          "uuid": "ba7627a2-8dcc-4bc4-983b-317ec29b07e0"
+                        },
+                        {
+                          "key": "is_published",
+                          "value": "1",
+                          "description": "sometimes boolean default is false",
+                          "type": "text",
+                          "uuid": "2697110c-9ef5-4e07-b0b8-d24e6e48348e"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/dashboard/articles/:id?_method=PUT",
+                      "host": [
+                        "{{base_url}}"
+                      ],
+                      "path": [
+                        "dashboard",
+                        "articles",
+                        ":id"
+                      ],
+                      "query": [
+                        {
+                          "key": "_method",
+                          "value": "PUT"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1",
+                          "description": "category id req"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
