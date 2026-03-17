@@ -1,35 +1,53 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { CategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CategoryService, SubCategoryService } from '@/api';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash } from '@/components/ui';
+import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
-import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 
-export function Categories() {
+export function SubCategories() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
+
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+
+  const [categories, setCategories] = useState([]);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const [formNameAr, setFormNameAr] = useState('');
   const [formNameEn, setFormNameEn] = useState('');
   const [formDescAr, setFormDescAr] = useState('');
   const [formDescEn, setFormDescEn] = useState('');
-  const [formTypeSlug, setFormTypeSlug] = useState('');
+  const [formCategoryId, setFormCategoryId] = useState('');
   const [formImage, setFormImage] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const confirm = useConfirm();
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  const categoriesById = useMemo(() => {
+    const m = new Map();
+    for (const c of categories) m.set(String(c.id), c);
+    return m;
+  }, [categories]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await CategoryService.getAll({ page: 1, per_page: 200 });
+      setCategories(Array.isArray(res?.data) ? res.data : []);
+    } catch (_) {
+      setCategories([]);
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await CategoryService.getAll({ search: search || undefined, page, per_page: 10 });
+      const res = await SubCategoryService.getAll({ search: search || undefined, page, per_page: 10 });
       setData(res.data);
       setMeta(res.meta);
     } catch (err) {
@@ -42,7 +60,7 @@ export function Categories() {
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
     try {
-      const res = await CategoryService.getPageByUrl(url);
+      const res = await SubCategoryService.getPageByUrl(url);
       if (res) {
         setData(res.data);
         setMeta(res.meta);
@@ -55,28 +73,12 @@ export function Categories() {
   }, []);
 
   useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      CategoryService.getById(id)
-        .then((res) => {
-          const item = res?.category ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
 
   const openCreate = () => {
     setEditing(null);
@@ -84,7 +86,7 @@ export function Categories() {
     setFormNameEn('');
     setFormDescAr('');
     setFormDescEn('');
-    setFormTypeSlug('');
+    setFormCategoryId('');
     setFormImage(null);
     setModalOpen(true);
   };
@@ -100,7 +102,7 @@ export function Categories() {
     setFormNameEn(row.name_en ?? nameObj?.en ?? en.name ?? row.name ?? '');
     setFormDescAr(row.description_ar ?? descObj?.ar ?? ar.description ?? row.description ?? '');
     setFormDescEn(row.description_en ?? descObj?.en ?? en.description ?? row.description ?? '');
-    setFormTypeSlug(row.type_slug ?? row.typeSlug ?? '');
+    setFormCategoryId(String(row.category_id ?? row.category?.id ?? ''));
     setFormImage(null);
     setModalOpen(true);
   };
@@ -111,7 +113,7 @@ export function Categories() {
     fd.append('name_en', formNameEn || formNameAr || '');
     fd.append('description_ar', formDescAr ?? '');
     fd.append('description_en', formDescEn ?? '');
-    fd.append('type_slug', formTypeSlug || '');
+    if (formCategoryId) fd.append('category_id', formCategoryId);
     if (formImage) fd.append('image', formImage);
     return fd;
   };
@@ -121,11 +123,11 @@ export function Categories() {
     setSubmitting(true);
     try {
       if (editing) {
-        await CategoryService.update(editing.id, buildFormData());
-        toast.success(t('categories.modalEdit'));
+        await SubCategoryService.update(editing.id, buildFormData());
+        toast.success(t('subCategories.modalEdit'));
       } else {
-        await CategoryService.create(buildFormData());
-        toast.success(t('categories.modalCreate'));
+        await SubCategoryService.create(buildFormData());
+        toast.success(t('subCategories.modalCreate'));
       }
       setModalOpen(false);
       fetchData();
@@ -139,15 +141,15 @@ export function Categories() {
   const handleDelete = async (row) => {
     const name = row.name ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? 'this';
     const ok = await confirm({
-      title: t('categories.deleteTitle'),
-      message: t('categories.deleteMessage', { name }),
+      title: t('subCategories.deleteTitle'),
+      message: t('subCategories.deleteMessage', { name }),
       confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
-      await CategoryService.remove(row.id);
-      toast.success(t('categories.deleteTitle'));
+      await SubCategoryService.remove(row.id);
+      toast.success(t('subCategories.deleteTitle'));
       fetchData();
     } catch (err) {
       toast.error(err.message);
@@ -160,24 +162,27 @@ export function Categories() {
   const getDisplayDesc = (row) =>
     row.description ?? row.translations?.ar?.description ?? row.translations?.en?.description ?? '';
 
+  const getCategoryName = (row) => {
+    const id = row.category_id ?? row.category?.id ?? '';
+    if (!id) return '-';
+    const c = categoriesById.get(String(id));
+    return c?.name ?? c?.translations?.ar?.name ?? c?.translations?.en?.name ?? id;
+  };
+
   if (loading && !data.length) return <Loading />;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">
-          {t('categories.title')}
-        </h1>
-        <Button onClick={openCreate}>{t('categories.add')}</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('subCategories.title')}</h1>
+        <Button onClick={openCreate}>{t('subCategories.add')}</Button>
       </div>
+
       <DataTable
         columns={[
-          { key: 'name', header: t('categories.name'), render: (r) => getDisplayName(r) },
-          {
-            key: 'description',
-            header: t('categories.description'),
-            render: (r) => getDisplayDesc(r),
-          },
+          { key: 'name', header: t('subCategories.name'), render: (r) => getDisplayName(r) },
+          { key: 'category', header: t('subCategories.category'), render: (r) => getCategoryName(r) },
+          { key: 'description', header: t('subCategories.description'), render: (r) => getDisplayDesc(r) },
         ]}
         data={data}
         meta={meta ?? undefined}
@@ -187,14 +192,9 @@ export function Categories() {
           setSearch(v);
           setPage(1);
         }}
-        emptyMessage={t('categories.empty')}
+        emptyMessage={t('subCategories.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
-            <Link to={`/categories/${row.id}`}>
-              <Button variant="ghost" className="!p-2 min-w-0" title="View" aria-label="View">
-                <IconView />
-              </Button>
-            </Link>
             <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
               <IconEdit />
             </Button>
@@ -204,34 +204,35 @@ export function Categories() {
           </div>
         )}
       />
+
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? t('categories.modalEdit') : t('categories.modalCreate')}
+        title={editing ? t('subCategories.modalEdit') : t('subCategories.modalCreate')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label={t('categories.nameAr')}
-            value={formNameAr}
-            onChange={(e) => setFormNameAr(e.target.value)}
-            required
-          />
-          <Input
-            label={t('categories.nameEn')}
-            value={formNameEn}
-            onChange={(e) => setFormNameEn(e.target.value)}
-            required
-          />
-          <Input
-            label={t('categories.typeSlug')}
-            value={formTypeSlug}
-            onChange={(e) => setFormTypeSlug(e.target.value)}
-            required
-          />
+          <Input label={t('subCategories.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
+          <Input label={t('subCategories.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
+
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('categories.descAr')}
-            </label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.category')}</label>
+            <select
+              value={formCategoryId}
+              onChange={(e) => setFormCategoryId(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-white"
+              required
+            >
+              <option value="">{t('subCategories.selectCategory')}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name ?? c.translations?.ar?.name ?? c.translations?.en?.name ?? c.id}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.descAr')}</label>
             <textarea
               value={formDescAr}
               onChange={(e) => setFormDescAr(e.target.value)}
@@ -240,9 +241,7 @@ export function Categories() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('categories.descEn')}
-            </label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.descEn')}</label>
             <textarea
               value={formDescEn}
               onChange={(e) => setFormDescEn(e.target.value)}
@@ -251,9 +250,7 @@ export function Categories() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('categories.image')}
-            </label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.image')}</label>
             <input
               type="file"
               accept="image/*"
@@ -274,3 +271,4 @@ export function Categories() {
     </div>
   );
 }
+

@@ -16,6 +16,23 @@ class RolesService extends BaseApiService {
     const res = await this.get(`/${id}`);
     return res.data || res;
   }
+
+  /** POST /dashboard/roles */
+  async createRole(payload) {
+    const res = await this.post('', payload);
+    return res.data || res;
+  }
+
+  /** PUT /dashboard/roles/:id */
+  async updateRole(id, payload) {
+    const res = await this.put(`/${id}`, payload);
+    return res.data || res;
+  }
+
+  /** DELETE /dashboard/roles/:id */
+  async deleteRole(id) {
+    await this.deleteRequest(`/${id}`);
+  }
 }
 
 class PermissionsService extends BaseApiService {
@@ -27,6 +44,29 @@ class PermissionsService extends BaseApiService {
   async listPermissions() {
     const res = await this.get('');
     return res.data || res;
+  }
+
+  /** GET /dashboard/permissions/:id */
+  async getPermission(id) {
+    const res = await this.get(`/${id}`);
+    return res.data || res;
+  }
+
+  /** POST /dashboard/permissions */
+  async createPermission(payload) {
+    const res = await this.post('', payload);
+    return res.data || res;
+  }
+
+  /** PUT /dashboard/permissions/:id */
+  async updatePermission(id, payload) {
+    const res = await this.put(`/${id}`, payload);
+    return res.data || res;
+  }
+
+  /** DELETE /dashboard/permissions/:id */
+  async deletePermission(id) {
+    await this.deleteRequest(`/${id}`);
   }
 }
 

@@ -7,6 +7,7 @@ export function Sidebar() {
   const NAV_ITEMS = [
     { to: '/', label: t('nav.dashboard') },
     { to: '/categories', label: t('nav.categories') },
+    { to: '/sub-categories', label: t('nav.subCategories') },
     { to: '/levels', label: t('nav.levels') },
     { to: '/mentors', label: t('nav.mentors') },
     { to: '/courses', label: t('nav.courses') },
@@ -15,6 +16,12 @@ export function Sidebar() {
     { to: '/faqs', label: t('nav.faqs') },
     { to: '/banners', label: t('nav.banners') },
     { to: '/about', label: t('nav.about') },
+    { to: '/consultation-categories', label: t('nav.consultationCategories') },
+    { to: '/consultation-sub-categories', label: t('nav.consultationSubCategories') },
+    { to: '/consultation-sessions', label: t('nav.consultationSessions') },
+    { to: '/reservations', label: t('nav.reservations') },
+    { to: '/consultation-reservations', label: t('nav.consultationReservations') },
+    { to: '/users', label: t('nav.users') },
     { to: '/roles-permissions', label: t('nav.rolesPermissions') },
     { to: '/profile', label: t('nav.profile') },
   ];

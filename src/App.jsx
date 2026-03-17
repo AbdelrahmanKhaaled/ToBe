@@ -8,6 +8,7 @@ import { Login } from '@/pages/Login';
 import { DashboardHome } from '@/pages/DashboardHome';
 import { Categories } from '@/pages/Categories';
 import { CategorySingle } from '@/pages/CategorySingle';
+import { SubCategories } from '@/pages/SubCategories';
 import { Levels } from '@/pages/Levels';
 import { LevelSingle } from '@/pages/LevelSingle';
 import { Mentors } from '@/pages/Mentors';
@@ -24,6 +25,12 @@ import { Profile } from '@/pages/Profile';
 import { Banners } from '@/pages/Banners';
 import { RolesPermissions } from '@/pages/RolesPermissions';
 import { AboutPage } from '@/pages/AboutPage';
+import { ConsultationCategories } from '@/pages/ConsultationCategories';
+import { ConsultationSubCategories } from '@/pages/ConsultationSubCategories';
+import { ConsultationSessions } from '@/pages/ConsultationSessions';
+import { Reservations } from '@/pages/Reservations';
+import { ConsultationReservations } from '@/pages/ConsultationReservations';
+import { Users } from '@/pages/Users';
 
 function ProtectedRoute({ children }) {
   const { authenticated, loading } = useAuth();
@@ -61,6 +68,7 @@ function AppRoutes() {
         <Route index element={<DashboardHome />} />
         <Route path="categories" element={<Categories />} />
         <Route path="categories/:id" element={<CategorySingle />} />
+        <Route path="sub-categories" element={<SubCategories />} />
         <Route path="levels" element={<Levels />} />
         <Route path="levels/:id" element={<LevelSingle />} />
         <Route path="mentors" element={<Mentors />} />
@@ -75,6 +83,12 @@ function AppRoutes() {
         <Route path="faqs/:id" element={<FaqSingle />} />
         <Route path="banners" element={<Banners />} />
         <Route path="about" element={<AboutPage />} />
+        <Route path="consultation-categories" element={<ConsultationCategories />} />
+        <Route path="consultation-sub-categories" element={<ConsultationSubCategories />} />
+        <Route path="consultation-sessions" element={<ConsultationSessions />} />
+        <Route path="reservations" element={<Reservations />} />
+        <Route path="consultation-reservations" element={<ConsultationReservations />} />
+        <Route path="users" element={<Users />} />
         <Route path="roles-permissions" element={<RolesPermissions />} />
         <Route path="profile" element={<Profile />} />
       </Route>
