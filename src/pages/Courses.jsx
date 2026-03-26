@@ -6,6 +6,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 
 function getItemName(item) {
   if (!item) return '—';
@@ -30,6 +31,7 @@ function toFormValue(val) {
 
 export function Courses() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,7 @@ export function Courses() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, filterAccepted, filterCategoryId, filterLevelId, filterMentorId, filterType]);
+  }, [page, search, filterAccepted, filterCategoryId, filterLevelId, filterMentorId, filterType, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -120,7 +122,7 @@ export function Courses() {
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [lang]);
 
   const editId = searchParams.get('edit');
   useEffect(() => {

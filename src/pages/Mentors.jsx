@@ -21,6 +21,15 @@ export function Mentors() {
   const [formEmail, setFormEmail] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formPassword, setFormPassword] = useState('');
+  const [formDeductionType, setFormDeductionType] = useState('fixed');
+  const [formDeductionValue, setFormDeductionValue] = useState('');
+  const [formBankName, setFormBankName] = useState('');
+  const [formBankAccountNumber, setFormBankAccountNumber] = useState('');
+  const [formBankAccountName, setFormBankAccountName] = useState('');
+  const [formBankAccountIban, setFormBankAccountIban] = useState('');
+  const [formBankAccountSwift, setFormBankAccountSwift] = useState('');
+  const [formBankAccountRoutingNumber, setFormBankAccountRoutingNumber] = useState('');
+  const [formBankAccountBranchCode, setFormBankAccountBranchCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const confirm = useConfirm();
@@ -94,6 +103,15 @@ export function Mentors() {
     setFormEmail('');
     setFormPhone('');
     setFormPassword('');
+    setFormDeductionType('fixed');
+    setFormDeductionValue('');
+    setFormBankName('');
+    setFormBankAccountNumber('');
+    setFormBankAccountName('');
+    setFormBankAccountIban('');
+    setFormBankAccountSwift('');
+    setFormBankAccountRoutingNumber('');
+    setFormBankAccountBranchCode('');
     setFieldErrors({});
     setModalOpen(true);
   };
@@ -128,6 +146,16 @@ export function Mentors() {
     setFormEmail(row.email ?? '');
     setFormPhone(getMentorPhone(row));
     setFormPassword('');
+    const details = row.mentor_detail ?? row.mentorDetail ?? {};
+    setFormDeductionType(details.deduction_type ?? details.deductionType ?? 'fixed');
+    setFormDeductionValue(details.deduction_value != null ? String(details.deduction_value) : '');
+    setFormBankName(details.bank_name ?? '');
+    setFormBankAccountNumber(details.bank_account_number ?? '');
+    setFormBankAccountName(details.bank_account_name ?? '');
+    setFormBankAccountIban(details.bank_account_iban ?? '');
+    setFormBankAccountSwift(details.bank_account_swift ?? '');
+    setFormBankAccountRoutingNumber(details.bank_account_routing_number ?? '');
+    setFormBankAccountBranchCode(details.bank_account_branch_code ?? '');
     setModalOpen(true);
   };
 
@@ -136,36 +164,105 @@ export function Mentors() {
       setFormName(editing.name ?? editing.name_ar ?? editing.name_en ?? '');
       setFormEmail(editing.email ?? '');
       setFormPhone(getMentorPhone(editing));
+      const details = editing.mentor_detail ?? editing.mentorDetail ?? {};
+      setFormDeductionType(details.deduction_type ?? details.deductionType ?? 'fixed');
+      setFormDeductionValue(details.deduction_value != null ? String(details.deduction_value) : '');
+      setFormBankName(details.bank_name ?? '');
+      setFormBankAccountNumber(details.bank_account_number ?? '');
+      setFormBankAccountName(details.bank_account_name ?? '');
+      setFormBankAccountIban(details.bank_account_iban ?? '');
+      setFormBankAccountSwift(details.bank_account_swift ?? '');
+      setFormBankAccountRoutingNumber(details.bank_account_routing_number ?? '');
+      setFormBankAccountBranchCode(details.bank_account_branch_code ?? '');
     }
   }, [editing?.id, modalOpen]);
+
+  const buildMentorFormData = (includePassword) => {
+    const fd = new FormData();
+    fd.append('name', formName);
+    fd.append('email', formEmail);
+    fd.append('phone_number', formPhone);
+    fd.append('deduction_type', formDeductionType || 'fixed');
+    if (formDeductionValue !== '') fd.append('deduction_value', formDeductionValue);
+    fd.append('bank_name', formBankName);
+    fd.append('bank_account_number', formBankAccountNumber);
+    fd.append('bank_account_name', formBankAccountName);
+    fd.append('bank_account_iban', formBankAccountIban);
+    fd.append('bank_account_swift', formBankAccountSwift);
+    fd.append('bank_account_routing_number', formBankAccountRoutingNumber);
+    fd.append('bank_account_branch_code', formBankAccountBranchCode);
+    if (includePassword && formPassword) fd.append('password', formPassword);
+    return fd;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setFieldErrors({});
     try {
+      if (formDeductionType === 'percentage') {
+        const valueNum = Number(formDeductionValue);
+        if (!Number.isFinite(valueNum) || valueNum < 1 || valueNum > 100) {
+          toast.error('When deduction type is percentage, deduction value must be between 1 and 100.');
+          return;
+        }
+      }
+
       if (editing) {
-        const originalEmail = editing.email ?? '';
-        const params = { name: formName, phone_number: formPhone };
-        if (formEmail !== originalEmail) params.email = formEmail;
-        if (formPassword) params.password = formPassword;
-        await MentorService.update(editing.id, params);
+        const fd = buildMentorFormData(!!formPassword);
+        await MentorService.update(editing.id, fd);
         toast.success('Mentor updated');
         setStoredMentorPhone(editing.id, formPhone);
         setData((prev) =>
           prev.map((r) =>
             r.id === editing.id
-              ? { ...r, phone: formPhone, phone_number: formPhone, name: formName, ...(formEmail !== (editing.email ?? '') && { email: formEmail }) }
+              ? {
+                  ...r,
+                  phone: formPhone,
+                  phone_number: formPhone,
+                  name: formName,
+                  email: formEmail,
+                  mentor_detail: {
+                    ...(r.mentor_detail ?? {}),
+                    deduction_type: formDeductionType,
+                    deduction_value: formDeductionValue,
+                    bank_name: formBankName,
+                    bank_account_number: formBankAccountNumber,
+                    bank_account_name: formBankAccountName,
+                    bank_account_iban: formBankAccountIban,
+                    bank_account_swift: formBankAccountSwift,
+                    bank_account_routing_number: formBankAccountRoutingNumber,
+                    bank_account_branch_code: formBankAccountBranchCode,
+                  },
+                }
               : r
           )
         );
-        setEditing((prev) => (prev && prev.id === editing.id ? { ...prev, phone: formPhone, phone_number: formPhone, name: formName, ...(formEmail !== (editing.email ?? '') && { email: formEmail }) } : prev));
+        setEditing((prev) =>
+          prev && prev.id === editing.id
+            ? {
+                ...prev,
+                phone: formPhone,
+                phone_number: formPhone,
+                name: formName,
+                email: formEmail,
+                mentor_detail: {
+                  ...(prev.mentor_detail ?? {}),
+                  deduction_type: formDeductionType,
+                  deduction_value: formDeductionValue,
+                  bank_name: formBankName,
+                  bank_account_number: formBankAccountNumber,
+                  bank_account_name: formBankAccountName,
+                  bank_account_iban: formBankAccountIban,
+                  bank_account_swift: formBankAccountSwift,
+                  bank_account_routing_number: formBankAccountRoutingNumber,
+                  bank_account_branch_code: formBankAccountBranchCode,
+                },
+              }
+            : prev
+        );
       } else {
-        const fd = new FormData();
-        fd.append('name', formName);
-        fd.append('email', formEmail);
-        fd.append('phone', formPhone);
-        fd.append('password', formPassword);
+        const fd = buildMentorFormData(true);
         const created = await MentorService.create(fd);
         toast.success('Mentor created');
         setModalOpen(false);
@@ -285,6 +382,54 @@ export function Mentors() {
             onChange={(e) => { setFormPhone(e.target.value); setFieldErrors((prev) => ({ ...prev, phone: undefined, phone_number: undefined })); }}
             error={fieldErrors.phone?.[0] || fieldErrors.phone || fieldErrors.phone_number?.[0] || fieldErrors.phone_number}
           />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium text-[var(--color-primary)]">Deduction type</label>
+              <select
+                value={formDeductionType}
+                onChange={(e) => setFormDeductionType(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-white"
+              >
+                <option value="fixed">fixed</option>
+                <option value="percentage">percentage</option>
+              </select>
+            </div>
+            <Input
+              label="Deduction value"
+              type="number"
+              value={formDeductionValue}
+              onChange={(e) => setFormDeductionValue(e.target.value)}
+              min={formDeductionType === 'percentage' ? 1 : undefined}
+              max={formDeductionType === 'percentage' ? 100 : undefined}
+            />
+          </div>
+          <Input label="Bank name" value={formBankName} onChange={(e) => setFormBankName(e.target.value)} />
+          <Input
+            label="Bank account number"
+            value={formBankAccountNumber}
+            onChange={(e) => setFormBankAccountNumber(e.target.value)}
+          />
+          <Input
+            label="Bank account name"
+            value={formBankAccountName}
+            onChange={(e) => setFormBankAccountName(e.target.value)}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input label="Bank account IBAN" value={formBankAccountIban} onChange={(e) => setFormBankAccountIban(e.target.value)} />
+            <Input label="Bank account SWIFT" value={formBankAccountSwift} onChange={(e) => setFormBankAccountSwift(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input
+              label="Bank account routing number"
+              value={formBankAccountRoutingNumber}
+              onChange={(e) => setFormBankAccountRoutingNumber(e.target.value)}
+            />
+            <Input
+              label="Bank account branch code"
+              value={formBankAccountBranchCode}
+              onChange={(e) => setFormBankAccountBranchCode(e.target.value)}
+            />
+          </div>
           <Input
             label={editing ? t('mentors.newPassword') : t('mentors.password')}
             type="password"

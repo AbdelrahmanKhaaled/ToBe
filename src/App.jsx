@@ -31,6 +31,13 @@ import { ConsultationSessions } from '@/pages/ConsultationSessions';
 import { Reservations } from '@/pages/Reservations';
 import { ConsultationReservations } from '@/pages/ConsultationReservations';
 import { Users } from '@/pages/Users';
+import { Wallets } from '@/pages/Wallets';
+import { WalletSingle } from '@/pages/WalletSingle';
+import { SubCategorySingle } from '@/pages/SubCategorySingle';
+import { ConsultationCategorySingle } from '@/pages/ConsultationCategorySingle';
+import { ConsultationSubCategorySingle } from '@/pages/ConsultationSubCategorySingle';
+import { ConsultationSessionSingle } from '@/pages/ConsultationSessionSingle';
+import { BannerSingle } from '@/pages/BannerSingle';
 
 function ProtectedRoute({ children }) {
   const { authenticated, loading } = useAuth();
@@ -69,6 +76,7 @@ function AppRoutes() {
         <Route path="categories" element={<Categories />} />
         <Route path="categories/:id" element={<CategorySingle />} />
         <Route path="sub-categories" element={<SubCategories />} />
+        <Route path="sub-categories/:id" element={<SubCategorySingle />} />
         <Route path="levels" element={<Levels />} />
         <Route path="levels/:id" element={<LevelSingle />} />
         <Route path="mentors" element={<Mentors />} />
@@ -82,12 +90,18 @@ function AppRoutes() {
         <Route path="faqs" element={<Faqs />} />
         <Route path="faqs/:id" element={<FaqSingle />} />
         <Route path="banners" element={<Banners />} />
+        <Route path="banners/:id" element={<BannerSingle />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="consultation-categories" element={<ConsultationCategories />} />
+        <Route path="consultation-categories/:id" element={<ConsultationCategorySingle />} />
         <Route path="consultation-sub-categories" element={<ConsultationSubCategories />} />
+        <Route path="consultation-sub-categories/:id" element={<ConsultationSubCategorySingle />} />
         <Route path="consultation-sessions" element={<ConsultationSessions />} />
+        <Route path="consultation-sessions/:id" element={<ConsultationSessionSingle />} />
         <Route path="reservations" element={<Reservations />} />
         <Route path="consultation-reservations" element={<ConsultationReservations />} />
+        <Route path="wallets" element={<Wallets />} />
+        <Route path="wallets/:id" element={<WalletSingle />} />
         <Route path="users" element={<Users />} />
         <Route path="roles-permissions" element={<RolesPermissions />} />
         <Route path="profile" element={<Profile />} />

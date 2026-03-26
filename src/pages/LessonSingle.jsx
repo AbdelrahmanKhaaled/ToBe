@@ -5,6 +5,7 @@ import { Button, Loading, IconEdit, IconTrash } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
 import { LessonVideoUploader } from '@/components/VideoChunkUploader';
+import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'lesson') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -36,6 +37,7 @@ export function LessonSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,7 @@ export function LessonSingle() {
     }
     if (id) load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]);
 
   const handleDelete = async () => {
     const title = getTitle(item);

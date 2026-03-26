@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/Input';
 import { LessonVideoUploader } from '@/components/VideoChunkUploader';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
+import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'course') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -163,6 +164,7 @@ export function CourseSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lessonsLoading, setLessonsLoading] = useState(false);
@@ -193,7 +195,7 @@ export function CourseSingle() {
     }
     if (id) load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]);
 
   const refreshCourse = useCallback(async () => {
     if (!id) return;

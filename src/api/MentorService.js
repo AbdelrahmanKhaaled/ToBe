@@ -29,8 +29,17 @@ class MentorServiceClass extends BaseApiService {
     return res.data || res;
   }
 
-  async update(id, formData) {
-    const res = await this.postUrlEncoded(`/${id}?_method=PUT`, formData);
+  async update(id, payload) {
+    const formData = payload instanceof FormData ? payload : (() => {
+      const fd = new FormData();
+      if (!payload || typeof payload !== 'object') return fd;
+      for (const [key, value] of Object.entries(payload)) {
+        if (value === undefined || value === null) continue;
+        fd.append(key, String(value));
+      }
+      return fd;
+    })();
+    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
     return res.data || res;
   }
 

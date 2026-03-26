@@ -4,6 +4,7 @@ import { FaqService } from '@/api';
 import { Button, Loading, IconEdit, IconTrash } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
+import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'faq') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -21,6 +22,7 @@ export function FaqSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +42,7 @@ export function FaqSingle() {
     }
     if (id) load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]);
 
   const handleDelete = async () => {
     const question = getQuestion(item);

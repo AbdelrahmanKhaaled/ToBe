@@ -4,6 +4,7 @@ import { ArticleService } from '@/api';
 import { Button, Loading, IconEdit, IconTrash } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
+import { useLanguage } from '@/context/LanguageContext';
 
 function getTitle(row) {
   const t = row?.title;
@@ -19,6 +20,7 @@ export function ArticleSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +39,7 @@ export function ArticleSingle() {
     }
     if (id) load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]);
 
   const handleDelete = async () => {
     const title = getTitle(item);

@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function Banners() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export function Banners() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -103,12 +105,18 @@ export function Banners() {
     const trans = row.translations || {};
     const ar = trans.ar || row;
     const en = trans.en || row;
-    setFormNameAr(row.name_ar ?? ar.name ?? row.name ?? '');
-    setFormNameEn(row.name_en ?? en.name ?? row.name ?? '');
-    setFormDescAr(row.description_ar ?? ar.description ?? row.description ?? '');
-    setFormDescEn(row.description_en ?? en.description ?? row.description ?? '');
-    setFormButtonTextAr(row.button_text_ar ?? ar.button_text ?? row.button_text ?? '');
-    setFormButtonTextEn(row.button_text_en ?? en.button_text ?? row.button_text ?? '');
+    // API list/show may return title/description/button_text as plain fields.
+    // Keep Arabic/English inputs filled by falling back to these generic values.
+    const fallbackTitle = row.title ?? row.name ?? '';
+    const fallbackDescription = row.description ?? '';
+    const fallbackButtonText = row.button_text ?? '';
+
+    setFormNameAr(row.name_ar ?? ar.name ?? ar.title ?? fallbackTitle);
+    setFormNameEn(row.name_en ?? en.name ?? en.title ?? fallbackTitle);
+    setFormDescAr(row.description_ar ?? ar.description ?? fallbackDescription);
+    setFormDescEn(row.description_en ?? en.description ?? fallbackDescription);
+    setFormButtonTextAr(row.button_text_ar ?? ar.button_text ?? fallbackButtonText);
+    setFormButtonTextEn(row.button_text_en ?? en.button_text ?? fallbackButtonText);
     setFormButtonUrl(row.button_url ?? row.url ?? '');
     setFormImage(null);
     setModalOpen(true);
@@ -128,8 +136,12 @@ export function Banners() {
   };
 
   const buildUpdateBody = () => ({
+    // Backend may persist/display the banner title using either `name_*` or `title_*`.
+    // We send both to ensure "Name/Title" updates reliably.
     name_ar: formNameAr || formNameEn || '',
     name_en: formNameEn || formNameAr || '',
+    title_ar: formNameAr || formNameEn || '',
+    title_en: formNameEn || formNameAr || '',
     description_ar: formDescAr ?? '',
     description_en: formDescEn ?? '',
     button_text_ar: formButtonTextAr ?? '',
@@ -213,12 +225,6 @@ export function Banners() {
         columns={[
           { key: 'title', header: t('bannersPage.name'), render: (r) => getDisplayName(r) },
           { key: 'description', header: t('bannersPage.description'), render: (r) => getDisplayDesc(r) },
-          {
-            key: 'button_text',
-            header: t('bannersPage.buttonText'),
-            render: (r) => r.button_text ?? r.button_text_en ?? r.button_text_ar ?? '',
-          },
-          { key: 'url', header: t('bannersPage.url'), render: (r) => r.button_url ?? '' },
         ]}
         data={data}
         meta={meta ?? undefined}
@@ -231,13 +237,12 @@ export function Banners() {
         emptyMessage={t('bannersPage.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
-            <Link to="#" aria-disabled="true">
+            <Link to={`/banners/${row.id}`}>
               <Button
                 variant="ghost"
                 className="!p-2 min-w-0"
                 title={t('common.view')}
                 aria-label={t('common.view')}
-                disabled
               >
                 <IconView />
               </Button>

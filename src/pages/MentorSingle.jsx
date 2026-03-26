@@ -5,6 +5,7 @@ import { Button, Loading, IconEdit, IconTrash } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
 import { getStoredMentorPhone } from '@/utils/mentorPhoneStorage';
+import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'mentor') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -34,6 +35,7 @@ export function MentorSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +55,7 @@ export function MentorSingle() {
     }
     if (id) load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]);
 
   const handleDelete = async () => {
     const name = item.name ?? 'this mentor';
@@ -75,6 +77,7 @@ export function MentorSingle() {
 
   if (loading) return <Loading />;
   if (!item) return <div className="text-gray-500">Mentor not found.</div>;
+  const detail = item?.mentor_detail ?? item?.mentorDetail ?? null;
 
   return (
     <div>
@@ -87,10 +90,6 @@ export function MentorSingle() {
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
         <dl className="divide-y divide-[var(--color-border)]">
           <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">ID</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{item.id}</dd>
-          </div>
-          <div className="px-4 py-3">
             <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 text-[var(--color-primary)]">{item.name ?? '—'}</dd>
           </div>
@@ -102,6 +101,50 @@ export function MentorSingle() {
             <dt className="text-sm font-medium text-gray-500">Phone</dt>
             <dd className="mt-1 text-[var(--color-primary)]">{getPhone(item) || '—'}</dd>
           </div>
+          <div className="px-4 py-3">
+            <dt className="text-sm font-medium text-gray-500">Wallet balance</dt>
+            <dd className="mt-1 text-[var(--color-primary)]">{item?.wallet_balance?.balance ?? item?.walletBalance?.balance ?? '0.00'}</dd>
+          </div>
+          {detail && (
+            <>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Deduction type</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.deduction_type ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Deduction value</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.deduction_value ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank name</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_name ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account number</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_number ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account name</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_name ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account IBAN</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_iban ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account SWIFT</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_swift ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account routing number</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_routing_number ?? '—'}</dd>
+              </div>
+              <div className="px-4 py-3">
+                <dt className="text-sm font-medium text-gray-500">Bank account branch code</dt>
+                <dd className="mt-1 text-[var(--color-primary)]">{detail.bank_account_branch_code ?? '—'}</dd>
+              </div>
+            </>
+          )}
         </dl>
       </div>
       <div className="mt-4 flex gap-2">

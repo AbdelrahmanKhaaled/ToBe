@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CategoryService, SubCategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function SubCategories() {
   const { t } = useTranslation();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
 
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -28,6 +31,7 @@ export function SubCategories() {
   const [formDescEn, setFormDescEn] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
   const [formImage, setFormImage] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const categoriesById = useMemo(() => {
     const m = new Map();
@@ -42,7 +46,7 @@ export function SubCategories() {
     } catch (_) {
       setCategories([]);
     }
-  }, []);
+  }, [lang]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -55,7 +59,7 @@ export function SubCategories() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -79,6 +83,32 @@ export function SubCategories() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('edit');
+        return next;
+      });
+
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEdit(row);
+      clearEdit();
+    } else {
+      SubCategoryService.getById(id)
+        .then((res) => {
+          const item = res?.sub_category ?? res?.data ?? res;
+          if (item) openEdit(item);
+          clearEdit();
+        })
+        .catch(() => clearEdit());
+    }
+  }, [editId, data, loading]);
 
   const openCreate = () => {
     setEditing(null);
@@ -195,6 +225,11 @@ export function SubCategories() {
         emptyMessage={t('subCategories.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
+            <Link to={`/sub-categories/${row.id}`}>
+              <Button variant="ghost" className="!p-2 min-w-0" title={t('common.view')} aria-label={t('common.view')}>
+                <IconView />
+              </Button>
+            </Link>
             <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
               <IconEdit />
             </Button>

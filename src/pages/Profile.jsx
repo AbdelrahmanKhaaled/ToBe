@@ -129,11 +129,17 @@ export function Profile() {
                   <dd className="font-medium text-[var(--color-primary)]">{user?.email ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-gray-600">{t('profile.id')}</dt>
-                  <dd className="font-mono text-sm text-[var(--color-primary)]">{user?.id ?? '—'}</dd>
+                  <dt className="text-sm text-gray-600">{t('profile.phoneNumber')}</dt>
+                  <dd className="font-medium text-[var(--color-primary)]">{user?.phone_number ?? user?.phoneNumber ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-gray-600">{t('profile.roles')}</dt>
+                  <dd className="font-medium text-[var(--color-primary)]">
+                    {Array.isArray(user?.roles) && user.roles.length ? user.roles.join(', ') : '—'}
+                  </dd>
                 </div>
               </dl>
-              <Button variant="ghost" onClick={startEdit} className="mt-4">
+              <Button variant="primary" onClick={startEdit} className="mt-4 w-full">
                 {t('profile.editProfile')}
               </Button>
             </>

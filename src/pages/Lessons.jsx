@@ -6,6 +6,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 import { LessonVideoUploader } from '@/components/VideoChunkUploader';
 
 function toFormValue(val) {
@@ -39,6 +40,7 @@ function isCourseRecorded(c) {
 
 export function Lessons() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export function Lessons() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, courseId]);
+  }, [page, search, courseId, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -105,7 +107,7 @@ export function Lessons() {
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [lang]);
 
   const editId = searchParams.get('edit');
   useEffect(() => {

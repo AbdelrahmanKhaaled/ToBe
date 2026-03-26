@@ -6,6 +6,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -19,6 +20,7 @@ function toFormValue(val) {
 
 export function Articles() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ export function Articles() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, filterPublished, filterAccepted]);
+  }, [page, search, filterPublished, filterAccepted, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -87,7 +89,7 @@ export function Articles() {
     } catch {
       setCourses([]);
     }
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     if (modalOpen) fetchCourses();

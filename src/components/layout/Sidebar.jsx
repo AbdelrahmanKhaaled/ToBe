@@ -21,6 +21,7 @@ export function Sidebar() {
     { to: '/consultation-sessions', label: t('nav.consultationSessions') },
     { to: '/reservations', label: t('nav.reservations') },
     { to: '/consultation-reservations', label: t('nav.consultationReservations') },
+    { to: '/wallets', label: t('nav.wallets') },
     { to: '/users', label: t('nav.users') },
     { to: '/roles-permissions', label: t('nav.rolesPermissions') },
     { to: '/profile', label: t('nav.profile') },

@@ -18,3 +18,4 @@ export { ConsultationSessionService } from './ConsultationSessionService';
 export { ReservationService } from './ReservationService';
 export { ConsultationReservationService } from './ConsultationReservationService';
 export { UserService } from './UserService';
+export { WalletService } from './WalletService';

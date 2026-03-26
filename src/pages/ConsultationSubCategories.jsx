@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ConsultationCategoryService, ConsultationSubCategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function ConsultationSubCategories() {
   const { t } = useTranslation();
   const confirm = useConfirm();
+  const { lang } = useLanguage();
 
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -43,7 +46,7 @@ export function ConsultationSubCategories() {
     } catch (_) {
       setCategories([]);
     }
-  }, []);
+  }, [lang]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -56,7 +59,7 @@ export function ConsultationSubCategories() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -215,6 +218,11 @@ export function ConsultationSubCategories() {
         emptyMessage={t('consultationSubCategories.empty')}
         actions={(row) => (
           <div className="flex gap-1 justify-end">
+            <Link to={`/consultation-sub-categories/${row.id}`}>
+              <Button variant="ghost" className="!p-2 min-w-0" title={t('common.view')} aria-label={t('common.view')}>
+                <IconView />
+              </Button>
+            </Link>
             <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
               <IconEdit />
             </Button>
