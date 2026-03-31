@@ -31,7 +31,10 @@ class ArticleServiceClass extends BaseApiService {
   }
 
   async update(id, formData) {
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res.data || res;
   }
 
@@ -40,30 +43,32 @@ class ArticleServiceClass extends BaseApiService {
   }
 
   async publish(id) {
-    const res = await this.post(`/${id}/publish?_method=PUT`);
+    const res = await this.put(`/${id}/publish`);
     return res.data || res;
   }
 
   async unpublish(id) {
-    const res = await this.post(`/${id}/unpublish?_method=PUT`);
+    const res = await this.put(`/${id}/unpublish`);
     return res.data || res;
   }
 
-  /** POST /dashboard/articles/:id/accept?_method=PUT */
+  /** PUT /dashboard/articles/:id/accept */
   async accept(id) {
-    const res = await this.post(`/${id}/accept?_method=PUT`);
+    const res = await this.put(`/${id}/accept`);
     return res.data || res;
   }
 
-  /** POST /dashboard/articles/:id/reject?_method=PUT */
+  /** PUT /dashboard/articles/:id/reject */
   async reject(id) {
-    const res = await this.post(`/${id}/reject?_method=PUT`);
+    const res = await this.put(`/${id}/reject`);
     return res.data || res;
   }
 
   /** GET /dashboard/articles/:id/edit — returns the article object */
-  async getForEdit(id) {
-    const res = await this.get(`/${id}/edit`);
+  async getForEdit(id, options = {}) {
+    const articleId = id != null ? String(id) : id;
+    if (articleId == null || articleId === '') return null;
+    const res = await this.request(`/${articleId}/edit`, { method: 'GET', omitLanguage: true, ...options });
     return res?.article ?? res?.data ?? res ?? null;
   }
 }

@@ -25,6 +25,7 @@ export function Categories() {
   const [formTypeSlug, setFormTypeSlug] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -60,26 +61,6 @@ export function Categories() {
     fetchData();
   }, [fetchData]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      CategoryService.getById(id)
-        .then((res) => {
-          const item = res?.category ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormNameAr('');
@@ -93,19 +74,108 @@ export function Categories() {
 
   const openEdit = (row) => {
     setEditing(row);
-    const trans = row.translations || {};
-    const ar = trans.ar || row;
-    const en = trans.en || row;
-    const nameObj = row.name && typeof row.name === 'object' ? row.name : null;
-    const descObj = row.description && typeof row.description === 'object' ? row.description : null;
-    setFormNameAr(row.name_ar ?? nameObj?.ar ?? ar.name ?? row.name ?? '');
-    setFormNameEn(row.name_en ?? nameObj?.en ?? en.name ?? row.name ?? '');
-    setFormDescAr(row.description_ar ?? descObj?.ar ?? ar.description ?? row.description ?? '');
-    setFormDescEn(row.description_en ?? descObj?.en ?? en.description ?? row.description ?? '');
-    setFormTypeSlug(row.type_slug ?? row.typeSlug ?? '');
+    const trans = row?.translations || {};
+    const nameObj = row?.name && typeof row.name === 'object' ? row.name : null;
+    const descObj = row?.description && typeof row.description === 'object' ? row.description : null;
+
+    const nameAr =
+      row?.name_ar ??
+      nameObj?.ar ??
+      trans?.ar?.name ??
+      (typeof row?.name === 'string' ? row.name : '') ??
+      '';
+    const nameEn =
+      row?.name_en ??
+      nameObj?.en ??
+      trans?.en?.name ??
+      (typeof row?.name === 'string' ? row.name : '') ??
+      '';
+
+    const descAr =
+      row?.description_ar ??
+      descObj?.ar ??
+      trans?.ar?.description ??
+      (typeof row?.description === 'string' ? row.description : '') ??
+      '';
+    const descEn =
+      row?.description_en ??
+      descObj?.en ??
+      trans?.en?.description ??
+      (typeof row?.description === 'string' ? row.description : '') ??
+      '';
+
+    setFormNameAr(nameAr || nameEn || '');
+    setFormNameEn(nameEn || nameAr || '');
+    setFormDescAr(descAr);
+    setFormDescEn(descEn);
+    setFormTypeSlug(row.type_slug ?? row.typeSlug ?? row.type ?? '');
     setFormImage(null);
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const categoryId = id != null ? String(id) : id;
+    if (categoryId == null || categoryId === '') return;
+    setEditLoading(true);
+    try {
+      const res = await CategoryService.getForEdit(categoryId);
+      const neutral = res?.category ?? res?.data ?? res;
+      if (!neutral) return;
+
+      const hasBilingual =
+        neutral?.name && typeof neutral.name === 'object' && neutral.name?.ar != null && neutral.name?.en != null &&
+        neutral?.description && typeof neutral.description === 'object' && neutral.description?.ar != null && neutral.description?.en != null;
+
+      if (hasBilingual) {
+        openEdit(neutral);
+        return;
+      }
+
+      const pickText = (val) => {
+        if (!val) return '';
+        if (typeof val === 'string') return val;
+        if (typeof val === 'object') return val?.ar ?? val?.en ?? '';
+        return '';
+      };
+
+      const [resAr, resEn] = await Promise.all([
+        CategoryService.getForEdit(categoryId, { headers: { 'Accept-Language': 'ar' } }),
+        CategoryService.getForEdit(categoryId, { headers: { 'Accept-Language': 'en' } }),
+      ]);
+
+      const arItem = resAr?.category ?? resAr?.data ?? resAr;
+      const enItem = resEn?.category ?? resEn?.data ?? resEn;
+
+      const merged = {
+        ...neutral,
+        name: { ar: pickText(arItem?.name) || pickText(neutral?.name), en: pickText(enItem?.name) || pickText(neutral?.name) },
+        description: {
+          ar: pickText(arItem?.description) || pickText(neutral?.description),
+          en: pickText(enItem?.description) || pickText(neutral?.description),
+        },
+      };
+
+      openEdit(merged);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -197,7 +267,7 @@ export function Categories() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
               <IconEdit />
             </Button>
             <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
@@ -211,7 +281,10 @@ export function Categories() {
         onClose={() => setModalOpen(false)}
         title={editing ? t('categories.modalEdit') : t('categories.modalCreate')}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label={t('categories.nameAr')}
             value={formNameAr}
@@ -271,7 +344,8 @@ export function Categories() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

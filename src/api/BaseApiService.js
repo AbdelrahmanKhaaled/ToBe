@@ -35,11 +35,11 @@ export default class BaseApiService {
     return `${this.baseUrl}/${this.resource}`;
   }
 
-  getHeaders(omitContentType = false) {
+  getHeaders(omitContentType = false, omitLanguage = false) {
     const token = authStorage.getToken();
     const headers = {
       Accept: 'application/json',
-      'Accept-Language': getCurrentLanguage(),
+      ...(!omitLanguage && { 'Accept-Language': getCurrentLanguage() }),
       ...(token && { Authorization: `Bearer ${token}` }),
     };
     if (!omitContentType) {
@@ -50,10 +50,12 @@ export default class BaseApiService {
 
   async request(endpoint, options = {}) {
     const url = endpoint.startsWith('http') ? endpoint : `${this.url}${endpoint}`;
+    const omitLanguage = options?.omitLanguage === true;
     const config = {
       ...options,
-      headers: { ...this.getHeaders(options.body instanceof FormData), ...options.headers },
+      headers: { ...this.getHeaders(options.body instanceof FormData, omitLanguage), ...options.headers },
     };
+    delete config.omitLanguage;
     if (config.body instanceof FormData) {
       delete config.headers['Content-Type'];
     }
@@ -115,6 +117,20 @@ export default class BaseApiService {
   async put(endpoint, body) {
     return this.request(endpoint, {
       method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  }
+
+  async putFormData(endpoint, formData) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: formData,
+    });
+  }
+
+  async patch(endpoint, body) {
+    return this.request(endpoint, {
+      method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
     });
   }

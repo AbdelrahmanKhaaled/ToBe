@@ -6,7 +6,7 @@ class AuthServiceClass extends BaseApiService {
   }
 
   async login(email, password) {
-    const res = await this.postUrlEncoded('/login', { email, password });
+    const res = await this.post('/login', { email, password });
     const payload = res.data || res;
     return {
       token: payload.token || payload.access_token,
@@ -29,24 +29,26 @@ class AuthServiceClass extends BaseApiService {
   }
 
   /**
-   * Update user profile. POST {{base_url}}/dashboard/user?_method=PUT&id=:id
-   * Body: name, email (url-encoded).
+   * PUT /dashboard/user
+   * Body: { name, email } (JSON)
    */
   async updateProfile(name, email, userId = null) {
-    const id = userId != null && userId !== '' ? encodeURIComponent(userId) : '';
-    const endpoint = id ? `/user?_method=PUT&id=${id}` : '/profile?_method=PUT';
-    const res = await this.postUrlEncoded(endpoint, { name, email });
+    const payload = {
+      ...(name !== undefined && { name }),
+      ...(email !== undefined && { email }),
+      ...(userId != null && userId !== '' && { id: userId }),
+    };
+    const res = await this.put('/user', payload);
     return res.data || res;
   }
 
-  /** POST /dashboard/password?_method=PUT — update current user password */
-  async updatePassword(currentPassword, newPassword, newPasswordConfirmation = null) {
+  /** PUT /dashboard/password — update current user password */
+  async updatePassword(_currentPassword, newPassword, newPasswordConfirmation = null) {
     const body = {
-      current_password: currentPassword,
       password: newPassword,
       password_confirmation: newPasswordConfirmation ?? newPassword,
     };
-    const res = await this.post('/password?_method=PUT', body);
+    const res = await this.put('/password', body);
     return res.data || res;
   }
 }

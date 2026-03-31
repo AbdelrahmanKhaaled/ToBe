@@ -8,6 +8,7 @@ import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 export function ConsultationSubCategories() {
   const { t } = useTranslation();
@@ -32,6 +33,7 @@ export function ConsultationSubCategories() {
   const [formDescEn, setFormDescEn] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
   const [formImage, setFormImage] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   const categoriesById = useMemo(() => {
     const m = new Map();
@@ -110,6 +112,25 @@ export function ConsultationSubCategories() {
     setFormImage(null);
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const subCategoryId = id != null ? String(id) : id;
+    if (subCategoryId == null || subCategoryId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: ConsultationSubCategoryService.getForEdit.bind(ConsultationSubCategoryService),
+        id: subCategoryId,
+        extractKeys: ['sub_category', 'data'],
+        bilingualFields: ['name', 'description'],
+      });
+      if (merged) openEdit(merged);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -223,7 +244,7 @@ export function ConsultationSubCategories() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
               <IconEdit />
             </Button>
             <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
@@ -238,7 +259,10 @@ export function ConsultationSubCategories() {
         onClose={() => setModalOpen(false)}
         title={editing ? t('consultationSubCategories.modalEdit') : t('consultationSubCategories.modalCreate')}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input label={t('consultationSubCategories.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
           <Input label={t('consultationSubCategories.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
 
@@ -296,7 +320,8 @@ export function ConsultationSubCategories() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

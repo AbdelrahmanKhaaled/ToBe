@@ -34,7 +34,10 @@ class LessonServiceClass extends BaseApiService {
   }
 
   async update(id, formData) {
-    const res = await this.postUrlEncoded(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res.data || res;
   }
 
@@ -49,8 +52,10 @@ class LessonServiceClass extends BaseApiService {
   }
 
   /** GET /dashboard/lessons/:id/edit */
-  async getForEdit(id) {
-    const res = await this.get(`/${id}/edit`);
+  async getForEdit(id, options = {}) {
+    const lessonId = id != null ? String(id) : id;
+    if (lessonId == null || lessonId === '') return null;
+    const res = await this.request(`/${lessonId}/edit`, { method: 'GET', omitLanguage: true, ...options });
     return res.data || res;
   }
 }

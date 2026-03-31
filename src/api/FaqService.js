@@ -24,13 +24,26 @@ class FaqServiceClass extends BaseApiService {
     return res.data || res;
   }
 
+  /**
+   * GET /dashboard/faqs/:id/edit
+   * Default: do NOT send Accept-Language (can be overridden via options.headers).
+   */
+  async getForEdit(id, options = {}) {
+    const faqId = id != null ? String(id) : id;
+    if (faqId == null || faqId === '') return null;
+    return this.request(`/${faqId}/edit`, { method: 'GET', omitLanguage: true, ...options });
+  }
+
   async create(formData) {
     const res = await this.postFormData('', formData);
     return res.data || res;
   }
 
   async update(id, formData) {
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res.data || res;
   }
 

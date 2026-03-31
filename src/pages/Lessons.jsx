@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { LessonVideoUploader } from '@/components/VideoChunkUploader';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -59,6 +60,7 @@ export function Lessons() {
   const [formOrder, setFormOrder] = useState('');
   const [formDuration, setFormDuration] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -109,26 +111,6 @@ export function Lessons() {
     return () => { cancelled = true; };
   }, [lang]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      LessonService.getForEdit(id)
-        .then((res) => {
-          const item = res?.lesson ?? res?.data ?? res ?? { id };
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormTitleAr('');
@@ -160,13 +142,52 @@ export function Lessons() {
     setModalOpen(true);
   };
 
+  const openEditById = useCallback(async (id) => {
+    const lessonId = id != null ? String(id) : id;
+    if (lessonId == null || lessonId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: LessonService.getForEdit.bind(LessonService),
+        id: lessonId,
+        extractKeys: ['lesson', 'data'],
+        bilingualFields: ['title', 'content'],
+      });
+      openEdit(merged ?? { id: lessonId });
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
+
   useEffect(() => {
     if (!editing?.id || !modalOpen) return;
     let cancelled = false;
-    LessonService.getForEdit(editing.id)
+    setEditLoading(true);
+    fetchBilingualEdit({
+      getForEdit: LessonService.getForEdit.bind(LessonService),
+      id: editing.id,
+      extractKeys: ['lesson', 'data'],
+      bilingualFields: ['title', 'content'],
+    })
       .then((res) => {
         if (cancelled) return;
-        const d = res?.lesson ?? res?.data ?? res ?? {};
+        const d = res ?? {};
         const titleObj = d.title && typeof d.title === 'object' ? d.title : null;
         const contentObj = d.content && typeof d.content === 'object' ? d.content : null;
         const trans = d.translations || {};
@@ -181,7 +202,10 @@ export function Lessons() {
         setFormOrder(String(d.order ?? ''));
         setFormDuration(String(d.duration ?? ''));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEditLoading(false);
+      });
     return () => { cancelled = true; };
   }, [editing?.id, modalOpen]);
 
@@ -324,7 +348,7 @@ export function Lessons() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
               <IconEdit />
             </Button>
             <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
@@ -339,6 +363,7 @@ export function Lessons() {
         title={t('lessons.modalEdit')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {editLoading && <div className="text-sm text-gray-500">Loading full lesson details…</div>}
           <Input
             label={t('lessons.titleAr')}
             value={formTitleAr}
@@ -425,7 +450,7 @@ export function Lessons() {
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" loading={submitting}>
+            <Button type="submit" loading={submitting} disabled={editLoading}>
               {t('common.update')}
             </Button>
           </div>

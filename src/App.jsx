@@ -30,6 +30,8 @@ import { ConsultationSubCategories } from '@/pages/ConsultationSubCategories';
 import { ConsultationSessions } from '@/pages/ConsultationSessions';
 import { Reservations } from '@/pages/Reservations';
 import { ConsultationReservations } from '@/pages/ConsultationReservations';
+import { ConsultationRequests } from '@/pages/ConsultationRequests';
+import { ConsultationRequestSingle } from '@/pages/ConsultationRequestSingle';
 import { Users } from '@/pages/Users';
 import { Wallets } from '@/pages/Wallets';
 import { WalletSingle } from '@/pages/WalletSingle';
@@ -100,6 +102,8 @@ function AppRoutes() {
         <Route path="consultation-sessions/:id" element={<ConsultationSessionSingle />} />
         <Route path="reservations" element={<Reservations />} />
         <Route path="consultation-reservations" element={<ConsultationReservations />} />
+        <Route path="consultation-requests" element={<ConsultationRequests />} />
+        <Route path="consultation-requests/:id" element={<ConsultationRequestSingle />} />
         <Route path="wallets" element={<Wallets />} />
         <Route path="wallets/:id" element={<WalletSingle />} />
         <Route path="users" element={<Users />} />

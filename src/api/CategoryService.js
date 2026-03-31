@@ -24,13 +24,26 @@ class CategoryServiceClass extends BaseApiService {
     return res.data || res;
   }
 
+  /**
+   * GET /dashboard/categories/:id/edit
+   * IMPORTANT: This endpoint must NOT send Accept-Language.
+   */
+  async getForEdit(id, options = {}) {
+    const categoryId = id != null ? String(id) : id;
+    if (categoryId == null || categoryId === '') return null;
+    return this.request(`/${categoryId}/edit`, { method: 'GET', omitLanguage: true, ...options });
+  }
+
   async create(formData) {
     const res = await this.postFormData('', formData);
     return res.data || res;
   }
 
   async update(id, formData) {
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res.data || res;
   }
 

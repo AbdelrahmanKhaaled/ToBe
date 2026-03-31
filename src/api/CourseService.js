@@ -10,13 +10,13 @@ class CourseServiceClass extends BaseApiService {
   async getAll(filters = {}) {
     const qs = buildQueryParams(filters);
     const res = await this.get(qs ? `?${qs}` : '');
-    return normalizePaginatedResponse(res, { requestedPage: filters?.page });
+    return normalizePaginatedResponse(res?.courses ?? res, { requestedPage: filters?.page });
   }
 
   async getPageByUrl(url) {
     if (!url) return null;
     const res = await this.getByUrl(url);
-    return res ? normalizePaginatedResponse(res) : null;
+    return res ? normalizePaginatedResponse(res?.courses ?? res) : null;
   }
 
   async getById(id) {
@@ -30,7 +30,10 @@ class CourseServiceClass extends BaseApiService {
   }
 
   async update(id, formData) {
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res.data || res;
   }
 
@@ -48,23 +51,25 @@ class CourseServiceClass extends BaseApiService {
     }
   }
 
-  /** POST /dashboard/courses/:id/accept (Laravel: _method=PUT in query, JSON body) */
+  /** PUT /dashboard/courses/:id/accept */
   async accept(id) {
     const courseId = id != null ? String(id) : id;
-    const res = await this.post(`/${courseId}/accept?_method=PUT`, {});
+    const res = await this.put(`/${courseId}/accept`, {});
     return res?.data ?? res;
   }
 
-  /** POST /dashboard/courses/:id/reject (Laravel: _method=PUT in query, JSON body) */
+  /** PUT /dashboard/courses/:id/reject */
   async reject(id) {
     const courseId = id != null ? String(id) : id;
-    const res = await this.post(`/${courseId}/reject?_method=PUT`, {});
+    const res = await this.put(`/${courseId}/reject`, {});
     return res?.data ?? res;
   }
 
   /** GET /dashboard/courses/:id/edit — returns the course object */
-  async getForEdit(id) {
-    const res = await this.get(`/${id}/edit`);
+  async getForEdit(id, options = {}) {
+    const courseId = id != null ? String(id) : id;
+    if (courseId == null || courseId === '') return null;
+    const res = await this.request(`/${courseId}/edit`, { method: 'GET', omitLanguage: true, ...options });
     return res?.course ?? res?.data ?? res ?? null;
   }
 }

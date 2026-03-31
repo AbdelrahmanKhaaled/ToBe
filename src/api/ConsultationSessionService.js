@@ -25,13 +25,26 @@ class ConsultationSessionServiceClass extends BaseApiService {
     return res?.session ?? res?.data ?? res;
   }
 
+  /**
+   * GET /dashboard/consultation-sessions/:id/edit
+   * Default: do NOT send Accept-Language (can be overridden via options.headers).
+   */
+  async getForEdit(id, options = {}) {
+    const sessionId = id != null ? String(id) : id;
+    if (sessionId == null || sessionId === '') return null;
+    return this.request(`/${sessionId}/edit`, { method: 'GET', omitLanguage: true, ...options });
+  }
+
   async create(formData) {
     const res = await this.postFormData('', formData);
     return res?.session ?? res?.data ?? res;
   }
 
   async update(id, formData) {
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const endpoint = `/${id}`;
+    const res = formData instanceof FormData
+      ? await this.putFormData(endpoint, formData)
+      : await this.put(endpoint, formData);
     return res?.session ?? res?.data ?? res;
   }
 

@@ -27,6 +27,16 @@ class BannerServiceClass extends BaseApiService {
   }
 
   /**
+   * GET /dashboard/banners/:id/edit
+   * Default: do NOT send Accept-Language (can be overridden via options.headers).
+   */
+  async getForEdit(id, options = {}) {
+    const bannerId = id != null ? String(id) : id;
+    if (bannerId == null || bannerId === '') return null;
+    return this.request(`/${bannerId}/edit`, { method: 'GET', omitLanguage: true, ...options });
+  }
+
+  /**
    * Create banner.
    * Expected form-data fields:
    * - image (file)

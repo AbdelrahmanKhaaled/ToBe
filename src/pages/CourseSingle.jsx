@@ -16,6 +16,7 @@ import { LessonVideoUploader } from '@/components/VideoChunkUploader';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 function unwrap(res, key = 'course') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -56,6 +57,7 @@ function humanizeLabel(key) {
     price: 'Price',
     url: 'URL',
     category: 'Category',
+    sub_category: 'Sub Category',
     level: 'Level',
     mentor: 'Mentor',
     students_count: 'Students count',
@@ -74,7 +76,7 @@ function getRelationName(obj) {
 
 function getDisplayValue(key, value) {
   if (value === null || value === undefined) return '—';
-  if (key === 'category' || key === 'level' || key === 'mentor') {
+  if (key === 'category' || key === 'sub_category' || key === 'level' || key === 'mentor') {
     return getRelationName(value);
   }
   if (key === 'accepted') {
@@ -91,7 +93,7 @@ function getDisplayValue(key, value) {
   return String(value);
 }
 
-const RELATION_KEYS = new Set(['category', 'level', 'mentor']);
+const RELATION_KEYS = new Set(['category', 'sub_category', 'level', 'mentor']);
 
 function buildDisplayRows(item) {
   const rows = [];
@@ -170,6 +172,7 @@ export function CourseSingle() {
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lessonModalOpen, setLessonModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
+  const [lessonEditLoading, setLessonEditLoading] = useState(false);
   const [lessonTitleAr, setLessonTitleAr] = useState('');
   const [lessonTitleEn, setLessonTitleEn] = useState('');
   const [lessonContentAr, setLessonContentAr] = useState('');
@@ -250,18 +253,34 @@ export function CourseSingle() {
     setLessonModalOpen(true);
   };
 
-  const openEditLesson = (lesson) => {
-    setEditingLesson(lesson);
-    const title = lesson.title && typeof lesson.title === 'object' ? lesson.title : null;
-    const content = lesson.content && typeof lesson.content === 'object' ? lesson.content : null;
-    setLessonTitleAr(lesson.title_ar ?? title?.ar ?? '');
-    setLessonTitleEn(lesson.title_en ?? title?.en ?? '');
-    setLessonContentAr(lesson.content_ar ?? content?.ar ?? '');
-    setLessonContentEn(lesson.content_en ?? content?.en ?? '');
-    setLessonVideoUrl(lesson.video_url ?? '');
-    setLessonOrder(String(lesson.order ?? ''));
-    setLessonDuration(String(lesson.duration ?? ''));
+  const openEditLesson = async (lesson) => {
+    const lessonId = lesson?.id;
+    if (!lessonId) return;
+    setLessonEditLoading(true);
     setLessonModalOpen(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: LessonService.getForEdit.bind(LessonService),
+        id: lessonId,
+        extractKeys: ['lesson', 'data'],
+        bilingualFields: ['title', 'content'],
+      });
+      const d = merged ?? lesson;
+      setEditingLesson(d);
+      const title = d.title && typeof d.title === 'object' ? d.title : null;
+      const content = d.content && typeof d.content === 'object' ? d.content : null;
+      setLessonTitleAr(d.title_ar ?? title?.ar ?? '');
+      setLessonTitleEn(d.title_en ?? title?.en ?? '');
+      setLessonContentAr(d.content_ar ?? content?.ar ?? '');
+      setLessonContentEn(d.content_en ?? content?.en ?? '');
+      setLessonVideoUrl(d.video_url ?? '');
+      setLessonOrder(String(d.order ?? ''));
+      setLessonDuration(String(d.duration ?? ''));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLessonEditLoading(false);
+    }
   };
 
   const handleSubmitLesson = async (e) => {
@@ -352,6 +371,10 @@ export function CourseSingle() {
               <dd className="mt-1 text-[var(--color-primary)]">
                 {key === 'category' && raw?.id != null ? (
                   <Link to={`/categories/${raw.id}`} className="text-[var(--color-accent)] hover:underline">
+                    {value}
+                  </Link>
+                ) : key === 'sub_category' && raw?.id != null ? (
+                  <Link to={`/sub-categories/${raw.id}`} className="text-[var(--color-accent)] hover:underline">
                     {value}
                   </Link>
                 ) : key === 'level' && raw?.id != null ? (
@@ -533,6 +556,9 @@ export function CourseSingle() {
           onClose={() => setLessonModalOpen(false)}
           title={editingLesson ? 'Edit lesson' : 'Create lesson'}
         >
+          {lessonEditLoading && (
+            <div className="text-sm text-gray-500 mb-2">Loading full lesson details…</div>
+          )}
           <form onSubmit={handleSubmitLesson} className="space-y-4">
             <Input
               label="Title (Arabic)"
@@ -592,7 +618,7 @@ export function CourseSingle() {
               <Button type="button" variant="ghost" onClick={() => setLessonModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" loading={lessonSubmitting}>
+              <Button type="submit" loading={lessonSubmitting} disabled={lessonEditLoading}>
                 {editingLesson ? 'Update' : 'Create'}
               </Button>
             </div>

@@ -17,5 +17,6 @@ export { ConsultationSubCategoryService } from './ConsultationSubCategoryService
 export { ConsultationSessionService } from './ConsultationSessionService';
 export { ReservationService } from './ReservationService';
 export { ConsultationReservationService } from './ConsultationReservationService';
+export { ConsultationRequestService } from './ConsultationRequestService';
 export { UserService } from './UserService';
 export { WalletService } from './WalletService';

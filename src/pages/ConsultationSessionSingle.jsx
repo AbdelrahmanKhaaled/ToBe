@@ -18,6 +18,12 @@ function getDisplayDesc(row) {
   return row?.description ?? row?.translations?.ar?.description ?? row?.translations?.en?.description ?? '—';
 }
 
+function getRelationName(obj) {
+  if (!obj || typeof obj !== 'object') return '—';
+  const name = obj.name ?? obj.title ?? obj.name_ar ?? obj.name_en ?? '';
+  return String(name).trim() || '—';
+}
+
 export function ConsultationSessionSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -71,6 +77,9 @@ export function ConsultationSessionSingle() {
   if (loading) return <Loading />;
   if (!item) return <div className="text-gray-500">Consultation session not found.</div>;
 
+  const mentorName = getRelationName(item.mentor);
+  const subCategoryName = getRelationName(item.sub_category);
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
@@ -83,10 +92,6 @@ export function ConsultationSessionSingle() {
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
         <dl className="divide-y divide-[var(--color-border)]">
           <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">ID</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{item.id}</dd>
-          </div>
-          <div className="px-4 py-3">
             <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 text-[var(--color-primary)]">{getDisplayName(item)}</dd>
           </div>
@@ -94,6 +99,81 @@ export function ConsultationSessionSingle() {
             <dt className="text-sm font-medium text-gray-500">Description</dt>
             <dd className="mt-1 text-[var(--color-primary)] whitespace-pre-wrap">{getDisplayDesc(item)}</dd>
           </div>
+          {item.content != null && item.content !== '' && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Content</dt>
+              <dd className="mt-1 text-[var(--color-primary)] whitespace-pre-wrap">{item.content}</dd>
+            </div>
+          )}
+          {item.video_url && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Video URL</dt>
+              <dd className="mt-1">
+                <a
+                  href={item.video_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--color-accent)] hover:underline break-all"
+                >
+                  {item.video_url}
+                </a>
+              </dd>
+            </div>
+          )}
+          {(item.image_url || item.image) && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Image</dt>
+              <dd className="mt-1">
+                <img
+                  src={item.image_url || item.image}
+                  alt=""
+                  className="max-w-xs rounded-[var(--radius)] border border-[var(--color-border)]"
+                />
+              </dd>
+            </div>
+          )}
+          {item.price != null && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Price</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{String(item.price)}</dd>
+            </div>
+          )}
+          {item.duration != null && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Duration</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{String(item.duration)}</dd>
+            </div>
+          )}
+          {item.type != null && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Type</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{String(item.type)}</dd>
+            </div>
+          )}
+          {item.earning_points != null && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Earning points</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{String(item.earning_points)}</dd>
+            </div>
+          )}
+          {subCategoryName !== '—' && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Sub-category</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{subCategoryName}</dd>
+            </div>
+          )}
+          {mentorName !== '—' && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Mentor</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{mentorName}</dd>
+            </div>
+          )}
+          {item.updated_at != null && (
+            <div className="px-4 py-3">
+              <dt className="text-sm font-medium text-gray-500">Updated at</dt>
+              <dd className="mt-1 text-[var(--color-primary)]">{String(item.updated_at)}</dd>
+            </div>
+          )}
         </dl>
       </div>
 

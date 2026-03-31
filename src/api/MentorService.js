@@ -39,7 +39,7 @@ class MentorServiceClass extends BaseApiService {
       }
       return fd;
     })();
-    const res = await this.postFormData(`/${id}?_method=PUT`, formData);
+    const res = await this.putFormData(`/${id}`, formData);
     return res.data || res;
   }
 

@@ -7,6 +7,7 @@ import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -37,6 +38,7 @@ export function Articles() {
   const [formEarningPoints, setFormEarningPoints] = useState('0');
   const [formIsPublished, setFormIsPublished] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const [courses, setCourses] = useState([]);
   const confirm = useConfirm();
 
@@ -149,7 +151,13 @@ export function Articles() {
   useEffect(() => {
     if (!editing?.id || !modalOpen) return;
     let cancelled = false;
-    ArticleService.getForEdit(editing.id)
+    setEditLoading(true);
+    fetchBilingualEdit({
+      getForEdit: ArticleService.getForEdit.bind(ArticleService),
+      id: editing.id,
+      extractKeys: ['article', 'data'],
+      bilingualFields: ['title', 'content'],
+    })
       .then((data) => {
         if (cancelled || !data) return;
         // Edit API returns { article: { title: { ar, en }, content: { ar, en }, course_id, ... } }
@@ -167,7 +175,10 @@ export function Articles() {
         setFormEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
         setFormIsPublished(d.is_published === true || d.is_published === 1);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEditLoading(false);
+      });
     return () => { cancelled = true; };
   }, [editing?.id, modalOpen]);
 
@@ -422,6 +433,7 @@ export function Articles() {
         title={editing ? t('articles.modalEdit') : t('articles.modalCreate')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {editLoading && <div className="text-sm text-gray-500">Loading full article details…</div>}
           <Input
             label={t('articles.titleAr')}
             value={formTitleAr}
@@ -510,7 +522,7 @@ export function Articles() {
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" loading={submitting}>
+            <Button type="submit" loading={submitting} disabled={editLoading}>
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>

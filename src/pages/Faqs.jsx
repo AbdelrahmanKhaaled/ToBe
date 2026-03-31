@@ -7,6 +7,7 @@ import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 export function Faqs() {
   const { t } = useTranslation();
@@ -23,6 +24,7 @@ export function Faqs() {
   const [formAnswerAr, setFormAnswerAr] = useState('');
   const [formAnswerEn, setFormAnswerEn] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -62,26 +64,6 @@ export function Faqs() {
     fetchData();
   }, [fetchData]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      FaqService.getById(id)
-        .then((res) => {
-          const item = res?.faq ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormQuestionAr('');
@@ -96,12 +78,51 @@ export function Faqs() {
     const trans = row.translations || {};
     const ar = trans.ar || row;
     const en = trans.en || row;
-    setFormQuestionAr(ar.question || row.question || '');
-    setFormQuestionEn(en.question || row.question || '');
-    setFormAnswerAr(ar.answer || row.answer || '');
-    setFormAnswerEn(en.answer || row.answer || '');
+    const qObj = row.question && typeof row.question === 'object' ? row.question : null;
+    const aObj = row.answer && typeof row.answer === 'object' ? row.answer : null;
+    const qFallback = ar.question || row.question || '';
+    const qFallbackEn = en.question || row.question || '';
+    const aFallback = ar.answer || row.answer || '';
+    const aFallbackEn = en.answer || row.answer || '';
+    setFormQuestionAr((qObj?.ar ?? qFallback) || '');
+    setFormQuestionEn((qObj?.en ?? qFallbackEn) || '');
+    setFormAnswerAr((aObj?.ar ?? aFallback) || '');
+    setFormAnswerEn((aObj?.en ?? aFallbackEn) || '');
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const faqId = id != null ? String(id) : id;
+    if (faqId == null || faqId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: FaqService.getForEdit.bind(FaqService),
+        id: faqId,
+        extractKeys: ['faq', 'data'],
+        bilingualFields: ['question', 'answer'],
+      });
+      if (merged) openEdit(merged);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -200,7 +221,7 @@ export function Faqs() {
               className="!p-2 min-w-0"
               title={t('common.edit')}
               aria-label={t('common.edit')}
-              onClick={() => openEdit(row)}
+              onClick={() => openEditById(row.id)}
             >
               <IconEdit />
             </Button>
@@ -221,7 +242,10 @@ export function Faqs() {
         onClose={() => setModalOpen(false)}
         title={editing ? t('faqs.modalEdit') : t('faqs.modalCreate')}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label={t('faqs.questionAr')}
             value={formQuestionAr}
@@ -265,7 +289,8 @@ export function Faqs() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

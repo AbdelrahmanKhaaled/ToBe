@@ -7,6 +7,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 export function SubCategories() {
   const { t } = useTranslation();
@@ -31,6 +32,7 @@ export function SubCategories() {
   const [formDescEn, setFormDescEn] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
   const [formImage, setFormImage] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const categoriesById = useMemo(() => {
@@ -84,32 +86,6 @@ export function SubCategories() {
     fetchData();
   }, [fetchData]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () =>
-      setSearchParams((p) => {
-        const next = new URLSearchParams(p);
-        next.delete('edit');
-        return next;
-      });
-
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      SubCategoryService.getById(id)
-        .then((res) => {
-          const item = res?.sub_category ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormNameAr('');
@@ -136,6 +112,45 @@ export function SubCategories() {
     setFormImage(null);
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const subCategoryId = id != null ? String(id) : id;
+    if (subCategoryId == null || subCategoryId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: SubCategoryService.getForEdit.bind(SubCategoryService),
+        id: subCategoryId,
+        extractKeys: ['sub_category', 'data'],
+        bilingualFields: ['name', 'description'],
+      });
+      if (merged) openEdit(merged);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('edit');
+        return next;
+      });
+
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -230,7 +245,7 @@ export function SubCategories() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
               <IconEdit />
             </Button>
             <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
@@ -245,7 +260,10 @@ export function SubCategories() {
         onClose={() => setModalOpen(false)}
         title={editing ? t('subCategories.modalEdit') : t('subCategories.modalCreate')}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input label={t('subCategories.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
           <Input label={t('subCategories.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
 
@@ -301,7 +319,8 @@ export function SubCategories() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

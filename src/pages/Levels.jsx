@@ -7,6 +7,7 @@ import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 export function Levels() {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ export function Levels() {
   const [formDescEn, setFormDescEn] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -59,26 +61,6 @@ export function Levels() {
     fetchData();
   }, [fetchData]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      LevelService.getById(id)
-        .then((res) => {
-          const item = res?.level ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormNameAr('');
@@ -103,6 +85,39 @@ export function Levels() {
     setFormImage(null);
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const levelId = id != null ? String(id) : id;
+    if (levelId == null || levelId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: LevelService.getForEdit.bind(LevelService),
+        id: levelId,
+        extractKeys: ['level', 'data'],
+        bilingualFields: ['name', 'description'],
+      });
+      if (merged) openEdit(merged);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () => setSearchParams((p) => { const next = new URLSearchParams(p); next.delete('edit'); return next; });
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -181,7 +196,7 @@ export function Levels() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEdit(row)}>
+            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
               <IconEdit />
             </Button>
             <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
@@ -191,7 +206,10 @@ export function Levels() {
         )}
       />
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? t('levels.modalEdit') : t('levels.modalCreate')}>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input label={t('levels.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
           <Input label={t('levels.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
           <div>
@@ -229,7 +247,8 @@ export function Levels() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

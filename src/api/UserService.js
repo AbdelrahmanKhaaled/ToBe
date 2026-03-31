@@ -27,7 +27,7 @@ class UserServiceClass extends BaseApiService {
 
   /**
    * Update user.
-   * Backend (Postman) uses multipart/form-data with `_method=PUT`,
+   * Postman collection updates via POST /dashboard/users/:id using multipart/form-data,
    * including keys like: roles[role] and permissions[<index>].
    */
   async update(id, payload) {
@@ -65,10 +65,7 @@ class UserServiceClass extends BaseApiService {
     if (payload?.deduction_value !== undefined) formData.append('deduction_value', payload?.deduction_value ?? '');
     if (payload?.deductionValue !== undefined) formData.append('deduction_value', payload?.deductionValue ?? '');
 
-    // Laravel method spoofing if backend expects it inside form-data
-    formData.append('_method', 'PUT');
-
-    // Postman sends: POST /dashboard/users/:id with form-data including _method=PUT
+    // Postman sends: POST /dashboard/users/:id with form-data
     const res = await this.postFormData(`/${userId}`, formData);
     return res.data || res;
   }

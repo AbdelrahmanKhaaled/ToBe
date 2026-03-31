@@ -7,6 +7,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 export function Banners() {
   const { t } = useTranslation();
@@ -27,6 +28,7 @@ export function Banners() {
   const [formButtonUrl, setFormButtonUrl] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -62,31 +64,6 @@ export function Banners() {
     fetchData();
   }, [fetchData]);
 
-  const editId = searchParams.get('edit');
-  useEffect(() => {
-    if (!editId || loading) return;
-    const id = Number(editId) || editId;
-    const clearEdit = () =>
-      setSearchParams((p) => {
-        const next = new URLSearchParams(p);
-        next.delete('edit');
-        return next;
-      });
-    const row = data.find((r) => r.id == id || String(r.id) === String(id));
-    if (row) {
-      openEdit(row);
-      clearEdit();
-    } else {
-      BannerService.getById(id)
-        .then((res) => {
-          const item = res?.banner ?? res?.data ?? res;
-          if (item) openEdit(item);
-          clearEdit();
-        })
-        .catch(() => clearEdit());
-    }
-  }, [editId, data, loading]);
-
   const openCreate = () => {
     setEditing(null);
     setFormNameAr('');
@@ -105,22 +82,63 @@ export function Banners() {
     const trans = row.translations || {};
     const ar = trans.ar || row;
     const en = trans.en || row;
+    const titleObj = row.title && typeof row.title === 'object' ? row.title : null;
+    const descObj = row.description && typeof row.description === 'object' ? row.description : null;
+    const btnTextObj = row.button_text && typeof row.button_text === 'object' ? row.button_text : null;
     // API list/show may return title/description/button_text as plain fields.
     // Keep Arabic/English inputs filled by falling back to these generic values.
     const fallbackTitle = row.title ?? row.name ?? '';
     const fallbackDescription = row.description ?? '';
     const fallbackButtonText = row.button_text ?? '';
 
-    setFormNameAr(row.name_ar ?? ar.name ?? ar.title ?? fallbackTitle);
-    setFormNameEn(row.name_en ?? en.name ?? en.title ?? fallbackTitle);
-    setFormDescAr(row.description_ar ?? ar.description ?? fallbackDescription);
-    setFormDescEn(row.description_en ?? en.description ?? fallbackDescription);
-    setFormButtonTextAr(row.button_text_ar ?? ar.button_text ?? fallbackButtonText);
-    setFormButtonTextEn(row.button_text_en ?? en.button_text ?? fallbackButtonText);
+    setFormNameAr(row.name_ar ?? titleObj?.ar ?? ar.name ?? ar.title ?? fallbackTitle);
+    setFormNameEn(row.name_en ?? titleObj?.en ?? en.name ?? en.title ?? fallbackTitle);
+    setFormDescAr(row.description_ar ?? descObj?.ar ?? ar.description ?? fallbackDescription);
+    setFormDescEn(row.description_en ?? descObj?.en ?? en.description ?? fallbackDescription);
+    setFormButtonTextAr(row.button_text_ar ?? btnTextObj?.ar ?? ar.button_text ?? fallbackButtonText);
+    setFormButtonTextEn(row.button_text_en ?? btnTextObj?.en ?? en.button_text ?? fallbackButtonText);
     setFormButtonUrl(row.button_url ?? row.url ?? '');
     setFormImage(null);
     setModalOpen(true);
   };
+
+  const openEditById = useCallback(async (id) => {
+    const bannerId = id != null ? String(id) : id;
+    if (bannerId == null || bannerId === '') return;
+    setEditLoading(true);
+    try {
+      const merged = await fetchBilingualEdit({
+        getForEdit: BannerService.getForEdit.bind(BannerService),
+        id: bannerId,
+        extractKeys: ['banner', 'data'],
+        bilingualFields: ['title', 'description', 'button_text'],
+      });
+      if (merged) openEdit(merged);
+    } catch (err) {
+      toast.error(err.message || 'Failed to load banner');
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('edit');
+        return next;
+      });
+    const row = data.find((r) => r.id == id || String(r.id) === String(id));
+    if (row) {
+      openEditById(row.id);
+      clearEdit();
+    } else {
+      openEditById(id).finally(() => clearEdit());
+    }
+  }, [editId, data, loading, openEditById]);
 
   const buildCreateFormData = () => {
     const fd = new FormData();
@@ -252,7 +270,7 @@ export function Banners() {
               className="!p-2 min-w-0"
               title={t('common.edit')}
               aria-label={t('common.edit')}
-              onClick={() => openEdit(row)}
+              onClick={() => openEditById(row.id)}
             >
               <IconEdit />
             </Button>
@@ -273,7 +291,10 @@ export function Banners() {
         onClose={() => setModalOpen(false)}
         title={editing ? t('bannersPage.modalEdit') : t('bannersPage.modalCreate')}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {editLoading ? (
+          <Loading />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label={t('bannersPage.nameAr')}
             value={formNameAr}
@@ -337,7 +358,8 @@ export function Banners() {
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal>
     </div>
   );

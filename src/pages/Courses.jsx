@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CourseService, CategoryService, LevelService, MentorService } from '@/api';
+import { CourseService, SubCategoryService, LevelService, MentorService } from '@/api';
 import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconCheck, IconX } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
 function getItemName(item) {
   if (!item) return '—';
@@ -47,21 +48,22 @@ export function Courses() {
   const [formType, setFormType] = useState('live');
   const [formPrice, setFormPrice] = useState('');
   const [formUrl, setFormUrl] = useState('');
-  const [formCategoryId, setFormCategoryId] = useState('');
+  const [formSubCategoryId, setFormSubCategoryId] = useState('');
   const [formLevelId, setFormLevelId] = useState('');
   const [formMentorId, setFormMentorId] = useState('');
   const [formEarningPoints, setFormEarningPoints] = useState('0');
   const [submitting, setSubmitting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
 
   const [filterAccepted, setFilterAccepted] = useState('');
-  const [filterCategoryId, setFilterCategoryId] = useState('');
+  const [filterSubCategoryId, setFilterSubCategoryId] = useState('');
   const [filterLevelId, setFilterLevelId] = useState('');
   const [filterMentorId, setFilterMentorId] = useState('');
   const [filterType, setFilterType] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [levels, setLevels] = useState([]);
   const [mentors, setMentors] = useState([]);
 
@@ -72,7 +74,7 @@ export function Courses() {
         search: search || undefined,
         page,
         per_page: 10,
-        category_id: filterCategoryId || undefined,
+        sub_category_id: filterSubCategoryId || undefined,
         level_id: filterLevelId || undefined,
         mentor_id: filterMentorId || undefined,
         type: filterType || undefined,
@@ -85,7 +87,7 @@ export function Courses() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, filterAccepted, filterCategoryId, filterLevelId, filterMentorId, filterType, lang]);
+  }, [page, search, filterAccepted, filterSubCategoryId, filterLevelId, filterMentorId, filterType, lang]);
 
   const fetchByUrl = useCallback(async (url) => {
     setLoading(true);
@@ -109,13 +111,13 @@ export function Courses() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      CategoryService.getAll({ per_page: 500 }).then((r) => r.data),
+      SubCategoryService.getAll({ per_page: 500 }).then((r) => r.data),
       LevelService.getAll({ per_page: 500 }).then((r) => r.data),
       MentorService.getAll({ per_page: 500 }).then((r) => r.data),
     ])
-      .then(([catData, lvlData, mntData]) => {
+      .then(([subCatData, lvlData, mntData]) => {
         if (!cancelled) {
-          setCategories(Array.isArray(catData) ? catData : []);
+          setSubCategories(Array.isArray(subCatData) ? subCatData : []);
           setLevels(Array.isArray(lvlData) ? lvlData : []);
           setMentors(Array.isArray(mntData) ? mntData : []);
         }
@@ -154,7 +156,7 @@ export function Courses() {
     setFormType('live');
     setFormPrice('');
     setFormUrl('');
-    setFormCategoryId('');
+    setFormSubCategoryId('');
     setFormLevelId('');
     setFormMentorId('');
     setFormEarningPoints('0');
@@ -176,7 +178,13 @@ export function Courses() {
     setFormType(row.type ?? 'live');
     setFormPrice(row.price != null ? String(row.price) : '');
     setFormUrl(row.url ?? '');
-    setFormCategoryId(row.category_id != null ? String(row.category_id) : row.category?.id != null ? String(row.category.id) : '');
+    setFormSubCategoryId(
+      row.sub_category_id != null
+        ? String(row.sub_category_id)
+        : row.sub_category?.id != null
+          ? String(row.sub_category.id)
+          : ''
+    );
     setFormLevelId(row.level_id != null ? String(row.level_id) : row.level?.id != null ? String(row.level.id) : '');
     setFormMentorId(row.mentor_id != null ? String(row.mentor_id) : row.mentor?.id != null ? String(row.mentor.id) : '');
     setFormEarningPoints(row.earning_points != null ? String(row.earning_points) : '0');
@@ -186,7 +194,13 @@ export function Courses() {
   useEffect(() => {
     if (!editing?.id || !modalOpen) return;
     let cancelled = false;
-    CourseService.getForEdit(editing.id)
+    setEditLoading(true);
+    fetchBilingualEdit({
+      getForEdit: CourseService.getForEdit.bind(CourseService),
+      id: editing.id,
+      extractKeys: ['course', 'data'],
+      bilingualFields: ['name', 'description'],
+    })
       .then((data) => {
         if (cancelled || !data) return;
         const d = data;
@@ -202,12 +216,21 @@ export function Courses() {
         setFormType(d.type ?? 'live');
         setFormPrice(d.price != null ? String(d.price) : '');
         setFormUrl(d.url ?? '');
-        setFormCategoryId(d.category_id != null ? String(d.category_id) : d.category?.id != null ? String(d.category.id) : '');
+        setFormSubCategoryId(
+          d.sub_category_id != null
+            ? String(d.sub_category_id)
+            : d.sub_category?.id != null
+              ? String(d.sub_category.id)
+              : ''
+        );
         setFormLevelId(d.level_id != null ? String(d.level_id) : d.level?.id != null ? String(d.level.id) : '');
         setFormMentorId(d.mentor_id != null ? String(d.mentor_id) : d.mentor?.id != null ? String(d.mentor.id) : '');
         setFormEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEditLoading(false);
+      });
     return () => { cancelled = true; };
   }, [editing?.id, modalOpen]);
 
@@ -221,7 +244,7 @@ export function Courses() {
     fd.append('type', formType || 'live');
     fd.append('price', formPrice || '0');
     fd.append('url', formUrl ?? '');
-    fd.append('category_id', formCategoryId || '');
+    fd.append('sub_category_id', formSubCategoryId || '');
     fd.append('level_id', formLevelId || '');
     fd.append('mentor_id', '5');
     fd.append('earning_points', formEarningPoints || '0');
@@ -230,8 +253,8 @@ export function Courses() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formCategoryId || !formLevelId || !formMentorId) {
-      toast.error('Please select category, level, and mentor.');
+    if (!formSubCategoryId || !formLevelId || !formMentorId) {
+      toast.error('Please select sub-category, level, and mentor.');
       return;
     }
     if (formType === 'recorded' && !formUrl?.trim()) {
@@ -331,14 +354,14 @@ export function Courses() {
       </div>
       <div className="flex flex-wrap gap-3 mb-4">
         <select
-          value={filterCategoryId}
-          onChange={(e) => { setFilterCategoryId(e.target.value); setPage(1); }}
+          value={filterSubCategoryId}
+          onChange={(e) => { setFilterSubCategoryId(e.target.value); setPage(1); }}
           className="px-3 py-2 min-w-[140px] rounded-[var(--radius)] border border-[var(--color-border)] text-sm bg-[var(--color-surface)]"
         >
-          <option value="">{t('courses.filters.allCategories')}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {getItemName(c)}
+          <option value="">{t('courses.filters.allSubCategories', 'All sub-categories')}</option>
+          {subCategories.map((sc) => (
+            <option key={sc.id} value={sc.id}>
+              {getItemName(sc)}
             </option>
           ))}
         </select>
@@ -469,6 +492,7 @@ export function Courses() {
         title={editing ? t('courses.modalEdit') : t('courses.modalCreate')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {editLoading && <div className="text-sm text-gray-500">Loading full course details…</div>}
           <Input
             label={t('courses.nameAr')}
             value={formNameAr}
@@ -544,16 +568,16 @@ export function Courses() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.category')}</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.subCategory', 'Sub-category *')}</label>
             <select
-              value={formCategoryId}
-              onChange={(e) => setFormCategoryId(e.target.value)}
+              value={formSubCategoryId}
+              onChange={(e) => setFormSubCategoryId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
               required
             >
-              <option value="">{t('courses.selectCategory')}</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{getItemName(c)}</option>
+              <option value="">{t('courses.selectSubCategory', 'Select sub-category')}</option>
+              {subCategories.map((sc) => (
+                <option key={sc.id} value={sc.id}>{getItemName(sc)}</option>
               ))}
             </select>
           </div>
@@ -596,7 +620,7 @@ export function Courses() {
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" loading={submitting}>
+            <Button type="submit" loading={submitting} disabled={editLoading}>
               {editing ? t('common.update') : t('common.create')}
             </Button>
           </div>
