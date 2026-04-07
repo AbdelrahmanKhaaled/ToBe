@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardService } from '@/api';
 import { Loading } from '@/components/ui';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/context/LanguageContext';
 
 function StatCard({ label, value, error, to }) {
   const content = (
@@ -22,19 +23,37 @@ function StatCard({ label, value, error, to }) {
   return content;
 }
 
-function getTitle(item) {
-  return item?.title ?? item?.translations?.ar?.title ?? item?.translations?.en?.title ?? item?.name ?? '—';
+/** Pick localized title for courses/articles (bilingual API or Accept-Language string). */
+function getTitle(item, lang) {
+  const loc = lang === 'ar' ? 'ar' : 'en';
+  const t = item?.title;
+  if (t != null && typeof t === 'object') {
+    const fromObj = t[loc] ?? t.ar ?? t.en;
+    if (fromObj != null && String(fromObj).trim() !== '') return String(fromObj);
+  }
+  if (typeof t === 'string' && t.trim() !== '') return t;
+  const tr = item?.translations?.[loc] ?? item?.translations?.ar ?? item?.translations?.en;
+  if (tr?.title != null && String(tr.title).trim() !== '') return String(tr.title);
+  const n = item?.name;
+  if (n != null && typeof n === 'object') {
+    const fromN = n[loc] ?? n.ar ?? n.en;
+    if (fromN != null && String(fromN).trim() !== '') return String(fromN);
+  }
+  if (typeof n === 'string' && n.trim() !== '') return n;
+  return '—';
 }
 
 export function DashboardHome() {
   const { t } = useTranslation();
+  const { lang } = useLanguage();
 
   const [stats, setStats] = useState(null);
   const [errors, setErrors] = useState({});
   const [recent, setRecent] = useState({ recentCourses: [], recentArticles: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const fetchDashboardData = async () => {
+
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     setErrors({});
@@ -51,11 +70,11 @@ export function DashboardHome() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [lang, fetchDashboardData]);
 
   if (loading && !stats) {
     return <Loading />;
@@ -142,8 +161,11 @@ export function DashboardHome() {
             <ul className="space-y-2">
               {recent.recentCourses.map((item) => (
                 <li key={item.id}>
-                  <Link to="/courses" className="text-[var(--color-accent)] hover:underline">
-                    {getTitle(item)}
+                  <Link
+                    to={item.id != null ? `/courses/${item.id}` : '/courses'}
+                    className="text-[var(--color-accent)] hover:underline"
+                  >
+                    {getTitle(item, lang)}
                   </Link>
                 </li>
               ))}
@@ -161,8 +183,11 @@ export function DashboardHome() {
             <ul className="space-y-2">
               {recent.recentArticles.map((item) => (
                 <li key={item.id}>
-                  <Link to="/articles" className="text-[var(--color-accent)] hover:underline">
-                    {getTitle(item)}
+                  <Link
+                    to={item.id != null ? `/articles/${item.id}` : '/articles'}
+                    className="text-[var(--color-accent)] hover:underline"
+                  >
+                    {getTitle(item, lang)}
                   </Link>
                 </li>
               ))}

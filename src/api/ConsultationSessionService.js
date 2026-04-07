@@ -22,7 +22,7 @@ class ConsultationSessionServiceClass extends BaseApiService {
 
   async getById(id) {
     const res = await this.get(`/${id}`);
-    return res?.session ?? res?.data ?? res;
+    return res?.session ?? res?.data?.session ?? res?.data ?? res;
   }
 
   /**

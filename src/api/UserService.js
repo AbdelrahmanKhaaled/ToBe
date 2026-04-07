@@ -7,20 +7,49 @@ class UserServiceClass extends BaseApiService {
     super('users');
   }
 
+  static unwrapListResponse(res) {
+    if (!res || typeof res !== 'object') return res;
+    return res.users ?? res.user ?? res;
+  }
+
   async getAll(filters = {}) {
     const qs = buildQueryParams(filters);
     const res = await this.get(qs ? `?${qs}` : '');
-    return normalizePaginatedResponse(res, { requestedPage: filters?.page });
+    const payload = UserServiceClass.unwrapListResponse(res);
+    return normalizePaginatedResponse(payload, { requestedPage: filters?.page });
   }
 
   async getPageByUrl(url) {
     if (!url) return null;
     const res = await this.getByUrl(url);
-    return res ? normalizePaginatedResponse(res) : null;
+    if (!res) return null;
+    const payload = UserServiceClass.unwrapListResponse(res);
+    return normalizePaginatedResponse(payload);
+  }
+
+  /** GET /dashboard/users/:id */
+  async getById(id) {
+    const uid = id != null ? String(id) : id;
+    if (uid == null || uid === '') return null;
+    const res = await this.get(`/${uid}`);
+    return res?.data ?? res?.user ?? res;
+  }
+
+  /**
+   * POST /dashboard/users/:id/change-status (multipart: status=active|blocked)
+   */
+  async updateStatus(id, status) {
+    const uid = id != null ? String(id) : id;
+    if (uid == null || uid === '') return null;
+    const fd = new FormData();
+    fd.append('status', status);
+    const res = await this.postFormData(`/${uid}/change-status`, fd);
+    return res?.data ?? res;
   }
 
   /** POST /dashboard/users */
   async create(payload) {
+    // Use JSON for create; include password if provided.
     const res = await this.post('', payload);
     return res.data || res;
   }
@@ -51,6 +80,16 @@ class UserServiceClass extends BaseApiService {
       // Postman example uses 1-based indexes: permissions[1], permissions[2]...
       formData.append(`permissions[${idx + 1}]`, String(permId));
     });
+
+    // password (optional): only send when provided
+    if (payload?.password) {
+      formData.append('password', String(payload.password));
+      if (payload?.password_confirmation) {
+        formData.append('password_confirmation', String(payload.password_confirmation));
+      } else {
+        formData.append('password_confirmation', String(payload.password));
+      }
+    }
 
     // bank + deductions (optional)
     if (payload?.bank_name !== undefined) formData.append('bank_name', payload?.bank_name ?? '');

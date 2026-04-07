@@ -7,16 +7,24 @@ class LevelServiceClass extends BaseApiService {
     super('levels');
   }
 
+  static unwrapListResponse(res) {
+    if (!res || typeof res !== 'object') return res;
+    return res.levels ?? res.level ?? res;
+  }
+
   async getAll(filters = {}) {
     const qs = buildQueryParams(filters);
     const res = await this.get(qs ? `?${qs}` : '');
-    return normalizePaginatedResponse(res, { requestedPage: filters?.page });
+    const payload = LevelServiceClass.unwrapListResponse(res);
+    return normalizePaginatedResponse(payload, { requestedPage: filters?.page });
   }
 
   async getPageByUrl(url) {
     if (!url) return null;
     const res = await this.getByUrl(url);
-    return res ? normalizePaginatedResponse(res) : null;
+    if (!res) return null;
+    const payload = LevelServiceClass.unwrapListResponse(res);
+    return normalizePaginatedResponse(payload);
   }
 
   async getById(id) {

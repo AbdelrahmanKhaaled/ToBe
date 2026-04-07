@@ -7,17 +7,79 @@ import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 
-function getItemName(item) {
+function getItemName(item, lang = 'en') {
   if (!item) return '—';
-  return item.name ?? item.name_ar ?? item.name_en ?? item.title ?? String(item.id ?? '');
+  const loc = lang === 'ar' ? 'ar' : 'en';
+  const n = item.name ?? item.name_ar ?? item.name_en ?? item.title;
+  if (n != null && typeof n === 'object') {
+    return String(n[loc] ?? n.en ?? n.ar ?? item.id ?? '');
+  }
+  if (n != null) return String(n);
+  return String(item.id ?? '');
 }
 
 /** Value to send as mentor_id: the mentor record id (from mentors table). */
 function getMentorValue(mentor) {
   if (!mentor) return '';
   return String(mentor.id ?? '');
+}
+
+function isMentorRoleUser(user) {
+  if (!user) return false;
+  if (typeof user.role === 'string' && user.role.toLowerCase() === 'mentor') return true;
+  const roles = user.roles;
+  if (!Array.isArray(roles)) return false;
+  return roles.some((r) => String(r).toLowerCase() === 'mentor');
+}
+
+function resolveMentorIdForUser(user, mentors) {
+  if (!user) return '';
+  const explicit = user.mentor_id ?? user.mentorId;
+  if (explicit != null && Array.isArray(mentors) && mentors.some((m) => String(m.id) === String(explicit))) {
+    return String(explicit);
+  }
+  const byUserId = Array.isArray(mentors)
+    ? mentors.find((m) => m.user_id != null && String(m.user_id) === String(user.id))
+    : null;
+  if (byUserId) return String(byUserId.id);
+  if (Array.isArray(mentors) && mentors.some((m) => String(m.id) === String(user.id))) {
+    return String(user.id);
+  }
+  const email = (user.email || '').trim().toLowerCase();
+  if (email && Array.isArray(mentors)) {
+    const byEmail = mentors.find((m) => (m.email || '').trim().toLowerCase() === email);
+    if (byEmail) return String(byEmail.id);
+  }
+  const name = (user.name || '').trim().toLowerCase();
+  if (name && Array.isArray(mentors)) {
+    const byName = mentors.find((m) => {
+      const ne = getItemName(m, 'en').trim().toLowerCase();
+      const na = getItemName(m, 'ar').trim().toLowerCase();
+      return ne === name || na === name;
+    });
+    if (byName) return String(byName.id);
+  }
+  if (!Array.isArray(mentors) || mentors.length === 0) {
+    if (user.id != null) return String(user.id);
+  }
+  return '';
+}
+
+/** Mentor user ids for `mentors[1]`, `mentors[2]`, … (excludes primary `mentor_id` / `mentor`). */
+function coMentorIdsFromRow(row) {
+  if (!row || typeof row !== 'object') return [];
+  const primary = row.mentor?.id ?? row.mentor_id ?? null;
+  const list = Array.isArray(row.mentors) ? row.mentors : [];
+  const rawIds = list
+    .map((m) => (m && typeof m === 'object' ? m.id : m))
+    .filter((id) => id != null)
+    .map(String);
+  if (primary == null) return [...new Set(rawIds)];
+  const p = String(primary);
+  return [...new Set(rawIds.filter((id) => id !== p))];
 }
 
 function toFormValue(val) {
@@ -47,14 +109,17 @@ export function Courses() {
   const [formImage, setFormImage] = useState(null);
   const [formType, setFormType] = useState('live');
   const [formPrice, setFormPrice] = useState('');
-  const [formUrl, setFormUrl] = useState('');
   const [formSubCategoryId, setFormSubCategoryId] = useState('');
   const [formLevelId, setFormLevelId] = useState('');
   const [formMentorId, setFormMentorId] = useState('');
+  const [formCoMentorIds, setFormCoMentorIds] = useState([]);
   const [formEarningPoints, setFormEarningPoints] = useState('0');
   const [submitting, setSubmitting] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
+  const { user: authUser } = useAuth();
+
+  const mentorSelectLocked = Boolean(authUser && isMentorRoleUser(authUser));
 
   const [filterAccepted, setFilterAccepted] = useState('');
   const [filterSubCategoryId, setFilterSubCategoryId] = useState('');
@@ -110,21 +175,40 @@ export function Courses() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      SubCategoryService.getAll({ per_page: 500 }).then((r) => r.data),
-      LevelService.getAll({ per_page: 500 }).then((r) => r.data),
-      MentorService.getAll({ per_page: 500 }).then((r) => r.data),
-    ])
-      .then(([subCatData, lvlData, mntData]) => {
-        if (!cancelled) {
-          setSubCategories(Array.isArray(subCatData) ? subCatData : []);
-          setLevels(Array.isArray(lvlData) ? lvlData : []);
-          setMentors(Array.isArray(mntData) ? mntData : []);
+    (async () => {
+      const results = await Promise.allSettled([
+        SubCategoryService.getAll({ per_page: 500 }),
+        LevelService.getAll({ per_page: 500 }),
+        MentorService.getAll({ per_page: 500 }),
+      ]);
+      if (cancelled) return;
+      const pick = (idx) => {
+        const r = results[idx];
+        if (r.status !== 'fulfilled') {
+          const label = idx === 0 ? 'Sub-categories' : idx === 1 ? 'Levels' : 'Mentors';
+          toast.error(r.reason?.message ?? `${label}: failed to load`);
+          return [];
         }
-      })
-      .catch(() => {});
+        const d = r.value?.data;
+        return Array.isArray(d) ? d : [];
+      };
+      setSubCategories(pick(0));
+      setLevels(pick(1));
+      setMentors(pick(2));
+    })();
     return () => { cancelled = true; };
   }, [lang]);
+
+  useEffect(() => {
+    if (!modalOpen || !mentorSelectLocked) return;
+    const mid = resolveMentorIdForUser(authUser, mentors);
+    if (mid) setFormMentorId(mid);
+  }, [modalOpen, mentorSelectLocked, authUser, mentors]);
+
+  useEffect(() => {
+    if (!formMentorId) return;
+    setFormCoMentorIds((prev) => prev.filter((id) => String(id) !== String(formMentorId)));
+  }, [formMentorId]);
 
   const editId = searchParams.get('edit');
   useEffect(() => {
@@ -155,10 +239,10 @@ export function Courses() {
     setFormImage(null);
     setFormType('live');
     setFormPrice('');
-    setFormUrl('');
     setFormSubCategoryId('');
     setFormLevelId('');
-    setFormMentorId('');
+    setFormMentorId(resolveMentorIdForUser(authUser, mentors));
+    setFormCoMentorIds([]);
     setFormEarningPoints('0');
     setModalOpen(true);
   };
@@ -177,7 +261,6 @@ export function Courses() {
     setFormImage(null);
     setFormType(row.type ?? 'live');
     setFormPrice(row.price != null ? String(row.price) : '');
-    setFormUrl(row.url ?? '');
     setFormSubCategoryId(
       row.sub_category_id != null
         ? String(row.sub_category_id)
@@ -187,6 +270,7 @@ export function Courses() {
     );
     setFormLevelId(row.level_id != null ? String(row.level_id) : row.level?.id != null ? String(row.level.id) : '');
     setFormMentorId(row.mentor_id != null ? String(row.mentor_id) : row.mentor?.id != null ? String(row.mentor.id) : '');
+    setFormCoMentorIds(coMentorIdsFromRow(row));
     setFormEarningPoints(row.earning_points != null ? String(row.earning_points) : '0');
     setModalOpen(true);
   };
@@ -215,7 +299,6 @@ export function Courses() {
         setFormDescEn(toFormValue(descObj?.en ?? d.description_en ?? en?.description));
         setFormType(d.type ?? 'live');
         setFormPrice(d.price != null ? String(d.price) : '');
-        setFormUrl(d.url ?? '');
         setFormSubCategoryId(
           d.sub_category_id != null
             ? String(d.sub_category_id)
@@ -225,6 +308,7 @@ export function Courses() {
         );
         setFormLevelId(d.level_id != null ? String(d.level_id) : d.level?.id != null ? String(d.level.id) : '');
         setFormMentorId(d.mentor_id != null ? String(d.mentor_id) : d.mentor?.id != null ? String(d.mentor.id) : '');
+        setFormCoMentorIds(coMentorIdsFromRow(d));
         setFormEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
       })
       .catch(() => {})
@@ -243,22 +327,30 @@ export function Courses() {
     if (formImage) fd.append('image', formImage);
     fd.append('type', formType || 'live');
     fd.append('price', formPrice || '0');
-    fd.append('url', formUrl ?? '');
     fd.append('sub_category_id', formSubCategoryId || '');
     fd.append('level_id', formLevelId || '');
-    fd.append('mentor_id', '5');
+    const mid =
+      formMentorId ||
+      (mentorSelectLocked && authUser?.id != null ? String(authUser.id) : '');
+    fd.append('mentor_id', mid);
+    const midStr = String(mid || '');
+    formCoMentorIds
+      .map((id) => String(id).trim())
+      .filter((id) => id && id !== midStr)
+      .forEach((id, idx) => {
+        fd.append(`mentors[${idx + 1}]`, id);
+      });
     fd.append('earning_points', formEarningPoints || '0');
     return fd;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formSubCategoryId || !formLevelId || !formMentorId) {
+    const mentorOk =
+      formMentorId ||
+      (mentorSelectLocked && authUser?.id != null ? String(authUser.id) : '');
+    if (!formSubCategoryId || !formLevelId || !mentorOk) {
       toast.error('Please select sub-category, level, and mentor.');
-      return;
-    }
-    if (formType === 'recorded' && !formUrl?.trim()) {
-      toast.error('URL is required when type is Recorded.');
       return;
     }
     setSubmitting(true);
@@ -332,8 +424,30 @@ export function Courses() {
     }
   };
 
-  const getCourseName = (row) =>
-    row.name ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? row.name_ar ?? row.name_en ?? row.title ?? row.translations?.ar?.title ?? row.translations?.en?.title ?? row.id ?? '—';
+  const getCourseName = (row) => {
+    if (!row) return '—';
+    const label = getItemName(row, lang);
+    if (label && label !== '—') return label;
+    return row.id != null ? String(row.id) : '—';
+  };
+
+  const getCourseDescriptionSnippet = (row) => {
+    if (!row) return '';
+    const loc = lang === 'ar' ? 'ar' : 'en';
+    let d =
+      row.description ??
+      row.translations?.[loc]?.description ??
+      row.translations?.ar?.description ??
+      row.translations?.en?.description ??
+      row.description_ar ??
+      row.description_en ??
+      '';
+    if (d && typeof d === 'object') {
+      d = d[loc] ?? d.en ?? d.ar ?? '';
+    }
+    const s = typeof d === 'string' ? d : String(d ?? '');
+    return s.slice(0, 50) + (s.length > 50 ? '...' : '');
+  };
 
   const getAcceptedBadge = (row) => {
     const accepted = row.accepted;
@@ -361,7 +475,7 @@ export function Courses() {
           <option value="">{t('courses.filters.allSubCategories', 'All sub-categories')}</option>
           {subCategories.map((sc) => (
             <option key={sc.id} value={sc.id}>
-              {getItemName(sc)}
+              {getItemName(sc, lang)}
             </option>
           ))}
         </select>
@@ -373,7 +487,7 @@ export function Courses() {
           <option value="">{t('courses.filters.allLevels')}</option>
           {levels.map((l) => (
             <option key={l.id} value={l.id}>
-              {getItemName(l)}
+              {getItemName(l, lang)}
             </option>
           ))}
         </select>
@@ -385,7 +499,7 @@ export function Courses() {
           <option value="">{t('courses.filters.allMentors')}</option>
           {mentors.map((m) => (
             <option key={m.id} value={m.id}>
-              {getItemName(m)}
+              {getItemName(m, lang)}
             </option>
           ))}
         </select>
@@ -416,10 +530,7 @@ export function Courses() {
           {
             key: 'description',
             header: t('courses.description'),
-            render: (r) => {
-              const d = r.description ?? r.translations?.ar?.description ?? r.translations?.en?.description ?? '';
-              return d.slice(0, 50) + (d.length > 50 ? '...' : '');
-            },
+            render: (r) => getCourseDescriptionSnippet(r),
           },
         ]}
         data={data}
@@ -555,19 +666,6 @@ export function Courses() {
             onChange={(e) => setFormPrice(e.target.value)}
           />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('courses.url')}{' '}
-              {formType === 'recorded' && `(${t('courses.urlRequiredRecorded')})`}
-            </label>
-            <input
-              type="url"
-              value={formUrl}
-              onChange={(e) => setFormUrl(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              placeholder=""
-            />
-          </div>
-          <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.subCategory', 'Sub-category *')}</label>
             <select
               value={formSubCategoryId}
@@ -577,7 +675,7 @@ export function Courses() {
             >
               <option value="">{t('courses.selectSubCategory', 'Select sub-category')}</option>
               {subCategories.map((sc) => (
-                <option key={sc.id} value={sc.id}>{getItemName(sc)}</option>
+                <option key={sc.id} value={sc.id}>{getItemName(sc, lang)}</option>
               ))}
             </select>
           </div>
@@ -591,23 +689,63 @@ export function Courses() {
             >
               <option value="">{t('courses.selectLevel')}</option>
               {levels.map((l) => (
-                <option key={l.id} value={l.id}>{getItemName(l)}</option>
+                <option key={l.id} value={l.id}>{getItemName(l, lang)}</option>
               ))}
             </select>
           </div>
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.mentor')}</label>
-            <select
-              value={formMentorId}
-              onChange={(e) => setFormMentorId(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              required
-            >
-              <option value="">{t('courses.selectMentor')}</option>
-              {mentors.map((m) => (
-                <option key={m.id} value={getMentorValue(m)}>{getItemName(m)}</option>
-              ))}
-            </select>
+            {mentorSelectLocked ? (
+              <div className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-bg-light)] text-[var(--color-primary)]">
+                {authUser?.name?.trim()
+                  ? authUser.name
+                  : getItemName(mentors.find((m) => String(m.id) === String(formMentorId)), lang) || '—'}
+              </div>
+            ) : (
+              <select
+                value={formMentorId}
+                onChange={(e) => setFormMentorId(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
+                required
+              >
+                <option value="">{t('courses.selectMentor')}</option>
+                {mentors.map((m) => (
+                  <option key={m.id} value={getMentorValue(m)}>{getItemName(m, lang)}</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.additionalMentors')}</label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">{t('courses.additionalMentorsHint')}</p>
+            <div className="max-h-40 overflow-y-auto rounded-[var(--radius)] border border-[var(--color-border)] p-2 space-y-2 bg-[var(--color-bg-light)]">
+              {mentors.filter((m) => String(getMentorValue(m)) !== String(formMentorId)).length === 0 ? (
+                <span className="text-sm text-gray-500">{t('courses.selectMentor')}</span>
+              ) : (
+                mentors
+                  .filter((m) => String(getMentorValue(m)) !== String(formMentorId))
+                  .map((m) => {
+                    const idStr = String(getMentorValue(m));
+                    const checked = formCoMentorIds.includes(idStr);
+                    return (
+                      <label key={m.id} className="flex items-center gap-2 text-sm text-[var(--color-primary)] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded border-[var(--color-border)]"
+                          checked={checked}
+                          onChange={(e) => {
+                            setFormCoMentorIds((prev) => {
+                              if (e.target.checked) return [...new Set([...prev, idStr])];
+                              return prev.filter((x) => String(x) !== idStr);
+                            });
+                          }}
+                        />
+                        <span>{getItemName(m, lang)}</span>
+                      </label>
+                    );
+                  })
+              )}
+            </div>
           </div>
           <Input
             type="number"

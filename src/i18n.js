@@ -29,7 +29,7 @@ const resources = {
         consultationReservations: "Consultation reservations",
         consultationRequests: "Consultation requests",
         wallets: "Wallets",
-        users: "Admins",
+        users: "Users",
         rolesPermissions: "Roles & Permissions",
         profile: "Profile",
       },
@@ -248,12 +248,15 @@ const resources = {
       },
       users: {
         title: "Admins",
+        studentsTitle: "Students",
         name: "Name",
         email: "Email",
         phoneNumber: "Phone number",
-        adminOnlyNote: "Create admin accounts only. Students sign up from mobile, and mentors are created from the Mentors page.",
+        adminOnlyNote:
+          "Create admin accounts only. Students sign up from mobile, and mentors are created from the Mentors page.",
         roles: "Role *",
-        rolesSingleSelectHint: "Select exactly one role (super-admin or admin).",
+        rolesSingleSelectHint:
+          "Select exactly one role (super-admin or admin).",
         rolesRequired: "The roles field is required.",
         loadingRoles: "Loading roles...",
         noAllowedRoles: "No admin roles found (super-admin/admin).",
@@ -564,7 +567,7 @@ const resources = {
         consultationReservations: "حجوزات الاستشارات",
         consultationRequests: "طلبات الاستشارات",
         wallets: "المحافظ",
-        users: "المشرفون",
+        users: "المستخدمون",
         rolesPermissions: "الأدوار والصلاحيات",
         profile: "الملف الشخصي",
       },
@@ -783,12 +786,15 @@ const resources = {
       },
       users: {
         title: "المشرفون",
+        studentsTitle: "الطلاب",
         name: "الاسم",
         email: "البريد الإلكتروني",
         phoneNumber: "رقم الهاتف",
-        adminOnlyNote: "إنشاء حسابات الإدارة فقط. الطلاب يسجّلون من الموبايل، والمدرّبون يتم إنشاؤهم من صفحة المدرّبين.",
+        adminOnlyNote:
+          "إنشاء حسابات الإدارة فقط. الطلاب يسجّلون من الموبايل، والمدرّبون يتم إنشاؤهم من صفحة المدرّبين.",
         roles: "الدور *",
-        rolesSingleSelectHint: "اختر دورًا واحدًا فقط (سوبر أدمن أو أدمن).",
+        rolesSingleSelectHint:
+          "اختر دورًا واحدًا فقط (سوبر أدمن أو أدمن).",
         rolesRequired: "حقل الأدوار مطلوب.",
         loadingRoles: "جاري تحميل الأدوار...",
         noAllowedRoles: "لم يتم العثور على أدوار الإدارة (super-admin/admin).",
@@ -1093,3 +1099,4 @@ i18n.use(initReactI18next).init({
 });
 
 export default i18n;
+

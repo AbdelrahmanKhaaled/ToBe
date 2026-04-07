@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AccessControlService, UserService } from '@/api';
-import { Button, DataTable, IconEdit, IconTrash, Input, Loading, Modal } from '@/components/ui';
+import { Button, DataTable, IconEdit, IconTrash, IconView, Input, Loading, Modal } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
@@ -8,19 +9,6 @@ import { useTranslation } from 'react-i18next';
 function normalizeListItem(row, idx, fallbackPage) {
   const id = row?.id ?? row?.user_id ?? row?.userId ?? row?._id ?? `${fallbackPage}-${idx}`;
   return { ...row, id: id != null ? String(id) : `${fallbackPage}-${idx}` };
-}
-
-function extractRoleNames(rolesRaw) {
-  if (!rolesRaw) return [];
-  const arr = Array.isArray(rolesRaw) ? rolesRaw : [rolesRaw];
-  return arr
-    .map((r) => {
-      if (!r) return null;
-      if (typeof r === 'string') return r;
-      if (typeof r === 'number') return String(r);
-      return r?.name ?? null;
-    })
-    .filter(Boolean);
 }
 
 function extractRoleId(rolesRaw) {
@@ -32,6 +20,30 @@ function extractRoleId(rolesRaw) {
   if (first?.id != null) return String(first.id);
   if (first?.pivot?.role_id != null) return String(first.pivot.role_id);
   return null;
+}
+
+function extractRoleNames(rolesRaw) {
+  if (!rolesRaw) return [];
+  const arr = Array.isArray(rolesRaw) ? rolesRaw : [rolesRaw];
+  return arr
+    .map((r) => {
+      if (r == null) return null;
+      if (typeof r === 'string') return r;
+      if (typeof r === 'number') return String(r);
+      return r?.name != null ? String(r.name) : r?.role_name != null ? String(r.role_name) : null;
+    })
+    .filter(Boolean)
+    .map((x) => String(x).trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAdminLikeUser(row) {
+  const names = extractRoleNames(row?.roles ?? row?.role ?? row?.user_roles ?? row?.userRoles ?? row?.role_names);
+  return names.includes('admin') || names.includes('super-admin') || names.includes('superadmin');
+}
+
+function isBlockedStatus(status) {
+  return String(status ?? '').trim().toLowerCase() === 'blocked';
 }
 
 function extractPermissionIds(permsRaw) {
@@ -51,6 +63,7 @@ function extractPermissionIds(permsRaw) {
 export function Users() {
   const { t } = useTranslation();
   const confirm = useConfirm();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // List
   const [data, setData] = useState([]);
@@ -58,6 +71,7 @@ export function Users() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
 
   // Lookup lists (roles, permissions)
   const [loadingRoles, setLoadingRoles] = useState(true);
@@ -82,12 +96,33 @@ export function Users() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('admins'); // 'admins' | 'students'
+
+  useEffect(() => {
+    const tab = String(searchParams.get('tab') ?? '').toLowerCase();
+    if (tab === 'students') setActiveTab('students');
+    else if (tab === 'admins') setActiveTab('admins');
+  }, [searchParams]);
+
+  const setTab = useCallback(
+    (tab) => {
+      setActiveTab(tab);
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        if (tab === 'students') next.set('tab', 'students');
+        else next.delete('tab');
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState('');
   const [selectedPermissionIds, setSelectedPermissionIds] = useState([]);
+  const [password, setPassword] = useState('');
 
   const [bankName, setBankName] = useState('');
   const [bankAccountName, setBankAccountName] = useState('');
@@ -102,6 +137,7 @@ export function Users() {
     setPhoneNumber('');
     setSelectedRoleId('');
     setSelectedPermissionIds([]);
+    setPassword('');
     setBankName('');
     setBankAccountName('');
     setBankAccountNumber('');
@@ -169,6 +205,11 @@ export function Users() {
     }
   }, [page]);
 
+  const filteredData = useMemo(() => {
+    if (activeTab === 'students') return data.filter((r) => !isAdminLikeUser(r));
+    return data.filter((r) => isAdminLikeUser(r));
+  }, [activeTab, data]);
+
   useEffect(() => {
     fetchRoles();
     fetchPermissions();
@@ -193,6 +234,7 @@ export function Users() {
     setPhoneNumber(row.phone_number ?? row.phoneNumber ?? '');
     setSelectedRoleId(roleId ?? '');
     setSelectedPermissionIds(permIds);
+    setPassword('');
 
     setBankName(row.bank_name ?? row.bankName ?? '');
     setBankAccountName(row.bank_account_name ?? row.bankAccountName ?? '');
@@ -216,6 +258,12 @@ export function Users() {
       toast.error(t('users.rolesRequired'));
       return;
     }
+    if (password !== '') {
+      if (password.length < 8) {
+        toast.error(t('profile.toasts.passwordTooShort', 'New password must be at least 8 characters.'));
+        return;
+      }
+    }
 
     setSubmitting(true);
     try {
@@ -231,6 +279,11 @@ export function Users() {
         deduction_type: deductionType,
         deduction_value: deductionValue === '' ? null : Number(deductionValue),
       };
+      if (password) {
+        payload.password = password;
+        // Backend often requires `confirmed` rule; we auto-fill it without a UI field.
+        payload.password_confirmation = password;
+      }
 
       if (editingId) {
         await UserService.update(editingId, payload);
@@ -247,6 +300,25 @@ export function Users() {
       toast.error(err.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleRowStatusToggle = async (row) => {
+    const id = row?.id;
+    if (id == null || id === '') return;
+    const blocked = isBlockedStatus(row.status);
+    const next = blocked ? 'active' : 'blocked';
+    setStatusUpdatingId(String(id));
+    try {
+      await UserService.updateStatus(id, next);
+      setData((prev) =>
+        prev.map((r) => (String(r.id) === String(id) ? { ...r, status: next } : r))
+      );
+      toast.success(t('users.statusUpdated'));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setStatusUpdatingId(null);
     }
   };
 
@@ -273,8 +345,32 @@ export function Users() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('users.title')}</h1>
-        <Button onClick={openCreate}>{t('users.create')}</Button>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-[var(--color-primary)]">
+            {activeTab === 'students' ? t('users.studentsTitle', 'Students') : t('users.title', 'Admins')}
+          </h1>
+          <div className="flex items-center rounded-[var(--radius)] border border-[var(--color-border)] bg-white p-1">
+            <button
+              type="button"
+              onClick={() => setTab('admins')}
+              className={`px-3 py-1.5 text-sm rounded-[var(--radius)] transition-colors ${
+                activeTab === 'admins' ? 'bg-[var(--color-accent)] text-white' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {t('users.tabs.admins', 'Admins')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('students')}
+              className={`px-3 py-1.5 text-sm rounded-[var(--radius)] transition-colors ${
+                activeTab === 'students' ? 'bg-[var(--color-accent)] text-white' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {t('users.tabs.students', 'Students')}
+            </button>
+          </div>
+        </div>
+        {activeTab === 'admins' ? <Button onClick={openCreate}>{t('users.create', 'Create admin')}</Button> : null}
       </div>
 
       <DataTable
@@ -286,13 +382,8 @@ export function Users() {
             header: t('users.phoneNumber'),
             render: (r) => r.phone_number ?? r.phoneNumber ?? '—',
           },
-          {
-            key: 'roles',
-            header: t('users.roles'),
-            render: (r) => extractRoleNames(r.roles ?? r.role ?? []).join(', ') || '—',
-          },
         ]}
-        data={data}
+        data={filteredData}
         meta={meta ?? undefined}
         onPageChange={(pageNum, linkUrl) => (linkUrl ? fetchByUrl(linkUrl) : setPage(pageNum))}
         search={search}
@@ -302,10 +393,40 @@ export function Users() {
         }}
         emptyMessage={t('users.empty')}
         actions={(row) => (
-          <div className="flex items-center justify-end gap-1">
-            <Button variant="ghost" className="!p-2 min-w-0" title={t('common.edit')} aria-label="Edit" onClick={() => openEdit(row)}>
-              <IconEdit />
-            </Button>
+          <div className="flex flex-wrap items-center justify-end gap-1">
+            <Link to={`/users/${row.id}`}>
+              <Button
+                variant="ghost"
+                className="!p-2 min-w-0"
+                title={t('common.view')}
+                aria-label={t('common.view')}
+              >
+                <IconView />
+              </Button>
+            </Link>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!isBlockedStatus(row.status)}
+              title={`${t('users.detailStatus')}: ${isBlockedStatus(row.status) ? t('users.statusBlocked') : t('users.statusActive')}`}
+              aria-label={t('users.toggleStatusAria')}
+              disabled={statusUpdatingId === String(row.id)}
+              onClick={() => handleRowStatusToggle(row)}
+              className={`flex h-7 w-12 shrink-0 items-center rounded-full px-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 disabled:opacity-50 ${
+                isBlockedStatus(row.status) ? 'bg-gray-300' : 'bg-[var(--color-accent)]'
+              }`}
+            >
+              <span
+                className={`h-5 w-5 rounded-full bg-white shadow transition-[margin] duration-200 ease-out ${
+                  isBlockedStatus(row.status) ? '' : 'ms-auto'
+                }`}
+              />
+            </button>
+            {activeTab === 'admins' ? (
+              <Button variant="ghost" className="!p-2 min-w-0" title={t('common.edit')} aria-label="Edit" onClick={() => openEdit(row)}>
+                <IconEdit />
+              </Button>
+            ) : null}
             <Button variant="danger" className="!p-2 min-w-0" title={t('common.delete')} aria-label="Delete" onClick={() => handleDelete(row)}>
               <IconTrash />
             </Button>
@@ -313,14 +434,23 @@ export function Users() {
         )}
       />
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? t('common.edit') : t('common.create')}>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {activeTab === 'admins' ? (
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? t('common.edit') : t('common.create')}>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input label={t('users.name')} value={name} onChange={(e) => setName(e.target.value)} required />
             <Input label={t('users.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           <Input label={t('users.phoneNumber')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+
+          <Input
+            label={editingId ? t('users.newPassword', 'New password (leave blank to keep)') : t('users.password', 'Password')}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required={false}
+          />
 
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('users.roles')}</label>
@@ -419,8 +549,9 @@ export function Users() {
               {editingId ? t('common.update') : t('users.create')}
             </Button>
           </div>
-        </form>
-      </Modal>
+          </form>
+        </Modal>
+      ) : null}
     </div>
   );
 }

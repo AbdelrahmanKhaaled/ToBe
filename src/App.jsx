@@ -15,7 +15,6 @@ import { Mentors } from '@/pages/Mentors';
 import { MentorSingle } from '@/pages/MentorSingle';
 import { Courses } from '@/pages/Courses';
 import { CourseSingle } from '@/pages/CourseSingle';
-import { Lessons } from '@/pages/Lessons';
 import { LessonSingle } from '@/pages/LessonSingle';
 import { Articles } from '@/pages/Articles';
 import { ArticleSingle } from '@/pages/ArticleSingle';
@@ -33,6 +32,7 @@ import { ConsultationReservations } from '@/pages/ConsultationReservations';
 import { ConsultationRequests } from '@/pages/ConsultationRequests';
 import { ConsultationRequestSingle } from '@/pages/ConsultationRequestSingle';
 import { Users } from '@/pages/Users';
+import { UserSingle } from '@/pages/UserSingle';
 import { Wallets } from '@/pages/Wallets';
 import { WalletSingle } from '@/pages/WalletSingle';
 import { SubCategorySingle } from '@/pages/SubCategorySingle';
@@ -40,6 +40,11 @@ import { ConsultationCategorySingle } from '@/pages/ConsultationCategorySingle';
 import { ConsultationSubCategorySingle } from '@/pages/ConsultationSubCategorySingle';
 import { ConsultationSessionSingle } from '@/pages/ConsultationSessionSingle';
 import { BannerSingle } from '@/pages/BannerSingle';
+import { Tags } from '@/pages/Tags';
+import { Posts } from '@/pages/Posts';
+import { PostSingle } from '@/pages/PostSingle';
+import { Polls } from '@/pages/Polls';
+import { PollSingle } from '@/pages/PollSingle';
 
 function ProtectedRoute({ children }) {
   const { authenticated, loading } = useAuth();
@@ -85,10 +90,14 @@ function AppRoutes() {
         <Route path="mentors/:id" element={<MentorSingle />} />
         <Route path="courses" element={<Courses />} />
         <Route path="courses/:id" element={<CourseSingle />} />
-        <Route path="lessons" element={<Lessons />} />
         <Route path="lessons/:id" element={<LessonSingle />} />
         <Route path="articles" element={<Articles />} />
         <Route path="articles/:id" element={<ArticleSingle />} />
+        <Route path="tags" element={<Tags />} />
+        <Route path="posts" element={<Posts />} />
+        <Route path="posts/:id" element={<PostSingle />} />
+        <Route path="polls" element={<Polls />} />
+        <Route path="polls/:id" element={<PollSingle />} />
         <Route path="faqs" element={<Faqs />} />
         <Route path="faqs/:id" element={<FaqSingle />} />
         <Route path="banners" element={<Banners />} />
@@ -107,6 +116,7 @@ function AppRoutes() {
         <Route path="wallets" element={<Wallets />} />
         <Route path="wallets/:id" element={<WalletSingle />} />
         <Route path="users" element={<Users />} />
+        <Route path="users/:id" element={<UserSingle />} />
         <Route path="roles-permissions" element={<RolesPermissions />} />
         <Route path="profile" element={<Profile />} />
       </Route>

@@ -47,16 +47,19 @@ export function DataTable({
         </div>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[var(--color-primary)] text-white">
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 text-left text-sm font-medium">
+                <th
+                  key={col.key}
+                  className="px-4 py-3 text-start align-middle text-sm font-medium"
+                >
                   {col.header}
                 </th>
               ))}
               {actions && (
-                <th className="px-4 py-3 text-right text-sm font-medium">
+                <th className="px-4 py-3 text-end align-middle text-sm font-medium">
                   {t('dataTable.actions')}
                 </th>
               )}
@@ -76,11 +79,13 @@ export function DataTable({
               data.map((row) => (
                 <tr key={row.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-light)]">
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 text-sm">
+                    <td key={col.key} className="px-4 py-3 text-sm text-start align-middle break-words">
                       {col.render ? col.render(row) : String(row[col.key] ?? '')}
                     </td>
                   ))}
-                  {actions && <td className="px-4 py-3 text-right">{actions(row)}</td>}
+                  {actions && (
+                    <td className="px-4 py-3 text-end align-middle">{actions(row)}</td>
+                  )}
                 </tr>
               ))
             )}

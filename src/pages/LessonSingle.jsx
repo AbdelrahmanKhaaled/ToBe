@@ -1,36 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { LessonService } from '@/api';
-import { Button, Loading, IconEdit, IconTrash } from '@/components/ui';
+import { Button, Loading, IconTrash, IconEdit } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
-import { LessonVideoUploader } from '@/components/VideoChunkUploader';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
-function unwrap(res, key = 'lesson') {
-  return res?.[key] ?? res?.data ?? res ?? null;
-}
-
-function getTitle(row) {
-  if (!row) return '—';
-  const t = row.title;
-  if (t != null && typeof t === 'object') return t.en ?? t.ar ?? '—';
-  return row.title ?? row.translations?.ar?.title ?? row.translations?.en?.title ?? '—';
-}
-
-function getContent(row) {
-  if (!row) return '—';
-  const c = row.content;
-  if (c != null && typeof c === 'object') return c.en ?? c.ar ?? '—';
-  return row.content ?? row.translations?.ar?.content ?? row.translations?.en?.content ?? '—';
-}
-
-function getRelationName(obj) {
-  if (obj == null || typeof obj !== 'object') return '—';
-  const n = obj.name ?? obj.title;
-  if (typeof n === 'string') return n;
-  if (n && typeof n === 'object') return n.en ?? n.ar ?? '—';
-  return '—';
+function localizedValue(val, lang) {
+  if (val == null) return '—';
+  if (typeof val === 'string') return val || '—';
+  if (typeof val === 'object') return String(val?.[lang] ?? val?.en ?? val?.ar ?? '—');
+  return String(val);
 }
 
 export function LessonSingle() {
@@ -38,170 +19,135 @@ export function LessonSingle() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { lang } = useLanguage();
+  const { t } = useTranslation();
+
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
+    (async () => {
       setLoading(true);
       try {
         const res = await LessonService.getById(id);
-        const data = unwrap(res, 'lesson');
-        if (!cancelled) setItem(data);
+        const row = res?.lesson ?? res?.data?.lesson ?? res?.data ?? res ?? null;
+        if (!cancelled) setItem(row && typeof row === 'object' ? row : null);
       } catch (err) {
         if (!cancelled) toast.error(err.message);
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }
-    if (id) load();
-    return () => { cancelled = true; };
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [id, lang]);
 
+  const course = item?.course;
+  const backTo = course?.id != null ? `/courses/${course.id}` : '/courses';
+  const editTo = course?.id != null ? `/courses/${course.id}?lesson_edit=${item.id}` : null;
+
+  const title = useMemo(() => {
+    const raw = item?.title ?? item?.name ?? item?.label;
+    return localizedValue(raw, lang);
+  }, [item, lang]);
+
   const handleDelete = async () => {
-    const title = getTitle(item);
+    if (!item?.id) return;
     const ok = await confirm({
-      title: 'Delete lesson',
-      message: `Delete "${title}"? This cannot be undone.`,
-      confirmLabel: 'Delete',
+      title: t('lessons.deleteTitle', 'Delete lesson'),
+      message: t('lessons.deleteMessage', 'Delete this lesson?'),
+      confirmLabel: t('common.delete', 'Delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await LessonService.remove(item.id);
-      toast.success('Lesson deleted');
-      navigate('/lessons');
+      toast.success(t('lessons.toasts.deleted', 'Lesson deleted'));
+      navigate(backTo);
     } catch (err) {
       toast.error(err.message);
     }
   };
 
   if (loading) return <Loading />;
-  if (!item) return <div className="text-gray-500">Lesson not found.</div>;
+  if (!item) return <div className="text-gray-500">{t('lessons.notFound', 'Lesson not found.')}</div>;
 
-  const course = item.course && typeof item.course === 'object' ? item.course : null;
-  const isRecordedCourse = course?.type === 'recorded';
+  const InfoRow = ({ label, children }) => (
+    <div className="px-4 py-3">
+      <dt className="text-sm font-medium text-gray-500">{label}</dt>
+      <dd className="mt-1 text-[var(--color-primary)]">{children}</dd>
+    </div>
+  );
 
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link to="/lessons" className="text-[var(--color-accent)] hover:underline">
-          ← Back to Lessons
+        <Link to={backTo} className="text-[var(--color-accent)] hover:underline">
+          ← {t('lessons.backToCourse', 'Back to course')}
         </Link>
       </div>
-      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">{getTitle(item)}</h1>
+
+      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">{title}</h1>
+
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
         <dl className="divide-y divide-[var(--color-border)]">
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">ID</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{item.id}</dd>
-          </div>
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">Title</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{getTitle(item)}</dd>
-          </div>
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">Course</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">
-              {course?.id != null ? (
-                <Link to={`/courses/${course.id}`} className="text-[var(--color-accent)] hover:underline">
-                  {getRelationName(course)}
-                </Link>
-              ) : (
-                getRelationName(course) || (item.course_id ?? item.courseId ?? '—')
-              )}
-            </dd>
-          </div>
-          {course?.category?.id != null && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Category</dt>
-              <dd className="mt-1">
-                <Link to={`/categories/${course.category.id}`} className="text-[var(--color-accent)] hover:underline">
-                  {getRelationName(course.category)}
-                </Link>
-              </dd>
-            </div>
-          )}
-          {course?.level?.id != null && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Level</dt>
-              <dd className="mt-1">
-                <Link to={`/levels/${course.level.id}`} className="text-[var(--color-accent)] hover:underline">
-                  {getRelationName(course.level)}
-                </Link>
-              </dd>
-            </div>
-          )}
-          {course?.mentor?.id != null && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Mentor</dt>
-              <dd className="mt-1">
-                <Link to={`/mentors/${course.mentor.id}`} className="text-[var(--color-accent)] hover:underline">
-                  {getRelationName(course.mentor)}
-                </Link>
-              </dd>
-            </div>
-          )}
-          {(item.order != null && item.order !== '') && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Order</dt>
-              <dd className="mt-1 text-[var(--color-primary)]">{item.order}</dd>
-            </div>
-          )}
-          {(item.duration != null && item.duration !== '') && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Duration</dt>
-              <dd className="mt-1 text-[var(--color-primary)]">{item.duration} min</dd>
-            </div>
-          )}
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">Content</dt>
-            <dd className="mt-1 text-[var(--color-primary)] whitespace-pre-wrap">{getContent(item)}</dd>
-          </div>
-          {item.video_url && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Video URL</dt>
-              <dd className="mt-1">
-                <a
-                  href={item.video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[var(--color-accent)] hover:underline break-all"
-                >
-                  {item.video_url}
-                </a>
-              </dd>
-            </div>
-          )}
+          <InfoRow label={t('lessons.columns.id', 'ID')}>{item.id}</InfoRow>
+          <InfoRow label={t('lessons.columns.course', 'Course')}>
+            {course?.id != null ? (
+              <Link to={`/courses/${course.id}`} className="text-[var(--color-accent)] hover:underline">
+                {localizedValue(course?.title ?? course?.name, lang)}
+              </Link>
+            ) : (
+              '—'
+            )}
+          </InfoRow>
+          <InfoRow label={t('lessons.columns.order', 'Order')}>{item.order ?? '—'}</InfoRow>
+          <InfoRow label={t('lessons.columns.duration', 'Duration')}>
+            {item.duration != null && item.duration !== '' ? `${item.duration}` : '—'}
+          </InfoRow>
+          <InfoRow label={t('lessons.columns.content', 'Content')}>
+            <span className="whitespace-pre-wrap">{localizedValue(item.content, lang)}</span>
+          </InfoRow>
+          {item.video_url ? (
+            <InfoRow label={t('lessons.columns.videoUrl', 'Video URL')}>
+              <a
+                href={item.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-accent)] hover:underline break-all"
+              >
+                {item.video_url}
+              </a>
+            </InfoRow>
+          ) : null}
         </dl>
       </div>
-      {isRecordedCourse && (
-        <div className="mt-4 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-2">
-            Upload / Replace lesson video
-          </h2>
-          <p className="text-xs text-gray-600 mb-2">
-            Upload a video file for this recorded lesson. Large files will be uploaded in chunks.
-          </p>
-          <LessonVideoUploader
-            lessonId={item.id}
-            onComplete={(url) => {
-              setItem((prev) => (prev ? { ...prev, video_url: url } : prev));
-            }}
-          />
-        </div>
-      )}
+
       <div className="mt-4 flex gap-2">
-        <Link to={`/lessons?edit=${item.id}`}>
-          <Button variant="secondary" className="!p-2" title="Edit lesson" aria-label="Edit lesson">
-            <IconEdit />
-          </Button>
-        </Link>
-        <Button variant="danger" className="!p-2" title="Delete lesson" aria-label="Delete lesson" onClick={handleDelete}>
+        {editTo ? (
+          <Link to={editTo}>
+            <Button
+              variant="secondary"
+              className="!p-2"
+              title={t('common.edit', 'Edit')}
+              aria-label={t('common.edit', 'Edit')}
+            >
+              <IconEdit />
+            </Button>
+          </Link>
+        ) : null}
+        <Button
+          variant="danger"
+          className="!p-2"
+          title={t('common.delete', 'Delete')}
+          aria-label={t('common.delete', 'Delete')}
+          onClick={handleDelete}
+        >
           <IconTrash />
         </Button>
       </div>
     </div>
   );
 }
+

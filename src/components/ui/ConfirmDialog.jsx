@@ -2,13 +2,21 @@ import { useContext } from 'react';
 import { ConfirmContext } from '@/utils/confirmDialog';
 import { Modal } from './Modal';
 import { Button } from './Button';
+import { useTranslation } from 'react-i18next';
 
 export function ConfirmDialog() {
+  const { t } = useTranslation();
   const ctx = useContext(ConfirmContext);
 
   if (!ctx || !ctx.open || !ctx.options) return null;
 
-  const { title, message, confirmLabel = 'Confirm', cancelLabel = 'Cancel', variant = 'default' } = ctx.options;
+  const {
+    title,
+    message,
+    confirmLabel = t('common.confirm', 'Confirm'),
+    cancelLabel = t('common.cancel', 'Cancel'),
+    variant = 'default',
+  } = ctx.options;
   const isDanger = variant === 'danger';
 
   return (

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ConsultationCategoryService, ConsultationSubCategoryService } from '@/api';
 import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
@@ -14,6 +14,7 @@ export function ConsultationSubCategories() {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const { lang } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -97,7 +98,7 @@ export function ConsultationSubCategories() {
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = useCallback((row) => {
     setEditing(row);
     const trans = row.translations || {};
     const ar = trans.ar || row;
@@ -111,7 +112,7 @@ export function ConsultationSubCategories() {
     setFormCategoryId(String(row.consultation_category_id ?? row.consultation_category?.id ?? ''));
     setFormImage(null);
     setModalOpen(true);
-  };
+  }, []);
 
   const openEditById = useCallback(async (id) => {
     const subCategoryId = id != null ? String(id) : id;
@@ -130,7 +131,20 @@ export function ConsultationSubCategories() {
     } finally {
       setEditLoading(false);
     }
-  }, []);
+  }, [openEdit]);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('edit');
+        return next;
+      });
+    openEditById(id).finally(() => clearEdit());
+  }, [editId, loading, openEditById, setSearchParams]);
 
   const buildFormData = () => {
     const fd = new FormData();

@@ -20,3 +20,6 @@ export { ConsultationReservationService } from './ConsultationReservationService
 export { ConsultationRequestService } from './ConsultationRequestService';
 export { UserService } from './UserService';
 export { WalletService } from './WalletService';
+export { TagService } from './TagService';
+export { PostService } from './PostService';
+export { PollService } from './PollService';

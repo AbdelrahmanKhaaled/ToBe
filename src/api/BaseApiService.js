@@ -63,9 +63,18 @@ export default class BaseApiService {
     const response = await fetch(url, config);
 
     if (response.status === 401) {
-      authStorage.clear();
-      window.location.href = '/login';
-      throw new Error('Session expired');
+      const isLoginPost =
+        config.method === 'POST' && /\/login\/?(\?|$)/i.test(url.replace(/[#].*$/, ''));
+      if (!isLoginPost) {
+        authStorage.clear();
+        window.location.href = '/login';
+        throw new Error('Session expired');
+      }
+      const data = await response.json().catch(() => ({}));
+      const err = new Error(data.message || data.error || response.statusText);
+      err.response = response;
+      err.data = data;
+      throw err;
     }
 
     if (!response.ok) {

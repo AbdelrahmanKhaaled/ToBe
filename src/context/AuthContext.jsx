@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { useNavigate } from 'react-router-dom';
 import { AuthService } from '@/api';
 import { authStorage } from '@/utils/authStorage';
+import { createLoginBlockedError, isUserPayloadBlocked } from '@/utils/loginErrors';
 
 const AuthContext = createContext(null);
 
@@ -93,6 +94,10 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async (email, password) => {
       const res = await AuthService.login(email, password);
+      const rawUser = res.user && typeof res.user === 'object' ? res.user : null;
+      if (isUserPayloadBlocked(rawUser)) {
+        throw createLoginBlockedError();
+      }
       authStorage.setToken(res.token);
       const user = normalizeProfileUser({ data: res.user }) ?? normalizeProfileUser(res) ?? res.user ?? res;
       setState({ user: user && typeof user === 'object' ? user : null, loading: false, authenticated: true });

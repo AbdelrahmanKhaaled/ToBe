@@ -7,15 +7,30 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'category') {
-  return res?.[key] ?? res?.data ?? res ?? null;
+  return res?.[key] ?? res?.data?.[key] ?? res?.data ?? res ?? null;
 }
 
-function getDisplayName(row) {
-  return row?.name ?? row?.translations?.ar?.name ?? row?.translations?.en?.name ?? row?.title ?? row?.slug ?? '—';
+/** Resolve image URL (string or common nested shapes). */
+function categoryImageUrl(item) {
+  if (!item) return null;
+  const img = item.image ?? item.image_url;
+  if (typeof img === 'string' && img.trim()) return img;
+  if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+  return null;
 }
 
-function getDisplayDesc(row) {
-  return row?.description ?? row?.translations?.ar?.description ?? row?.translations?.en?.description ?? '—';
+function localizedFromBilingual(field, lang) {
+  if (field == null) return '—';
+  if (typeof field === 'string') return field || '—';
+  if (typeof field === 'object') {
+    const v = field[lang] ?? field.en ?? field.ar;
+    return v != null && String(v).trim() !== '' ? String(v) : '—';
+  }
+  return '—';
+}
+
+function titleForCategory(item, lang) {
+  return localizedFromBilingual(item?.name, lang);
 }
 
 export function ConsultationCategorySingle() {
@@ -50,7 +65,7 @@ export function ConsultationCategorySingle() {
   }, [id, lang]);
 
   const handleDelete = async () => {
-    const name = getDisplayName(item);
+    const name = titleForCategory(item, lang);
     const ok = await confirm({
       title: 'Delete consultation category',
       message: `Delete "${name}"? This cannot be undone.`,
@@ -71,6 +86,19 @@ export function ConsultationCategorySingle() {
   if (loading) return <Loading />;
   if (!item) return <div className="text-gray-500">Consultation category not found.</div>;
 
+  const subCategories = Array.isArray(item.sub_categories) ? item.sub_categories : [];
+  const imgSrc = categoryImageUrl(item);
+
+  const InfoRow = ({ label, children }) => (
+    <div className="px-4 py-3">
+      <dt className="text-sm font-medium text-gray-500">{label}</dt>
+      <dd className="mt-1 text-[var(--color-primary)]">{children}</dd>
+    </div>
+  );
+
+  const nameObj = item.name && typeof item.name === 'object' ? item.name : null;
+  const descObj = item.description && typeof item.description === 'object' ? item.description : null;
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
@@ -78,22 +106,77 @@ export function ConsultationCategorySingle() {
           ← Back to Consultation categories
         </Link>
       </div>
-      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">{getDisplayName(item)}</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">{titleForCategory(item, lang)}</h1>
 
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
         <dl className="divide-y divide-[var(--color-border)]">
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">ID</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{item.id}</dd>
-          </div>
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">Name</dt>
-            <dd className="mt-1 text-[var(--color-primary)]">{getDisplayName(item)}</dd>
-          </div>
-          <div className="px-4 py-3">
-            <dt className="text-sm font-medium text-gray-500">Description</dt>
-            <dd className="mt-1 text-[var(--color-primary)] whitespace-pre-wrap">{getDisplayDesc(item)}</dd>
-          </div>
+          <InfoRow label="ID">{item.id}</InfoRow>
+
+          {nameObj ? (
+            <>
+              <InfoRow label="Name (EN)">{nameObj.en != null && nameObj.en !== '' ? nameObj.en : '—'}</InfoRow>
+              <InfoRow label="Name (AR)">{nameObj.ar != null && nameObj.ar !== '' ? nameObj.ar : '—'}</InfoRow>
+            </>
+          ) : (
+            <InfoRow label="Name">{localizedFromBilingual(item.name, lang)}</InfoRow>
+          )}
+
+          {descObj ? (
+            <>
+              <InfoRow label="Description (EN)">
+                <span className="whitespace-pre-wrap">{descObj.en != null && descObj.en !== '' ? descObj.en : '—'}</span>
+              </InfoRow>
+              <InfoRow label="Description (AR)">
+                <span className="whitespace-pre-wrap">{descObj.ar != null && descObj.ar !== '' ? descObj.ar : '—'}</span>
+              </InfoRow>
+            </>
+          ) : (
+            <InfoRow label="Description">
+              <span className="whitespace-pre-wrap">{localizedFromBilingual(item.description, lang)}</span>
+            </InfoRow>
+          )}
+
+          {imgSrc ? (
+            <InfoRow label="Image">
+              <img src={imgSrc} alt="" className="max-w-xs rounded-[var(--radius)] border border-[var(--color-border)]" />
+            </InfoRow>
+          ) : (
+            <InfoRow label="Image">
+              <span className="text-gray-500">—</span>
+            </InfoRow>
+          )}
+
+          <InfoRow label="Slug">{item.slug ?? '—'}</InfoRow>
+
+          <InfoRow label="Sub-categories">
+            {subCategories.length ? (
+              <div className="space-y-1">
+                {subCategories.map((sc) => {
+                  const n = sc?.name;
+                  const label =
+                    n && typeof n === 'object'
+                      ? (n[lang] ?? n.en ?? n.ar ?? `#${sc.id}`)
+                      : (n != null && String(n) !== '' ? String(n) : `#${sc.id}`);
+                  return (
+                    <div key={sc.id}>
+                      {sc?.id != null ? (
+                        <Link
+                          to={`/consultation-sub-categories/${sc.id}`}
+                          className="text-[var(--color-accent)] hover:underline"
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        <span>{label}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <span className="text-gray-500">—</span>
+            )}
+          </InfoRow>
         </dl>
       </div>
 
@@ -110,4 +193,3 @@ export function ConsultationCategorySingle() {
     </div>
   );
 }
-

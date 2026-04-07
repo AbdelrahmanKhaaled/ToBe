@@ -7,7 +7,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { useLanguage } from '@/context/LanguageContext';
 
 function unwrap(res, key = 'session') {
-  return res?.[key] ?? res?.data ?? res ?? null;
+  return res?.[key] ?? res?.data?.[key] ?? res?.data ?? res ?? null;
 }
 
 function getDisplayName(row) {
@@ -166,12 +166,6 @@ export function ConsultationSessionSingle() {
             <div className="px-4 py-3">
               <dt className="text-sm font-medium text-gray-500">Mentor</dt>
               <dd className="mt-1 text-[var(--color-primary)]">{mentorName}</dd>
-            </div>
-          )}
-          {item.updated_at != null && (
-            <div className="px-4 py-3">
-              <dt className="text-sm font-medium text-gray-500">Updated at</dt>
-              <dd className="mt-1 text-[var(--color-primary)]">{String(item.updated_at)}</dd>
             </div>
           )}
         </dl>

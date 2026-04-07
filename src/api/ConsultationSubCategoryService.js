@@ -22,7 +22,7 @@ class ConsultationSubCategoryServiceClass extends BaseApiService {
 
   async getById(id) {
     const res = await this.get(`/${id}`);
-    return res?.sub_category ?? res?.data ?? res;
+    return res?.sub_category ?? res?.data?.sub_category ?? res?.data ?? res;
   }
 
   /**

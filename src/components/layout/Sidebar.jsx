@@ -5,27 +5,29 @@ export function Sidebar() {
   const { t } = useTranslation();
 
   const NAV_ITEMS = [
-    { to: '/', label: t('nav.dashboard') },
-    { to: '/categories', label: t('nav.categories') },
-    { to: '/sub-categories', label: t('nav.subCategories') },
-    { to: '/levels', label: t('nav.levels') },
-    { to: '/mentors', label: t('nav.mentors') },
-    { to: '/courses', label: t('nav.courses') },
-    { to: '/lessons', label: t('nav.lessons') },
-    { to: '/articles', label: t('nav.articles') },
-    { to: '/faqs', label: t('nav.faqs') },
-    { to: '/banners', label: t('nav.banners') },
-    { to: '/about', label: t('nav.about') },
-    { to: '/consultation-categories', label: t('nav.consultationCategories') },
-    { to: '/consultation-sub-categories', label: t('nav.consultationSubCategories') },
-    { to: '/consultation-sessions', label: t('nav.consultationSessions') },
-    { to: '/reservations', label: t('nav.reservations') },
-    { to: '/consultation-reservations', label: t('nav.consultationReservations') },
+    { to: '/', label: t('nav.dashboard', 'Dashboard') },
+    { to: '/categories', label: t('nav.categories', 'Categories') },
+    { to: '/sub-categories', label: t('nav.subCategories', 'Sub-categories') },
+    { to: '/levels', label: t('nav.levels', 'Levels') },
+    { to: '/mentors', label: t('nav.mentors', 'Mentors') },
+    { to: '/courses', label: t('nav.courses', 'Courses') },
+    { to: '/articles', label: t('nav.articles', 'Articles') },
+    { to: '/tags', label: t('nav.tags', 'Tags') },
+    { to: '/posts', label: t('nav.posts', 'Posts') },
+    { to: '/polls', label: t('nav.polls', 'Polls') },
+    { to: '/faqs', label: t('nav.faqs', 'FAQs') },
+    { to: '/banners', label: t('nav.banners', 'Banners') },
+    { to: '/about', label: t('nav.about', 'About page') },
+    { to: '/consultation-categories', label: t('nav.consultationCategories', 'Consultation categories') },
+    { to: '/consultation-sub-categories', label: t('nav.consultationSubCategories', 'Consultation sub-categories') },
+    { to: '/consultation-sessions', label: t('nav.consultationSessions', 'Consultation sessions') },
+    { to: '/reservations', label: t('nav.reservations', 'Reservations') },
+    { to: '/consultation-reservations', label: t('nav.consultationReservations', 'Consultation reservations') },
     { to: '/consultation-requests', label: t('nav.consultationRequests', 'Consultation requests') },
-    { to: '/wallets', label: t('nav.wallets') },
-    { to: '/users', label: t('nav.users') },
-    { to: '/roles-permissions', label: t('nav.rolesPermissions') },
-    { to: '/profile', label: t('nav.profile') },
+    { to: '/wallets', label: t('nav.wallets', 'Wallets') },
+    { to: '/users', label: t('nav.users', 'Users') },
+    { to: '/roles-permissions', label: t('nav.rolesPermissions', 'Roles & Permissions') },
+    { to: '/profile', label: t('nav.profile', 'Profile') },
   ];
 
   return (
@@ -54,3 +56,4 @@ export function Sidebar() {
     </aside>
   );
 }
+

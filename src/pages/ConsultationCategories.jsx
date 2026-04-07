@@ -30,7 +30,6 @@ export function ConsultationCategories() {
   const [formDescAr, setFormDescAr] = useState('');
   const [formDescEn, setFormDescEn] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formTypeSlug, setFormTypeSlug] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
 
@@ -73,7 +72,6 @@ export function ConsultationCategories() {
     setFormDescAr('');
     setFormDescEn('');
     setFormSlug('');
-    setFormTypeSlug('');
     setFormImage(null);
     setModalOpen(true);
   };
@@ -90,7 +88,6 @@ export function ConsultationCategories() {
     setFormDescAr(row.description_ar ?? descObj?.ar ?? ar.description ?? row.description ?? '');
     setFormDescEn(row.description_en ?? descObj?.en ?? en.description ?? row.description ?? '');
     setFormSlug(row.slug ?? '');
-    setFormTypeSlug(row.type_slug ?? '');
     setFormImage(null);
     setModalOpen(true);
   };
@@ -120,7 +117,6 @@ export function ConsultationCategories() {
     fd.append('name_en', formNameEn || formNameAr || '');
     fd.append('description_ar', formDescAr ?? '');
     fd.append('description_en', formDescEn ?? '');
-    if (formTypeSlug) fd.append('type_slug', formTypeSlug);
     if (formSlug) fd.append('slug', formSlug);
     if (formImage) fd.append('image', formImage);
     return fd;
@@ -198,7 +194,6 @@ export function ConsultationCategories() {
         columns={[
           { key: 'name', header: t('consultationCategories.name'), render: (r) => getDisplayName(r) },
           { key: 'slug', header: t('consultationCategories.slug'), render: (r) => r.slug ?? '-' },
-          { key: 'type_slug', header: t('consultationCategories.typeSlug'), render: (r) => r.type_slug ?? '-' },
           { key: 'description', header: t('consultationCategories.description'), render: (r) => getDisplayDesc(r) },
         ]}
         data={data}
@@ -249,11 +244,6 @@ export function ConsultationCategories() {
             required
           />
           <Input label={t('consultationCategories.slug')} value={formSlug} onChange={(e) => setFormSlug(e.target.value)} />
-          <Input
-            label={t('consultationCategories.typeSlug')}
-            value={formTypeSlug}
-            onChange={(e) => setFormTypeSlug(e.target.value)}
-          />
 
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationCategories.descAr')}</label>

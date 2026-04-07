@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { CourseService, LessonService } from '@/api';
 import {
   Button,
@@ -17,6 +17,7 @@ import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useTranslation } from 'react-i18next';
 
 function unwrap(res, key = 'course') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -47,25 +48,7 @@ function shouldSkipKey(key) {
 }
 
 function humanizeLabel(key) {
-  const map = {
-    id: 'ID',
-    name: 'Name',
-    description: 'Description',
-    image_url: 'Image',
-    image: 'Image',
-    type: 'Type',
-    price: 'Price',
-    url: 'URL',
-    category: 'Category',
-    sub_category: 'Sub Category',
-    level: 'Level',
-    mentor: 'Mentor',
-    students_count: 'Students count',
-    lessons_count: 'Lessons count',
-    earning_points: 'Earning points',
-    accepted: 'Status',
-  };
-  return map[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function getRelationName(obj) {
@@ -74,14 +57,30 @@ function getRelationName(obj) {
   return String(name).trim() || '—';
 }
 
-function getDisplayValue(key, value) {
+/** Course detail may include `mentors` as an array; show names only (no raw JSON). */
+function formatMentorsValue(value) {
+  if (value == null) return '—';
+  if (Array.isArray(value)) {
+    const names = value
+      .map((m) => (m && typeof m === 'object' ? getRelationName(m) : '—'))
+      .filter((n) => n && n !== '—');
+    return names.length ? names.join(', ') : '—';
+  }
+  if (typeof value === 'object') return getRelationName(value);
+  return String(value);
+}
+
+function getDisplayValue(key, value, t) {
   if (value === null || value === undefined) return '—';
+  if (key === 'mentors') {
+    return formatMentorsValue(value);
+  }
   if (key === 'category' || key === 'sub_category' || key === 'level' || key === 'mentor') {
     return getRelationName(value);
   }
   if (key === 'accepted') {
     const accepted = value === true || value === 1;
-    return accepted ? 'Accepted' : 'Pending';
+    return accepted ? t?.('common.accepted', 'Accepted') ?? 'Accepted' : t?.('common.pending', 'Pending') ?? 'Pending';
   }
   if ((key === 'image_url' || key === 'image') && typeof value === 'string') {
     return value;
@@ -93,9 +92,32 @@ function getDisplayValue(key, value) {
   return String(value);
 }
 
-const RELATION_KEYS = new Set(['category', 'sub_category', 'level', 'mentor']);
+const RELATION_KEYS = new Set(['category', 'sub_category', 'level', 'mentor', 'mentors']);
 
-function buildDisplayRows(item) {
+function labelForKey(key, t) {
+  const map = {
+    id: t('common.id', 'ID'),
+    name: t('common.name', 'Name'),
+    description: t('common.description', 'Description'),
+    image_url: t('common.image', 'Image'),
+    image: t('common.image', 'Image'),
+    type: t('common.type', 'Type'),
+    price: t('common.price', 'Price'),
+    url: t('common.url', 'URL'),
+    category: t('common.category', 'Category'),
+    sub_category: t('common.subCategory', 'Sub Category'),
+    level: t('common.level', 'Level'),
+    mentor: t('common.mentor', 'Mentor'),
+    mentors: t('common.mentors', 'Mentors'),
+    students_count: t('courses.studentsCount', 'Students count'),
+    lessons_count: t('courses.lessonsCount', 'Lessons count'),
+    earning_points: t('common.earningPoints', 'Earning points'),
+    accepted: t('common.status', 'Status'),
+  };
+  return map[key] ?? humanizeLabel(key);
+}
+
+function buildDisplayRows(item, t) {
   const rows = [];
   const order = [
     'id',
@@ -109,6 +131,7 @@ function buildDisplayRows(item) {
     'category',
     'level',
     'mentor',
+    'mentors',
     'students_count',
     'lessons_count',
     'earning_points',
@@ -123,21 +146,22 @@ function buildDisplayRows(item) {
       const raw = item[key];
       rows.push({
         key,
-        label: humanizeLabel(key),
-        value: getDisplayValue(key, raw),
+        label: labelForKey(key, t),
+        value: getDisplayValue(key, raw, t),
         raw: RELATION_KEYS.has(key) ? raw : undefined,
       });
     }
   }
   for (const key of Object.keys(item)) {
     if (seen.has(key) || shouldSkipKey(key)) continue;
-    if (key === 'lessons' || key === 'posts' || key === 'polls') continue;
+    if (key === 'lessons' || key === 'posts' || key === 'polls' || key === 'articles') continue;
     if (typeof item[key] === 'function') continue;
+    const rawVal = item[key];
     rows.push({
       key,
-      label: humanizeLabel(key),
-      value: getDisplayValue(key, item[key]),
-      raw: undefined,
+      label: labelForKey(key, t),
+      value: getDisplayValue(key, rawVal, t),
+      raw: RELATION_KEYS.has(key) ? rawVal : undefined,
     });
   }
   return rows;
@@ -162,11 +186,28 @@ function getPollTitle(poll) {
   return str.slice(0, 60) + (str.length > 60 ? '…' : '') || '—';
 }
 
+function getArticleTitle(article) {
+  if (!article || typeof article !== 'object') return '—';
+  const t = article.title ?? article.name ?? article.heading ?? '';
+  if (t != null && typeof t === 'object') {
+    const v = t.ar ?? t.en ?? article.searchable_title ?? '';
+    const s = typeof v === 'string' ? v : String(v ?? '');
+    return s.slice(0, 60) + (s.length > 60 ? '…' : '') || '—';
+  }
+  const s = typeof t === 'string' ? t : String(t ?? '');
+  if (s) return s.slice(0, 60) + (s.length > 60 ? '…' : '');
+  const fallback = article.content ?? article.excerpt ?? '';
+  const f = typeof fallback === 'string' ? fallback : String(fallback ?? '');
+  return f.slice(0, 60) + (f.length > 60 ? '…' : '') || '—';
+}
+
 export function CourseSingle() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const confirm = useConfirm();
   const { lang } = useLanguage();
+  const { t } = useTranslation();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lessonsLoading, setLessonsLoading] = useState(false);
@@ -283,6 +324,28 @@ export function CourseSingle() {
     }
   };
 
+  // Allow deep-link: /courses/:id?lesson_edit=123 to open the lesson edit modal.
+  const lessonEditId = searchParams.get('lesson_edit');
+  useEffect(() => {
+    if (!lessonEditId || !item?.id) return;
+    const lid = Number(lessonEditId) || lessonEditId;
+    const clear = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('lesson_edit');
+        return next;
+      });
+    const found = Array.isArray(item.lessons) ? item.lessons.find((l) => String(l?.id) === String(lid)) : null;
+    (async () => {
+      try {
+        if (found) await openEditLesson(found);
+        else await openEditLesson({ id: lid });
+      } finally {
+        clear();
+      }
+    })();
+  }, [lessonEditId, item?.id]);
+
   const handleSubmitLesson = async (e) => {
     e.preventDefault();
     if (!item) return;
@@ -351,7 +414,7 @@ export function CourseSingle() {
   if (loading) return <Loading />;
   if (!item) return <div className="text-gray-500">Course not found.</div>;
 
-  const displayRows = buildDisplayRows(item);
+  const displayRows = buildDisplayRows(item, t);
 
   const isRecordedCourse = item?.type === 'recorded';
 
@@ -385,6 +448,24 @@ export function CourseSingle() {
                   <Link to={`/mentors/${raw.id}`} className="text-[var(--color-accent)] hover:underline">
                     {value}
                   </Link>
+                ) : key === 'mentors' && Array.isArray(raw) && raw.length > 0 ? (
+                  <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                    {raw.map((m, i) => (
+                      <span key={m?.id ?? i}>
+                        {i > 0 ? <span className="text-gray-400">, </span> : null}
+                        {m && typeof m === 'object' && m.id != null ? (
+                          <Link
+                            to={`/mentors/${m.id}`}
+                            className="text-[var(--color-accent)] hover:underline"
+                          >
+                            {getRelationName(m)}
+                          </Link>
+                        ) : (
+                          getRelationName(m)
+                        )}
+                      </span>
+                    ))}
+                  </span>
                 ) : key === 'accepted' ? (
                   <span
                     className={`inline-block px-2 py-1 rounded text-sm ${
@@ -435,24 +516,30 @@ export function CourseSingle() {
               {item.lessons.map((lesson) => (
                 <li key={lesson.id} className="px-4 py-2 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Link
-                      to={`/lessons/${lesson.id}`}
-                      className="text-[var(--color-accent)] hover:underline"
-                    >
-                      {getLessonTitle(lesson)}
-                    </Link>
+                    {lesson.id != null ? (
+                      <Link
+                        to={`/lessons/${lesson.id}`}
+                        className="text-[var(--color-accent)] hover:underline"
+                      >
+                        {getLessonTitle(lesson)}
+                      </Link>
+                    ) : (
+                      <span className="text-[var(--color-primary)]">{getLessonTitle(lesson)}</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Link to={`/lessons/${lesson.id}`}>
-                      <Button
-                        variant="ghost"
-                        className="!p-1 min-w-0"
-                        title="View lesson"
-                        aria-label="View lesson"
-                      >
-                        <IconViewSmall />
-                      </Button>
-                    </Link>
+                    {lesson.id != null ? (
+                      <Link to={`/lessons/${lesson.id}`}>
+                        <Button
+                          variant="ghost"
+                          className="!p-1 min-w-0"
+                          title="View lesson"
+                          aria-label="View lesson"
+                        >
+                          <IconViewSmall />
+                        </Button>
+                      </Link>
+                    ) : null}
                     <Button
                       variant="ghost"
                       className="!p-1 min-w-0"
@@ -513,6 +600,39 @@ export function CourseSingle() {
           </ul>
         ) : (
           <p className="px-4 py-3 text-sm text-gray-500">No posts yet for this course.</p>
+        )}
+      </div>
+
+      <div className="mt-6 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
+          <h2 className="text-sm font-semibold text-[var(--color-primary)]">
+            Articles
+          </h2>
+          <Link to="/articles">
+            <Button variant="secondary" className="!px-3 !py-1 text-xs">
+              Add article
+            </Button>
+          </Link>
+        </div>
+        {Array.isArray(item.articles) && item.articles.length > 0 ? (
+          <ul className="divide-y divide-[var(--color-border)]">
+            {item.articles.map((article) => (
+              <li key={article.id ?? getArticleTitle(article)} className="px-4 py-2">
+                {article.id != null ? (
+                  <Link
+                    to={`/articles/${article.id}`}
+                    className="text-[var(--color-accent)] hover:underline"
+                  >
+                    {getArticleTitle(article)}
+                  </Link>
+                ) : (
+                  <span className="text-[var(--color-primary)]">{getArticleTitle(article)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-4 py-3 text-sm text-gray-500">No articles yet for this course.</p>
         )}
       </div>
 

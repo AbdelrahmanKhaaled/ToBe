@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ConsultationSessionService, ConsultationSubCategoryService, MentorService } from '@/api';
 import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
@@ -9,11 +9,80 @@ import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useAuth } from '@/context/AuthContext';
+
+function extractRoleNames(user) {
+  const raw = user?.roles ?? user?.role ?? user?.roles_names ?? null;
+  if (Array.isArray(raw)) {
+    return raw
+      .map((r) => (typeof r === 'string' ? r : r?.name))
+      .filter(Boolean)
+      .map((s) => String(s));
+  }
+  if (typeof raw === 'string') return [raw];
+  if (raw && typeof raw === 'object' && raw?.name) return [String(raw.name)];
+  return [];
+}
+
+async function fetchAllPages(getPage, { perPage = 200, maxPages = 20 } = {}) {
+  const all = [];
+  for (let page = 1; page <= maxPages; page++) {
+    // eslint-disable-next-line no-await-in-loop
+    const res = await getPage(page, perPage);
+    const rows = Array.isArray(res?.data) ? res.data : [];
+    all.push(...rows);
+
+    const meta = res?.meta ?? {};
+    const currentPage = Number(meta.currentPage ?? meta.current_page ?? meta.pagination?.current_page ?? page) || page;
+    const lastPage = Number(meta.lastPage ?? meta.last_page ?? meta.pagination?.last_page ?? 0) || 0;
+    if (lastPage >= 1 && currentPage >= lastPage) break;
+
+    // Fallback stop condition when API doesn't provide last_page.
+    if (rows.length < perPage) break;
+  }
+  // Dedup by id
+  const seen = new Set();
+  return all.filter((r) => {
+    const id = r?.id != null ? String(r.id) : '';
+    if (!id) return true;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+async function fetchAllByNextLink(firstPage, getNextByUrl, { maxPages = 50 } = {}) {
+  const all = [];
+  let res = await firstPage();
+  let guard = 0;
+  while (res && guard < maxPages) {
+    const rows = Array.isArray(res?.data) ? res.data : [];
+    all.push(...rows);
+    const nextUrl = res?.links?.next ?? res?.meta?.links?.next ?? null;
+    if (!nextUrl) break;
+    // eslint-disable-next-line no-await-in-loop
+    res = await getNextByUrl(nextUrl);
+    guard++;
+  }
+  const seen = new Set();
+  return all.filter((r) => {
+    const id = r?.id != null ? String(r.id) : '';
+    if (!id) return true;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
 
 export function ConsultationSessions() {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const { lang } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
+
+  const isMentorUser = useMemo(() => extractRoleNames(user).includes('mentor'), [user]);
+  const loggedInMentorId = user?.id != null ? String(user.id) : '';
 
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -40,7 +109,6 @@ export function ConsultationSessions() {
   const [formEarningPoints, setFormEarningPoints] = useState('');
   const [formSubCategoryId, setFormSubCategoryId] = useState('');
   const [formMentorId, setFormMentorId] = useState('');
-  const [formVideoUrl, setFormVideoUrl] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
 
@@ -58,17 +126,30 @@ export function ConsultationSessions() {
 
   const fetchRefs = useCallback(async () => {
     try {
-      const [subCatsRes, mentorsRes] = await Promise.all([
-        ConsultationSubCategoryService.getAll({ page: 1, per_page: 200 }),
-        MentorService.getAll({ page: 1, per_page: 200 }),
-      ]);
-      setSubCategories(Array.isArray(subCatsRes?.data) ? subCatsRes.data : []);
-      setMentors(Array.isArray(mentorsRes?.data) ? mentorsRes.data : []);
+      const allSubCats = await fetchAllByNextLink(
+        () => ConsultationSubCategoryService.getAll({ page: 1, per_page: 200 }),
+        (url) => ConsultationSubCategoryService.getPageByUrl(url),
+        { maxPages: 200 }
+      );
+      setSubCategories(allSubCats);
+
+      // Mentors list endpoint may be restricted for mentor accounts.
+      if (isMentorUser) {
+        setMentors([]);
+        return;
+      }
+
+      const allMentors = await fetchAllByNextLink(
+        () => MentorService.getAll({ page: 1, per_page: 200 }),
+        (url) => MentorService.getPageByUrl(url),
+        { maxPages: 200 }
+      );
+      setMentors(allMentors);
     } catch (_) {
       setSubCategories([]);
       setMentors([]);
     }
-  }, [lang]);
+  }, [isMentorUser, lang]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -119,13 +200,12 @@ export function ConsultationSessions() {
     setFormType('offline');
     setFormEarningPoints('');
     setFormSubCategoryId('');
-    setFormMentorId('');
-    setFormVideoUrl('');
+    setFormMentorId(isMentorUser ? loggedInMentorId : '');
     setFormImage(null);
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = useCallback((row) => {
     setEditing(row);
     const trans = row.translations || {};
     const ar = trans.ar || row;
@@ -141,14 +221,14 @@ export function ConsultationSessions() {
     setFormContentEn(row.content_en ?? contentObj?.en ?? en.content ?? row.content ?? '');
     setFormPrice(String(row.price ?? ''));
     setFormDuration(String(row.duration ?? ''));
-    setFormType(row.type ?? 'offline');
+    // Only allow offline/live in the UI
+    setFormType(row.type === 'live' ? 'live' : 'offline');
     setFormEarningPoints(String(row.earning_points ?? ''));
     setFormSubCategoryId(String(row.consultation_sub_category_id ?? row.consultation_sub_category?.id ?? ''));
-    setFormMentorId(String(row.mentor_id ?? row.mentor?.id ?? ''));
-    setFormVideoUrl(row.video_url ?? '');
+    setFormMentorId(isMentorUser ? loggedInMentorId : String(row.mentor_id ?? row.mentor?.id ?? ''));
     setFormImage(null);
     setModalOpen(true);
-  };
+  }, [isMentorUser, loggedInMentorId]);
 
   const openEditById = useCallback(async (id) => {
     const sessionId = id != null ? String(id) : id;
@@ -167,7 +247,20 @@ export function ConsultationSessions() {
     } finally {
       setEditLoading(false);
     }
-  }, []);
+  }, [openEdit]);
+
+  const editId = searchParams.get('edit');
+  useEffect(() => {
+    if (!editId || loading) return;
+    const id = Number(editId) || editId;
+    const clearEdit = () =>
+      setSearchParams((p) => {
+        const next = new URLSearchParams(p);
+        next.delete('edit');
+        return next;
+      });
+    openEditById(id).finally(() => clearEdit());
+  }, [editId, loading, openEditById, setSearchParams]);
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -183,7 +276,6 @@ export function ConsultationSessions() {
     if (formEarningPoints !== '') fd.append('earning_points', formEarningPoints);
     if (formSubCategoryId) fd.append('consultation_sub_category_id', formSubCategoryId);
     if (formMentorId) fd.append('mentor_id', formMentorId);
-    if (formVideoUrl) fd.append('video_url', formVideoUrl);
     if (formImage) fd.append('image', formImage);
     return fd;
   };
@@ -277,9 +369,7 @@ export function ConsultationSessions() {
       <DataTable
         columns={[
           { key: 'name', header: t('consultationSessions.name'), render: (r) => getDisplayName(r) },
-          { key: 'type', header: t('consultationSessions.type'), render: (r) => r.type ?? '-' },
           { key: 'price', header: t('consultationSessions.price'), render: (r) => r.price ?? '-' },
-          { key: 'duration', header: t('consultationSessions.duration'), render: (r) => r.duration ?? '-' },
           { key: 'sub_category', header: t('consultationSessions.subCategory'), render: (r) => getSubCategoryName(r) },
           { key: 'mentor', header: t('consultationSessions.mentor'), render: (r) => getMentorName(r) },
         ]}
@@ -299,10 +389,22 @@ export function ConsultationSessions() {
                 <IconView />
               </Button>
             </Link>
-            <Button variant="ghost" className="!p-2 min-w-0" title="Edit" aria-label="Edit" onClick={() => openEditById(row.id)}>
+            <Button
+              variant="ghost"
+              className="!p-2 min-w-0"
+              title={t('common.edit', 'Edit')}
+              aria-label={t('common.edit', 'Edit')}
+              onClick={() => openEditById(row.id)}
+            >
               <IconEdit />
             </Button>
-            <Button variant="danger" className="!p-2 min-w-0" title="Delete" aria-label="Delete" onClick={() => handleDelete(row)}>
+            <Button
+              variant="danger"
+              className="!p-2 min-w-0"
+              title={t('common.delete', 'Delete')}
+              aria-label={t('common.delete', 'Delete')}
+              onClick={() => handleDelete(row)}
+            >
               <IconTrash />
             </Button>
           </div>
@@ -336,7 +438,6 @@ export function ConsultationSessions() {
               >
                 <option value="offline">{t('consultationSessions.types.offline')}</option>
                 <option value="live">{t('consultationSessions.types.live')}</option>
-                <option value="recorded">{t('consultationSessions.types.recorded')}</option>
               </select>
             </div>
             <Input
@@ -373,6 +474,7 @@ export function ConsultationSessions() {
                 onChange={(e) => setFormMentorId(e.target.value)}
                 className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-white"
                 required
+                disabled={isMentorUser}
               >
                 <option value="">{t('consultationSessions.selectMentor')}</option>
                 {mentors.map((m) => (
@@ -383,8 +485,6 @@ export function ConsultationSessions() {
               </select>
             </div>
           </div>
-
-          <Input label={t('consultationSessions.videoUrl')} value={formVideoUrl} onChange={(e) => setFormVideoUrl(e.target.value)} />
 
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.descAr')}</label>

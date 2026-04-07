@@ -5,10 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { API_CONFIG } from '@/config/api';
 import { authStorage } from '@/utils/authStorage';
 import { toast } from '@/utils/toast';
+import { useTranslation } from 'react-i18next';
 
 const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
 
 export function LessonVideoUploader({ lessonId, onComplete }) {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -19,7 +21,7 @@ export function LessonVideoUploader({ lessonId, onComplete }) {
 
       const token = authStorage.getToken();
       if (!token) {
-        toast.error('You must be logged in to upload video.');
+        toast.error(t('lessons.videoUpload.mustLogin', 'You must be logged in to upload video.'));
         return;
       }
 
@@ -60,14 +62,14 @@ export function LessonVideoUploader({ lessonId, onComplete }) {
             if (finalPath && typeof onComplete === 'function') {
               onComplete(finalPath);
             }
-            toast.success('Video upload complete');
+            toast.success(t('lessons.videoUpload.complete', 'Video upload complete'));
           }
         } catch (error) {
           console.error(`Error uploading chunk ${chunkIndex + 1}`, error);
           const msg =
             error?.response?.data?.message ||
             error?.message ||
-            'Upload failed. Please try again.';
+            t('lessons.videoUpload.failed', 'Upload failed. Please try again.');
           toast.error(msg);
           setIsUploading(false);
           return;
@@ -94,14 +96,16 @@ export function LessonVideoUploader({ lessonId, onComplete }) {
         <input {...getInputProps()} />
         <p className="text-sm text-gray-700">
           {isDragActive
-            ? 'Drop the video file here...'
-            : 'Drag & drop a video file here, or click to select file'}
+            ? t('lessons.videoUpload.dropHere', 'Drop the video file here...')
+            : t('lessons.videoUpload.dragDrop', 'Drag & drop a video file here, or click to select file')}
         </p>
       </div>
 
       {isUploading && (
         <div className="mt-3">
-          <p className="text-xs text-gray-600 mb-1">Uploading... {progress}%</p>
+          <p className="text-xs text-gray-600 mb-1">
+            {t('lessons.videoUpload.uploading', 'Uploading...')} {progress}%
+          </p>
           <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full bg-[var(--color-accent)] transition-all"

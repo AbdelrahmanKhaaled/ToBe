@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function Modal({ open, onClose, title, children }) {
+  const { t } = useTranslation();
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose();
@@ -34,7 +36,7 @@ export function Modal({ open, onClose, title, children }) {
             type="button"
             onClick={onClose}
             className="p-2 rounded-[var(--radius)] hover:bg-[var(--color-border)] text-[var(--color-primary)]"
-            aria-label="Close"
+            aria-label={t('common.close', 'Close')}
           >
             ×
           </button>

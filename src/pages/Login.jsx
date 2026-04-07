@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input } from '@/components/ui';
 import { useTranslation } from 'react-i18next';
+import { isLoginBlockedError } from '@/utils/loginErrors';
 
 export function Login() {
   const { login } = useAuth();
@@ -18,7 +19,14 @@ export function Login() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.message || t('login.errorGeneric'));
+      setError(
+        isLoginBlockedError(err)
+          ? t('login.errorEntryProhibited', {
+              defaultValue:
+                'Access to the admin panel is not available for this account. It may be restricted or deactivated. If you need help, please contact your administrator.',
+            })
+          : err.message || t('login.errorGeneric')
+      );
     } finally {
       setLoading(false);
     }
