@@ -18,6 +18,8 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
+import { hasPermission } from '@/utils/permissions';
 
 function unwrap(res, key = 'course') {
   return res?.[key] ?? res?.data ?? res ?? null;
@@ -208,6 +210,7 @@ export function CourseSingle() {
   const confirm = useConfirm();
   const { lang } = useLanguage();
   const { t } = useTranslation();
+  const auth = useAuth();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lessonsLoading, setLessonsLoading] = useState(false);
@@ -417,12 +420,17 @@ export function CourseSingle() {
   const displayRows = buildDisplayRows(item, t);
 
   const isRecordedCourse = item?.type === 'recorded';
+  const canManageCourse = hasPermission(auth, 'courses');
+  const canManageLessons = hasPermission(auth, 'lessons');
 
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link to="/courses" className="text-[var(--color-accent)] hover:underline">
-          ← Back to Courses
+        <Link
+          to={canManageCourse ? '/courses' : '/lessons'}
+          className="text-[var(--color-accent)] hover:underline"
+        >
+          ← {canManageCourse ? 'Back to Courses' : 'Back to Lessons'}
         </Link>
       </div>
       <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">{getCourseName(item)}</h1>
@@ -496,7 +504,7 @@ export function CourseSingle() {
         </dl>
       </div>
 
-      {isRecordedCourse && (
+      {isRecordedCourse && canManageLessons && (
         <div className="mt-6 bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
             <h2 className="text-sm font-semibold text-[var(--color-primary)]">
@@ -660,17 +668,21 @@ export function CourseSingle() {
         </div>
       )}
       <div className="mt-4 flex gap-2">
-        <Link to={`/courses?edit=${item.id}`}>
-          <Button variant="secondary" className="!p-2" title="Edit course" aria-label="Edit course">
-            <IconEdit />
-          </Button>
-        </Link>
-        <Button variant="danger" className="!p-2" title="Delete course" aria-label="Delete course" onClick={handleDelete}>
-          <IconTrash />
-        </Button>
+        {canManageCourse ? (
+          <>
+            <Link to={`/courses?edit=${item.id}`}>
+              <Button variant="secondary" className="!p-2" title="Edit course" aria-label="Edit course">
+                <IconEdit />
+              </Button>
+            </Link>
+            <Button variant="danger" className="!p-2" title="Delete course" aria-label="Delete course" onClick={handleDelete}>
+              <IconTrash />
+            </Button>
+          </>
+        ) : null}
       </div>
 
-      {isRecordedCourse && (
+      {isRecordedCourse && canManageLessons && (
         <Modal
           open={lessonModalOpen}
           onClose={() => setLessonModalOpen(false)}

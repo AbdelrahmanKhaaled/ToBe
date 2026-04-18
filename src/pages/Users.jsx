@@ -124,12 +124,6 @@ export function Users() {
   const [selectedPermissionIds, setSelectedPermissionIds] = useState([]);
   const [password, setPassword] = useState('');
 
-  const [bankName, setBankName] = useState('');
-  const [bankAccountName, setBankAccountName] = useState('');
-  const [bankAccountNumber, setBankAccountNumber] = useState('');
-  const [deductionType, setDeductionType] = useState('fixed');
-  const [deductionValue, setDeductionValue] = useState('');
-
   const resetForm = useCallback(() => {
     setEditingId(null);
     setName('');
@@ -138,11 +132,6 @@ export function Users() {
     setSelectedRoleId('');
     setSelectedPermissionIds([]);
     setPassword('');
-    setBankName('');
-    setBankAccountName('');
-    setBankAccountNumber('');
-    setDeductionType('fixed');
-    setDeductionValue('');
   }, []);
 
   const fetchRoles = useCallback(async () => {
@@ -236,14 +225,6 @@ export function Users() {
     setSelectedPermissionIds(permIds);
     setPassword('');
 
-    setBankName(row.bank_name ?? row.bankName ?? '');
-    setBankAccountName(row.bank_account_name ?? row.bankAccountName ?? '');
-    setBankAccountNumber(row.bank_account_number ?? row.bankAccountNumber ?? '');
-    setDeductionType(row.deduction_type ?? row.deductionType ?? 'fixed');
-    setDeductionValue(
-      row.deduction_value != null ? String(row.deduction_value) : row.deductionValue != null ? String(row.deductionValue) : ''
-    );
-
     setModalOpen(true);
   };
 
@@ -273,11 +254,6 @@ export function Users() {
         phone_number: phoneNumber === '' ? null : phoneNumber,
         roles: [selectedRoleId],
         permissions: selectedPermissionIds,
-        bank_name: bankName,
-        bank_account_name: bankAccountName,
-        bank_account_number: bankAccountNumber,
-        deduction_type: deductionType,
-        deduction_value: deductionValue === '' ? null : Number(deductionValue),
       };
       if (password) {
         payload.password = password;
@@ -506,39 +482,6 @@ export function Users() {
             ) : (
               <div className="text-sm text-gray-500 mt-2">{t('users.noPermissions')}</div>
             )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Input label={t('users.bankName')} value={bankName} onChange={(e) => setBankName(e.target.value)} required />
-            <Input label={t('users.bankAccountName')} value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} required />
-          </div>
-
-          <Input
-            label={t('users.bankAccountNumber')}
-            value={bankAccountNumber}
-            onChange={(e) => setBankAccountNumber(e.target.value)}
-            required
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-[var(--color-primary)]">{t('users.deductionType')}</label>
-              <select
-                value={deductionType}
-                onChange={(e) => setDeductionType(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-white"
-              >
-                <option value="fixed">{t('users.deductionTypes.fixed')}</option>
-                <option value="percentage">{t('users.deductionTypes.percentage')}</option>
-              </select>
-            </div>
-            <Input
-              label={t('users.deductionValue')}
-              type="number"
-              value={deductionValue}
-              onChange={(e) => setDeductionValue(e.target.value)}
-              required
-            />
           </div>
 
           <div className="flex justify-end gap-2">

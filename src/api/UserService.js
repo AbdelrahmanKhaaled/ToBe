@@ -56,8 +56,8 @@ class UserServiceClass extends BaseApiService {
 
   /**
    * Update user.
-   * Postman collection updates via POST /dashboard/users/:id using multipart/form-data,
-   * including keys like: roles[role] and permissions[<index>].
+   * Backend typically supports PUT/PATCH /dashboard/users/:id.
+   * We send multipart/form-data to support array-like keys such as roles[role] and permissions[<index>].
    */
   async update(id, payload) {
     const userId = id != null ? String(id) : id;
@@ -104,8 +104,8 @@ class UserServiceClass extends BaseApiService {
     if (payload?.deduction_value !== undefined) formData.append('deduction_value', payload?.deduction_value ?? '');
     if (payload?.deductionValue !== undefined) formData.append('deduction_value', payload?.deductionValue ?? '');
 
-    // Postman sends: POST /dashboard/users/:id with form-data
-    const res = await this.postFormData(`/${userId}`, formData);
+    // Use PUT (server rejects POST on this route).
+    const res = await this.putFormData(`/${userId}`, formData);
     return res.data || res;
   }
 

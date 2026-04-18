@@ -78,6 +78,13 @@ export function UserSingle() {
     ? item.wallet_balance.balance
     : null;
 
+  const points =
+    item.points ??
+    item.user_points ??
+    item.earning_points ??
+    item.earningPoints ??
+    null;
+
   const InfoRow = ({ label, children }) => (
     <div className="px-4 py-3">
       <dt className="text-sm font-medium text-gray-500">{label}</dt>
@@ -132,6 +139,9 @@ export function UserSingle() {
                 </span>
               </div>
             </div>
+          </InfoRow>
+          <InfoRow label={t('users.points', 'Points')}>
+            {points != null && points !== '' ? String(points) : '—'}
           </InfoRow>
           <InfoRow label={t('users.walletBalance', 'Wallet balance')}>
             {balance != null && balance !== '' ? String(balance) : '—'}

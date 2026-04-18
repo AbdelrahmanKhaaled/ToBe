@@ -109,6 +109,7 @@ export function Courses() {
   const [formImage, setFormImage] = useState(null);
   const [formType, setFormType] = useState('live');
   const [formPrice, setFormPrice] = useState('');
+  const [formPricePoints, setFormPricePoints] = useState('');
   const [formSubCategoryId, setFormSubCategoryId] = useState('');
   const [formLevelId, setFormLevelId] = useState('');
   const [formMentorId, setFormMentorId] = useState('');
@@ -239,6 +240,7 @@ export function Courses() {
     setFormImage(null);
     setFormType('live');
     setFormPrice('');
+    setFormPricePoints('');
     setFormSubCategoryId('');
     setFormLevelId('');
     setFormMentorId(resolveMentorIdForUser(authUser, mentors));
@@ -261,6 +263,7 @@ export function Courses() {
     setFormImage(null);
     setFormType(row.type ?? 'live');
     setFormPrice(row.price != null ? String(row.price) : '');
+    setFormPricePoints(row.price_points != null ? String(row.price_points) : row.pricePoints != null ? String(row.pricePoints) : '');
     setFormSubCategoryId(
       row.sub_category_id != null
         ? String(row.sub_category_id)
@@ -299,6 +302,7 @@ export function Courses() {
         setFormDescEn(toFormValue(descObj?.en ?? d.description_en ?? en?.description));
         setFormType(d.type ?? 'live');
         setFormPrice(d.price != null ? String(d.price) : '');
+        setFormPricePoints(d.price_points != null ? String(d.price_points) : d.pricePoints != null ? String(d.pricePoints) : '');
         setFormSubCategoryId(
           d.sub_category_id != null
             ? String(d.sub_category_id)
@@ -327,6 +331,7 @@ export function Courses() {
     if (formImage) fd.append('image', formImage);
     fd.append('type', formType || 'live');
     fd.append('price', formPrice || '0');
+    fd.append('price_points', formPricePoints || '0');
     fd.append('sub_category_id', formSubCategoryId || '');
     fd.append('level_id', formLevelId || '');
     const mid =
@@ -664,6 +669,14 @@ export function Courses() {
             label={t('courses.price')}
             value={formPrice}
             onChange={(e) => setFormPrice(e.target.value)}
+          />
+          <Input
+            type="number"
+            min="0"
+            step="1"
+            label={t('courses.pricePoints', 'Price (points)')}
+            value={formPricePoints}
+            onChange={(e) => setFormPricePoints(e.target.value)}
           />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.subCategory', 'Sub-category *')}</label>

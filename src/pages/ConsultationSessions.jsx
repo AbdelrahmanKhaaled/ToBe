@@ -111,6 +111,28 @@ export function ConsultationSessions() {
   const [formMentorId, setFormMentorId] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
+  const [formAvailableDates, setFormAvailableDates] = useState([
+    { available_date: '', available_start_time: '' },
+  ]);
+
+  const normalizeAvailableDates = useCallback((raw) => {
+    const arr = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    const rows = arr
+      .map((x) => {
+        if (!x || typeof x !== 'object') return null;
+        return {
+          available_date: x.available_date ?? x.availableDate ?? x.date ?? '',
+          available_start_time: x.available_start_time ?? x.availableStartTime ?? x.start_time ?? '',
+        };
+      })
+      .filter(Boolean)
+      .map((r) => ({
+        available_date: r.available_date != null ? String(r.available_date) : '',
+        available_start_time: r.available_start_time != null ? String(r.available_start_time) : '',
+      }))
+      .filter((r) => r.available_date || r.available_start_time);
+    return rows.length ? rows : [{ available_date: '', available_start_time: '' }];
+  }, []);
 
   const subCatById = useMemo(() => {
     const m = new Map();
@@ -202,6 +224,7 @@ export function ConsultationSessions() {
     setFormSubCategoryId('');
     setFormMentorId(isMentorUser ? loggedInMentorId : '');
     setFormImage(null);
+    setFormAvailableDates([{ available_date: '', available_start_time: '' }]);
     setModalOpen(true);
   };
 
@@ -227,8 +250,18 @@ export function ConsultationSessions() {
     setFormSubCategoryId(String(row.consultation_sub_category_id ?? row.consultation_sub_category?.id ?? ''));
     setFormMentorId(isMentorUser ? loggedInMentorId : String(row.mentor_id ?? row.mentor?.id ?? ''));
     setFormImage(null);
+    setFormAvailableDates(
+      normalizeAvailableDates(
+        row.available_dates ??
+          row.availableDates ??
+          row.availability ??
+          row.available_slots ??
+          row.availableSlots ??
+          []
+      )
+    );
     setModalOpen(true);
-  }, [isMentorUser, loggedInMentorId]);
+  }, [isMentorUser, loggedInMentorId, normalizeAvailableDates]);
 
   const openEditById = useCallback(async (id) => {
     const sessionId = id != null ? String(id) : id;
@@ -277,6 +310,20 @@ export function ConsultationSessions() {
     if (formSubCategoryId) fd.append('consultation_sub_category_id', formSubCategoryId);
     if (formMentorId) fd.append('mentor_id', formMentorId);
     if (formImage) fd.append('image', formImage);
+
+    // available_dates[n][available_date|available_start_time] (1-based)
+    const rows = Array.isArray(formAvailableDates) ? formAvailableDates : [];
+    rows
+      .map((r) => ({
+        available_date: r?.available_date != null ? String(r.available_date).trim() : '',
+        available_start_time: r?.available_start_time != null ? String(r.available_start_time).trim() : '',
+      }))
+      .filter((r) => r.available_date || r.available_start_time)
+      .forEach((r, idx) => {
+        const i = idx + 1;
+        if (r.available_date) fd.append(`available_dates[${i}][available_date]`, r.available_date);
+        if (r.available_start_time) fd.append(`available_dates[${i}][available_start_time]`, r.available_start_time);
+      });
     return fd;
   };
 
@@ -532,6 +579,77 @@ export function ConsultationSessions() {
               onChange={(e) => setFormImage(e.target.files?.[0] ?? null)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm file:mr-2 file:rounded file:border-0 file:bg-[var(--color-accent)] file:px-3 file:py-1 file:text-white file:text-sm"
             />
+          </div>
+
+          <div className="pt-2 border-t border-[var(--color-border)]">
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-sm font-medium text-[var(--color-primary)]">
+                {t('consultationSessions.availableDates', 'Available dates')}
+              </label>
+              <Button
+                type="button"
+                variant="secondary"
+                className="!px-3 !py-1 text-xs"
+                onClick={() =>
+                  setFormAvailableDates((prev) => [
+                    ...(Array.isArray(prev) ? prev : []),
+                    { available_date: '', available_start_time: '' },
+                  ])
+                }
+              >
+                {t('common.add', 'Add')}
+              </Button>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {formAvailableDates.map((row, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-1 md:grid-cols-[1fr_1fr_84px] gap-2 items-end bg-white border border-[var(--color-border)] rounded-[var(--radius)] p-3"
+                >
+                  <Input
+                    label={t('consultationSessions.availableDate', 'Date')}
+                    type="date"
+                    value={row.available_date}
+                    onChange={(e) =>
+                      setFormAvailableDates((prev) =>
+                        (Array.isArray(prev) ? prev : []).map((r, i) =>
+                          i === idx ? { ...r, available_date: e.target.value } : r
+                        )
+                      )
+                    }
+                  />
+                  <Input
+                    label={t('consultationSessions.availableStartTime', 'Start time')}
+                    type="time"
+                    value={row.available_start_time}
+                    onChange={(e) =>
+                      setFormAvailableDates((prev) =>
+                        (Array.isArray(prev) ? prev : []).map((r, i) =>
+                          i === idx ? { ...r, available_start_time: e.target.value } : r
+                        )
+                      )
+                    }
+                  />
+                  <Button
+                    type="button"
+                    variant="danger"
+                    className="!px-3 !py-2 text-xs"
+                    onClick={() =>
+                      setFormAvailableDates((prev) => {
+                        const arr = Array.isArray(prev) ? prev : [];
+                        const next = arr.filter((_, i) => i !== idx);
+                        return next.length
+                          ? next
+                          : [{ available_date: '', available_start_time: '' }];
+                      })
+                    }
+                  >
+                    {t('common.delete', 'Delete')}
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">

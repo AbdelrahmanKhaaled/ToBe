@@ -1,10 +1,24 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthService } from '@/api';
+import { AccessControlService, AuthService } from '@/api';
 import { authStorage } from '@/utils/authStorage';
 import { createLoginBlockedError, isUserPayloadBlocked } from '@/utils/loginErrors';
 
 const AuthContext = createContext(null);
+
+function normalizePermissionsPayload(res) {
+  const raw = res?.data ?? res;
+  const permsRaw = raw?.permissions ?? raw?.data?.permissions ?? raw?.user_permissions ?? raw?.permission ?? [];
+  const arr = Array.isArray(permsRaw) ? permsRaw : [permsRaw].filter(Boolean);
+  return arr
+    .map((p) => {
+      if (p == null) return null;
+      if (typeof p === 'string') return p.trim();
+      if (typeof p === 'number') return String(p);
+      return p?.name != null ? String(p.name).trim() : p?.id != null ? String(p.id) : null;
+    })
+    .filter(Boolean);
+}
 
 /** Normalize profile response so we always have { id, name, email } from any common API shape */
 function normalizeProfileUser(res) {
@@ -67,6 +81,7 @@ function normalizeProfileUser(res) {
 export function AuthProvider({ children }) {
   const [state, setState] = useState({
     user: null,
+    permissions: [],
     loading: true,
     authenticated: false,
   });
@@ -74,16 +89,25 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     if (!authStorage.isAuthenticated()) {
-      setState({ user: null, loading: false, authenticated: false });
+      setState({ user: null, permissions: [], loading: false, authenticated: false });
       return;
     }
     try {
       const res = await AuthService.getProfile();
       const u = normalizeProfileUser(res);
-      setState({ user: u, loading: false, authenticated: true });
+      let permissions = [];
+      if (u?.id != null) {
+        try {
+          const rp = await AccessControlService.users.getUserRolesAndPermissions(u.id);
+          permissions = normalizePermissionsPayload(rp);
+        } catch {
+          permissions = [];
+        }
+      }
+      setState({ user: u, permissions, loading: false, authenticated: true });
     } catch {
       authStorage.clear();
-      setState({ user: null, loading: false, authenticated: false });
+      setState({ user: null, permissions: [], loading: false, authenticated: false });
     }
   }, []);
 
@@ -100,7 +124,21 @@ export function AuthProvider({ children }) {
       }
       authStorage.setToken(res.token);
       const user = normalizeProfileUser({ data: res.user }) ?? normalizeProfileUser(res) ?? res.user ?? res;
-      setState({ user: user && typeof user === 'object' ? user : null, loading: false, authenticated: true });
+      let permissions = [];
+      if (user?.id != null) {
+        try {
+          const rp = await AccessControlService.users.getUserRolesAndPermissions(user.id);
+          permissions = normalizePermissionsPayload(rp);
+        } catch {
+          permissions = [];
+        }
+      }
+      setState({
+        user: user && typeof user === 'object' ? user : null,
+        permissions,
+        loading: false,
+        authenticated: true,
+      });
       navigate('/');
     },
     [navigate]
@@ -109,7 +147,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     await AuthService.logout();
     authStorage.clear();
-    setState({ user: null, loading: false, authenticated: false });
+    setState({ user: null, permissions: [], loading: false, authenticated: false });
     navigate('/login');
   }, [navigate]);
 
@@ -118,7 +156,7 @@ export function AuthProvider({ children }) {
       await AuthService.logoutAllDevices();
     } finally {
       authStorage.clear();
-      setState({ user: null, loading: false, authenticated: false });
+      setState({ user: null, permissions: [], loading: false, authenticated: false });
       navigate('/login');
     }
   }, [navigate]);
