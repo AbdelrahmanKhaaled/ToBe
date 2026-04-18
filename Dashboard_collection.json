@@ -8,7 +8,7 @@
   },
   "item": [
     {
-      "name": "Dashboard",
+      "name": "Dashboard Copy",
       "item": [
         {
           "name": "Auth",
@@ -38,9 +38,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/login",
+                  "raw": "{{tobe}}/dashboard/login",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
@@ -473,7 +473,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "64|5o631CfftQ64s5Vf2NhIiN0y9PIqmiGtGRLW1GrYbaaf55fe",
+                      "value": "126|SZxxRhGA5mJgIieAMfnNBcORhEHGU0tGOvnGJojKa0672775",
                       "type": "string"
                     }
                   ]
@@ -519,7 +519,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "93|X8i27er4GzNgzxbRCroG6osWrh4lPjvmiMMdpjjy158e1ec1",
+                      "value": "126|SZxxRhGA5mJgIieAMfnNBcORhEHGU0tGOvnGJojKa0672775",
                       "type": "string"
                     }
                   ]
@@ -591,9 +591,9 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobe}}/dashboard/users",
+                  "raw": "{{tobelocal}}/dashboard/users",
                   "host": [
-                    "{{tobe}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
@@ -651,7 +651,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "86|r0qWkvYqo823Df6hQwYCs9GxBa1ppoJwMFimuWCg4d0d90be",
+                      "value": "131|IxPieupIHUMgl1WfvsSVFsXXsciLhJq5wGk8Ayo76f9855c9",
                       "type": "string"
                     }
                   ]
@@ -669,13 +669,13 @@
                   "formdata": [
                     {
                       "key": "name",
-                      "value": "new admin",
+                      "value": "salem mentor",
                       "type": "text",
                       "uuid": "fd05c233-d4ed-4545-b057-8bc8a2a9908b"
                     },
                     {
                       "key": "email",
-                      "value": "admin@admin.com",
+                      "value": "salem2@mentor.com",
                       "type": "text",
                       "uuid": "fa9c4c54-f3ca-43cd-b5ac-81649aec3994"
                     },
@@ -683,7 +683,8 @@
                       "key": "phone_number",
                       "value": "011121212151",
                       "type": "text",
-                      "uuid": "58eb59b2-61de-4ffc-b96a-e3bba8a84ac3"
+                      "uuid": "58eb59b2-61de-4ffc-b96a-e3bba8a84ac3",
+                      "disabled": true
                     },
                     {
                       "key": "roles[role]",
@@ -701,13 +702,15 @@
                       "key": "permissions[2]",
                       "value": "2",
                       "type": "text",
-                      "uuid": "66da6310-0fc6-451a-afd0-d4f8141d6add"
+                      "uuid": "66da6310-0fc6-451a-afd0-d4f8141d6add",
+                      "disabled": true
                     },
                     {
                       "key": "permissions[3]",
                       "value": "3",
                       "type": "text",
-                      "uuid": "f9f5005d-ddc1-4803-87f0-99a81cb936d8"
+                      "uuid": "f9f5005d-ddc1-4803-87f0-99a81cb936d8",
+                      "disabled": true
                     },
                     {
                       "key": "_method",
@@ -718,14 +721,14 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobe}}/dashboard/users/405",
+                  "raw": "{{tobelocal}}/dashboard/users/407",
                   "host": [
-                    "{{tobe}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
                     "users",
-                    "405"
+                    "407"
                   ]
                 }
               },
@@ -739,7 +742,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "123|RcJYqtwgdxMUIjhyKbBh8fRPcC3AeTfbdkEouRFG389a8ff6",
+                      "value": "126|SZxxRhGA5mJgIieAMfnNBcORhEHGU0tGOvnGJojKa0672775",
                       "type": "string"
                     }
                   ]
@@ -761,14 +764,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{tobe}}/dashboard/users/50",
+                  "raw": "{{tobelocal}}/dashboard/users/414",
                   "host": [
-                    "{{tobe}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
                     "users",
-                    "50"
+                    "414"
                   ]
                 }
               },
@@ -1361,7 +1364,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "93|X8i27er4GzNgzxbRCroG6osWrh4lPjvmiMMdpjjy158e1ec1",
+                      "value": "221|IKAbD3R2AGKpCmvHl13kjnUwwsB2GvPMMsjxujZvf05c4a83",
                       "type": "string"
                     }
                   ]
@@ -4279,6 +4282,16 @@
                 "followRedirects": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4333,14 +4346,14 @@
                     {
                       "key": "image",
                       "type": "file",
-                      "value": null
+                      "src": "/C:/Users/user/Downloads/Animal_Nutrition.png"
                     }
                   ]
                 },
                 "url": {
-                  "raw": "{{tobe}}/dashboard/banners",
+                  "raw": "{{tobelocal}}/dashboard/banners",
                   "host": [
-                    "{{tobe}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
@@ -5188,6 +5201,16 @@
                 "followRedirects": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "132|c1Vk8F4V2ElWfOzKj7adU15JYrg1Jai7YC2ao7ok7ad97b07",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5198,13 +5221,20 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{token}}",
-                    "type": "string"
+                    "type": "string",
+                    "disabled": true
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "ar",
+                    "type": "text",
+                    "disabled": true
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/about-us",
+                  "raw": "{{tobelocal}}/dashboard/about-us",
                   "host": [
-                    "{{baseUrl}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
@@ -5364,7 +5394,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "93|oooRobDBiOkEKSnrHh9uKH3Uh9HSHsUg5fN25N4A0802a32a",
+                      "value": "179|YKoTFGZIHA8vSIu7sB8aowTT2mhUnDKG7UtNtTzBd13add29",
                       "type": "string"
                     }
                   ]
@@ -5388,14 +5418,13 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/courses/40",
+                  "raw": "{{tobe}}/dashboard/courses",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
-                    "courses",
-                    "40"
+                    "courses"
                   ]
                 }
               },
@@ -5444,7 +5473,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "123|RcJYqtwgdxMUIjhyKbBh8fRPcC3AeTfbdkEouRFG389a8ff6",
+                      "value": "{{auth_token}}",
                       "type": "string"
                     }
                   ]
@@ -5464,7 +5493,74 @@
                 ],
                 "body": {
                   "mode": "formdata",
-                  "formdata": []
+                  "formdata": [
+                    {
+                      "key": "name_en",
+                      "value": "Laravel Course new 2",
+                      "type": "text",
+                      "uuid": "37917f55-eef9-4499-8c16-ed9e08d215b7"
+                    },
+                    {
+                      "key": "name_ar",
+                      "value": "كورس لارافيل جديد2",
+                      "type": "text",
+                      "uuid": "fa80578b-a26d-4267-b60f-9e049dad8fc7"
+                    },
+                    {
+                      "key": "description_en",
+                      "value": "Learn Laravel new",
+                      "type": "text",
+                      "uuid": "0268d92e-defd-4ee4-87fd-927b13a54abb"
+                    },
+                    {
+                      "key": "description_ar",
+                      "value": "تعلم لارافيل جديد",
+                      "type": "text",
+                      "uuid": "d900c4fe-b950-4c90-95b1-fe53c26c9437"
+                    },
+                    {
+                      "key": "level_id",
+                      "value": "9",
+                      "type": "text",
+                      "uuid": "2b402240-e164-416c-bb7b-6973282864ec"
+                    },
+                    {
+                      "key": "type",
+                      "value": "recorded",
+                      "type": "text",
+                      "uuid": "5f81b9f6-859f-4b90-83aa-3c48fd42637e"
+                    },
+                    {
+                      "key": "price",
+                      "value": "500",
+                      "type": "text",
+                      "uuid": "06174a62-924a-43f9-957c-ecf91a81df87"
+                    },
+                    {
+                      "key": "sub_category_id",
+                      "value": "5",
+                      "type": "text",
+                      "uuid": "6ab49c29-7a7e-4dba-90c1-ac3e47b261ef"
+                    },
+                    {
+                      "key": "earning_points",
+                      "value": "100",
+                      "type": "text",
+                      "uuid": "50b81906-07bb-44b2-8aab-a9443a4c1047"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "uuid": "d3631936-22c6-461f-a8d6-3ce2a6bbe474",
+                      "src": "/C:/Users/user/Downloads/Plastics___Polymers.png"
+                    },
+                    {
+                      "key": "price_points",
+                      "value": "100",
+                      "type": "text",
+                      "uuid": "1a11e908-f6ad-419c-8c25-0dd28a3d8f5a"
+                    }
+                  ]
                 },
                 "url": {
                   "raw": "{{tobe}}/dashboard/courses",
@@ -5584,7 +5680,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "91|gHGtdTnepP9BxrcOhf1I3R995Ngu0F4Uz1zrqEfk6c28d2d7",
+                      "value": "173|eJdMxHNulF9kvOMV52IXk8SGmgmO3AniD2WF67Ycbec8842c",
                       "type": "string"
                     }
                   ]
@@ -5608,14 +5704,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/courses/40",
+                  "raw": "{{tobe}}/dashboard/courses/39",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
                     "courses",
-                    "40"
+                    "39"
                   ]
                 }
               },
@@ -5666,7 +5762,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "91|gHGtdTnepP9BxrcOhf1I3R995Ngu0F4Uz1zrqEfk6c28d2d7",
+                      "value": "114|kn4L6R4GL7F4fycKq5COGHHXemDTCceqrcMtDzQAa5641470",
                       "type": "string"
                     }
                   ]
@@ -5685,8 +5781,9 @@
                   },
                   {
                     "key": "Accept-Language",
-                    "value": "ar",
-                    "type": "text"
+                    "value": "",
+                    "type": "text",
+                    "disabled": true
                   }
                 ],
                 "body": {
@@ -5701,14 +5798,14 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/courses/37/edit",
+                  "raw": "{{tobelocal}}/dashboard/courses/36/edit",
                   "host": [
                     "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
                     "courses",
-                    "37",
+                    "36",
                     "edit"
                   ]
                 }
@@ -5807,14 +5904,14 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/courses/40",
+                  "raw": "{{tobelocal}}/dashboard/courses/36",
                   "host": [
                     "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
                     "courses",
-                    "40"
+                    "36"
                   ]
                 }
               },
@@ -6177,7 +6274,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "91|gHGtdTnepP9BxrcOhf1I3R995Ngu0F4Uz1zrqEfk6c28d2d7",
+                      "value": "179|YKoTFGZIHA8vSIu7sB8aowTT2mhUnDKG7UtNtTzBd13add29",
                       "type": "string"
                     }
                   ]
@@ -6200,7 +6297,7 @@
                   "formdata": [
                     {
                       "key": "course_id",
-                      "value": "40",
+                      "value": "36",
                       "type": "text",
                       "uuid": "e5d433f7-a893-4351-8584-6ac10e26f89a"
                     },
@@ -6243,9 +6340,9 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/lessons",
+                  "raw": "{{tobe}}/dashboard/lessons",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
@@ -6912,7 +7009,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "91|gHGtdTnepP9BxrcOhf1I3R995Ngu0F4Uz1zrqEfk6c28d2d7",
+                      "value": "108|f060mjeVLzNkeeSkqBqkqupQkt5HP0I0fJrlAB7i7afbb2d0",
                       "type": "string"
                     }
                   ]
@@ -6935,7 +7032,7 @@
                   "formdata": [
                     {
                       "key": "course_id",
-                      "value": "40",
+                      "value": "41",
                       "type": "text"
                     },
                     {
@@ -6972,7 +7069,7 @@
                     {
                       "key": "image",
                       "type": "file",
-                      "src": "/C:/Users/user/Downloads/Plastics___Polymers.png"
+                      "src": "/C:/Users/user/OneDrive/Pictures/Screenshots/logo.png"
                     }
                   ]
                 },
@@ -7473,6 +7570,16 @@
                 "followRedirects": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "109|WVXitf2qdrq4yVomzoUpjCZ7T2SiObaHbKZxzAU2259d82a9",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -7487,14 +7594,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/articles/1/accept",
+                  "raw": "{{tobelocal}}/dashboard/articles/68/accept",
                   "host": [
-                    "{{baseUrl}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
                     "articles",
-                    "1",
+                    "68",
                     "accept"
                   ]
                 }
@@ -8103,6 +8210,16 @@
                 "followRedirects": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -8121,7 +8238,7 @@
                   "formdata": [
                     {
                       "key": "name_en",
-                      "value": "Business",
+                      "value": "Business23",
                       "type": "text"
                     },
                     {
@@ -8142,7 +8259,8 @@
                     {
                       "key": "type_slug",
                       "value": "business",
-                      "type": "text"
+                      "type": "text",
+                      "disabled": true
                     },
                     {
                       "key": "slug",
@@ -8157,9 +8275,9 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/consultation-categories",
+                  "raw": "{{tobelocal}}/dashboard/consultation-categories",
                   "host": [
-                    "{{baseUrl}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
@@ -9039,7 +9157,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "93|oooRobDBiOkEKSnrHh9uKH3Uh9HSHsUg5fN25N4A0802a32a",
+                      "value": "{{auth_token}}",
                       "type": "string"
                     }
                   ]
@@ -9054,7 +9172,8 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{token}}",
-                    "type": "string"
+                    "type": "string",
+                    "disabled": true
                   },
                   {
                     "key": "Accept-Language",
@@ -9113,6 +9232,16 @@
                 "followRedirects": true
               },
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -9186,24 +9315,50 @@
                     },
                     {
                       "key": "mentor_id",
-                      "value": "1",
+                      "value": "409",
                       "type": "text"
                     },
                     {
                       "key": "image",
                       "type": "file",
-                      "value": null
+                      "value": null,
+                      "disabled": true
                     },
                     {
                       "key": "video_url",
-                      "type": "text"
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "available_dates[1][available_date]",
+                      "value": "2026-04-20",
+                      "type": "text",
+                      "uuid": "a0722cd2-5d82-47b8-8ef3-4610a74c0fc7"
+                    },
+                    {
+                      "key": "available_dates[1][available_start_time]",
+                      "value": "10:00",
+                      "type": "text",
+                      "uuid": "49132bd1-2bda-46b5-a9ec-91d80c225913"
+                    },
+                    {
+                      "key": "available_dates[2][available_date]",
+                      "value": "2026-04-21",
+                      "type": "text",
+                      "uuid": "641ee399-524f-49f8-a860-cc7541944c57"
+                    },
+                    {
+                      "key": "available_dates[2][available_start_time]",
+                      "value": "10:00",
+                      "type": "text",
+                      "uuid": "cec83bb0-93b4-49aa-be43-ce69d53e9b38"
                     }
                   ]
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/consultation-sessions",
+                  "raw": "{{tobelocal}}/dashboard/consultation-sessions",
                   "host": [
-                    "{{baseUrl}}"
+                    "{{tobelocal}}"
                   ],
                   "path": [
                     "dashboard",
@@ -10187,7 +10342,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\"email\": \"test2@mentor.com\", \"password\": \"password\"}",
+                  "raw": "{\"email\": \"salem@mentor.com\", \"password\": \"password\"}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -10195,9 +10350,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/login",
+                  "raw": "{{tobe}}/dashboard/login",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
@@ -10215,7 +10370,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "102|6ZeQr331BcnfriS1zPNCi4RQvN84loMcye4aStoR5c211834",
+                      "value": "122|rAkwlB7Z0pZKfFd84ihlq3DHRz8d8G8MTbVtP9Iw6c276eb7",
                       "type": "string"
                     }
                   ]
@@ -10233,13 +10388,13 @@
                   "formdata": [
                     {
                       "key": "name_en",
-                      "value": "Laravel Course new 2",
+                      "value": "test mentor flow ",
                       "type": "text",
                       "uuid": "d2b2165e-d639-4fb4-8db0-8d95767c9d16"
                     },
                     {
                       "key": "name_ar",
-                      "value": "كورس لارافيل جديد2",
+                      "value": "تجربة المنتور فلو",
                       "type": "text",
                       "uuid": "e1b0cf73-4565-4882-ae74-aae1ba170b5e"
                     },
@@ -10247,7 +10402,7 @@
                       "key": "image",
                       "type": "file",
                       "uuid": "baebc018-6840-438b-927e-5a82a233526b",
-                      "src": "/C:/Users/user/Downloads/Animal_Nutrition.png"
+                      "src": "/C:/Users/user/Downloads/Detergents (2).png"
                     },
                     {
                       "key": "type",
@@ -10321,7 +10476,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "102|6ZeQr331BcnfriS1zPNCi4RQvN84loMcye4aStoR5c211834",
+                      "value": "122|rAkwlB7Z0pZKfFd84ihlq3DHRz8d8G8MTbVtP9Iw6c276eb7",
                       "type": "string"
                     }
                   ]
@@ -10339,7 +10494,7 @@
                   "formdata": [
                     {
                       "key": "course_id",
-                      "value": "41",
+                      "value": "44",
                       "type": "text",
                       "uuid": "3241ecbd-07b5-4e5a-a5a3-c30b66e0d588"
                     },
@@ -10375,7 +10530,7 @@
                     },
                     {
                       "key": "order",
-                      "value": "2",
+                      "value": "1",
                       "type": "text",
                       "uuid": "15c5c63a-160a-468d-b54f-0da5198ee861"
                     }
@@ -10472,7 +10627,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "90|sbummiDPz4bMWvQIOL6Hr9WDvg1xJjhIfHoCSi2u67d4b815",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
                       "type": "string"
                     }
                   ]
@@ -10490,7 +10645,7 @@
                   "formdata": [
                     {
                       "key": "course_id",
-                      "value": "39",
+                      "value": "42",
                       "type": "text",
                       "uuid": "e5e6626a-4446-48af-bdc0-29902b707e4f"
                     },
@@ -10521,9 +10676,9 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/articles",
+                  "raw": "{{tobe}}/dashboard/articles",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
@@ -10815,6 +10970,374 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "list my courses",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tobe}}/dashboard/courses",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "courses"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update my course",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "description_en",
+                      "value": "test update",
+                      "type": "text",
+                      "uuid": "01d29e48-11d2-4c6c-a0bb-6ef9f8e16a0e"
+                    },
+                    {
+                      "key": "_method",
+                      "value": "PUT",
+                      "type": "text",
+                      "uuid": "3c16b91a-fdc4-45ec-bde3-7879f8c65ff9"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{tobe}}/dashboard/courses/42",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "courses",
+                    "42"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "show my course",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tobe}}/dashboard/courses/42",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "courses",
+                    "42"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "show my lesson",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "ar",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tobe}}/dashboard/lessons/23",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "lessons",
+                    "23"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update my lesson",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "ar",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "{{tobe}}/dashboard/lessons/23?_method=PUT&title_en=update lesson title &course_id=42",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "lessons",
+                    "23"
+                  ],
+                  "query": [
+                    {
+                      "key": "_method",
+                      "value": "PUT"
+                    },
+                    {
+                      "key": "title_en",
+                      "value": "update lesson title "
+                    },
+                    {
+                      "key": "course_id",
+                      "value": "42"
+                    },
+                    {
+                      "key": "order",
+                      "value": "1",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update my article",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "string"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "course_id",
+                      "value": "41",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "title_en",
+                      "value": "update Article Titl 63",
+                      "type": "text"
+                    },
+                    {
+                      "key": "title_ar",
+                      "value": "عنوان المقال",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "content_en",
+                      "value": "Content here",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "content_ar",
+                      "value": "المحتوى هنا",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "earning_points",
+                      "value": "50",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "is_published",
+                      "value": "0",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": "/C:/Users/user/OneDrive/Pictures/Screenshots/logo.png",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{tobe}}/dashboard/articles/63?_method=PUT",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "articles",
+                    "63"
+                  ],
+                  "query": [
+                    {
+                      "key": "content_en",
+                      "value": "updated my articel",
+                      "disabled": true
+                    },
+                    {
+                      "key": "_method",
+                      "value": "PUT"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "show my articel",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "187|BJHVWyV5VOn360qsHGz5PM0qUP5kIsGZeHH0oejzb66e76bc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "string"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "string"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tobe}}/dashboard/articles/63",
+                  "host": [
+                    "{{tobe}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "articles",
+                    "63"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -10829,7 +11352,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "65|ZjYq49FUZxIJB08l7IdtsbfDj2VnsTgZSR7xPMcH13615cc6",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
                       "type": "string"
                     }
                   ]
@@ -10847,7 +11370,7 @@
                   "formdata": [
                     {
                       "key": "name",
-                      "value": "tage3",
+                      "value": "tage10",
                       "type": "text",
                       "uuid": "ae02aee1-0b1d-42eb-b1af-1117603b6822"
                     }
@@ -10997,7 +11520,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "65|ZjYq49FUZxIJB08l7IdtsbfDj2VnsTgZSR7xPMcH13615cc6",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
                       "type": "string"
                     }
                   ]
@@ -11015,7 +11538,7 @@
                   "formdata": [
                     {
                       "key": "course_id",
-                      "value": "35",
+                      "value": "34",
                       "type": "text",
                       "uuid": "f294bcaa-9292-4c32-814b-bfe2509f80fd"
                     },
@@ -11042,11 +11565,11 @@
                       "key": "images[1]",
                       "type": "file",
                       "uuid": "7751d292-18d6-41db-865f-a5d92cc7e95d",
-                      "src": "/C:/Users/Ahmed Salem/OneDrive/Pictures/Screenshots/OIP.jpeg"
+                      "src": "/C:/Users/user/Downloads/comprehensive-business-feasibility-study-illustration-illustrative-icon-represents-studies-focus-evaluation-352795670.webp"
                     },
                     {
                       "key": "tags[1]",
-                      "value": "6",
+                      "value": "1",
                       "type": "text",
                       "uuid": "8dfd48bc-3261-41f8-86d0-47b7f894947f"
                     }
@@ -11076,7 +11599,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "65|ZjYq49FUZxIJB08l7IdtsbfDj2VnsTgZSR7xPMcH13615cc6",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
                       "type": "string"
                     }
                   ]
@@ -11117,7 +11640,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "65|ZjYq49FUZxIJB08l7IdtsbfDj2VnsTgZSR7xPMcH13615cc6",
+                      "value": "115|7RgU7ytpdBIVyp7pHkrPW9YERmlUxl9HpZN0LUxx89743e15",
                       "type": "string"
                     }
                   ]
@@ -11325,7 +11848,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "65|ZjYq49FUZxIJB08l7IdtsbfDj2VnsTgZSR7xPMcH13615cc6",
+                      "value": "166|bPQhbALrw8PyuSnSGRZxYU1h1qyWyeSDxml50ox55b1993d4",
                       "type": "string"
                     }
                   ]
@@ -11343,9 +11866,9 @@
                   "formdata": []
                 },
                 "url": {
-                  "raw": "{{tobelocal}}/dashboard/polls",
+                  "raw": "{{tobe}}/dashboard/polls",
                   "host": [
-                    "{{tobelocal}}"
+                    "{{tobe}}"
                   ],
                   "path": [
                     "dashboard",
@@ -11439,6 +11962,35 @@
                     }
                   ]
                 },
+                "url": {
+                  "raw": "{{tobelocal}}/dashboard/polls/3",
+                  "host": [
+                    "{{tobelocal}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "polls",
+                    "3"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "show poll",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "113|hAa4mP7JyWWerI0lIqhdioBD3GYE996hP6ylxO6i113b298e",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
                 "url": {
                   "raw": "{{tobelocal}}/dashboard/polls/3",
                   "host": [
