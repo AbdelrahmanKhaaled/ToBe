@@ -45,3 +45,62 @@ a {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+.rich-text-editor .ql-container {
+  min-height: 200px;
+  font-size: 1rem;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+.rich-text-editor .ql-toolbar {
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  background: var(--color-bg-light);
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 180px;
+}
+
+/* Show numeric pt sizes in the font-size picker (Word-like). */
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+  content: '12pt';
+}
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='8pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='8pt']::before { content: '8'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='9pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='9pt']::before { content: '9'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='10pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='10pt']::before { content: '10'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='11pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='11pt']::before { content: '11'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='12pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='12pt']::before { content: '12'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='14pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='14pt']::before { content: '14'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='16pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='16pt']::before { content: '16'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='18pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='18pt']::before { content: '18'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='20pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='20pt']::before { content: '20'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='22pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='22pt']::before { content: '22'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='24pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='24pt']::before { content: '24'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='26pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='26pt']::before { content: '26'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='28pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='28pt']::before { content: '28'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='36pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='36pt']::before { content: '36'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='48pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='48pt']::before { content: '48'; }
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='72pt']::before,
+.rich-text-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='72pt']::before { content: '72'; }
+
+.rich-text-editor .ql-snow .ql-picker.ql-size {
+  width: 72px;
+}
