@@ -1,0 +1,93 @@
+﻿
+تعديلات ابليكيشن تو بي
+
+لم أجد أي شئ بخصوص نظام نقاط تو بي والعضويات مع العلم انني ارسلت ملف يوجد به تفاصيل بخصوص هذه الامور ( مازالت لا تعمل قمت بفحصها من خلال قرائة مقال ولم يحدث شيء)
+-----------------------
+تفعيل جزئية لوج ان بطرق مختلفه مثل جوجل 
+-----------------------
+الهوية البصريه لدينا هي الوان البرتقالي والاسود والابيض لذا عند تفعيل خاصية الدارك مود يجب تحويل الهويه من الالوان الفاتحه الى الالوان الغامقه مثل الوان الازرار يجب ان تكون باللون البرتقالي وعند الذهاب اليها تتحول الى الابيض وهكذا في جميع الامور ( تم )
+-----------------------
+الجزء الخاص بمن نحن يجب تعديله بشكل كامل في الخلفيه والالوان لانها مع الاسف ليست مناسبه للهويه بنفس الذي اتفقنا عليه ( لا يوجد تناسق في الهويه تحتاج الى فصل عن الوضع الليلي )
+------------------------
+جميع الايقونات جميله جدا ولكن جودة الايقونات ضعيفه وسيئه جدا وكأنها ليست الصور الاصليه وايضا في الصفحه الرئيسيه يوجد قسم ( حزام ) فكرته رائعه ولكن محتاج ايضا يكون جودته عاليه وعند تحويل الى الدارك مود الوان الحزام لا تكون متناسقه ( تم)
+------------------------
+لا يمكنني تغيير صورتي الشخصيه في بروفايلي 
+------------------------
+يوجد في جميع الاشياء علامة الشير وهذا الشئ رائع ولكن اريدها مفعله لكي يستطيع اي عميل ان ينشر اي شئ في الموقع مع اصدقائه ( تم تفعيلها)
+--------------------------
+ايضا اردت ان عندما يفتح اي يوزر الابليكيشن يظهر لهم فيديو ترحيبي نحن كيوزرس نضعه ونغيره وايضا يمكن لليوزر ان يخرج من الفيديو متى شاء
+-----------------
+
+عند طلب الاستشاره لا يوجد تحديد تاريخ ( عندما يتم اضافتها اجعلها اخياريه ليست اجباريه للطلب )
+
+
+
+تعديلات في الداش بورد
+
+
+يوجد حد أقصى لعدد الكلمات التي يمكنني كتابتها وهو قليل وايضا لا يمكنني تغيير حجم الخط او اضافة اي شئ لجعل شكل اكثر اناقه. ( يوجد ايرور لا اعرف ما هو عند ملئ البيانات يخبرني )
+The Ids should be an array (and 1 more error)
+
+
+اريد هذا القسم اختياري وليس اجباري لانه ليس بالضروره الاتفاق عليه
+
+
+ما معنى كلمة اوردر في هذا القسم ؟ وايضا حاولت رفع اي فيديو وصوره ولا يمكنني رفعه دايما تظهر رساله حمراء ( استطيع رفع الفيديوهات الان ولكن لا يوجد فيديوهات تعمل دايما يظهر لي انه لا يعمل )
+
+
+
+اريد اضافه طريقه لتحديد الكثير من الاشياء معا ومسحهم افضل من مسح كل شئ على حدا ( مازال لا يوجد حل )
+
+
+في هذا القسم حاولت كثيرا مسح هذه الاقسام ولم استطع دائما تظهر هذه الرساله
+
+
+عند انشاء بوست لا يوجد سوا اللغه العربيه اين الانجليزي وايضا نفس مشكلة محدودية الكلمات وايضا لا يمكنني تغيير الخط و الاستايل وهكذا ( نفس المشكله )
+
+
+لماذا يجب تحديد كورس لكي ارفع اي ارتكل الطبيعي ان يكون ارتكل من تفكير المدرب غير مرتبط بكورس ( نفس المشكله ) 
+
+
+ما هو التاجز وما فائدته
+
+
+اين يوجد هذا القسم في الابليكيشن
+
+
+عند وضع اي منشور عن من نحن يظهر تلقائيا على الابليكيشن وهذا ممتاز ولكن ماذا افعل اذا اردت ان اعدل في هذا المنشور لا يوجد هذا الخيار
+
+
+
+لا استطيع الغاء اي من هذا الطلبات وايضا لا ادري اين يمكنني ان احدد الاوقات الممناسبه للمدرب للاستشارات لكي يتمكن المستخدم من اختيار من الاوقات المتقبيه
+-----------------------------
+ماذا افعل اذا اردت انشاء كورس برايفيت لاشخاص معينين هم فقط من يظهر لهم 
+----------------------------
+اريد اضافة طريقة لتحديد العديد من الاشخاص لازالتهم او لعمل اي خطوه بدون التعب في مسح شخص شخص 
+Login screen 
+•⁠ ⁠apple shouldn’t be fix, it should be situational depending on the phone 
+•⁠ ⁠⁠country code should be separate field and should be flagged. (There is a problem when booking anything when writing the phone number how can I know as an admin which country is this number for also in paying money I choosed Qatari riyal, but Saudi riyals appeared )
+-----------------------
+landing page
+- Hero banner, when clicks navigate to web 
+- ⁠Articles section is weird in design same as courses section 
+- ⁠Icons in footer are outdated ( still want to be changed with futuristic icons )
+- ⁠there should be section about Ramadan
+- In the section of our coach we don’t want all the information’s to be shown to the user, only we want some information about him and a button to book with him without his email and phone number ( still )
+
+
+community section: 
+comments should be under taps or topics ) Done but I cant make like )
+When I comment in any post I see my comment is in another post as well not only the post I commented on
+
+contact us page: 
+whatsapp is not working- not clickable
+
+Articles: 
+- design should be at the beginning of the article not footer and should be a way to put more photos between text.
+
+- Why is there no email verification at the beginning?
+
+Courses section:
+- trainer email should be hidden, and if someone wants to contact him there should be separate contact forms. ( Not done yet )
+- ⁠Book now button is Hidden by footer bar, it should be a little bit upward
+
