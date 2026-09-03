@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArticleService, CourseService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconCheck, IconX, IconPublish, IconUnpublish } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconCheck, IconX, IconPublish, IconUnpublish, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
+import { toastApiError } from '@/utils/apiErrors';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -188,7 +190,7 @@ export function Articles() {
     fd.append('title_en', formTitleEn || formTitleAr || '');
     fd.append('content_ar', formContentAr ?? '');
     fd.append('content_en', formContentEn ?? '');
-    fd.append('course_id', formCourseId || '');
+    if (formCourseId) fd.append('course_id', formCourseId);
     if (formImage) fd.append('image', formImage);
     fd.append('earning_points', formEarningPoints || '0');
     fd.append('is_published', formIsPublished ? '1' : '0');
@@ -197,10 +199,6 @@ export function Articles() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!editing && !formCourseId) {
-      toast.error(t('common.pleaseSelectCourse'));
-      return;
-    }
     setSubmitting(true);
     try {
       if (editing) {
@@ -213,7 +211,7 @@ export function Articles() {
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message);
+      toastApiError(err, toast, 'Failed to save article');
     } finally {
       setSubmitting(false);
     }
@@ -267,6 +265,16 @@ export function Articles() {
       toast.error(err.message);
     }
   };
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => ArticleService.remove(id),
+    confirmTitle: t('articles.bulkDeleteTitle', 'Delete selected articles'),
+    confirmMessage: (count) =>
+      t('articles.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} articles?' }),
+    successMessage: t('articles.bulkDeleted', 'Selected articles deleted'),
+  });
 
   const handleDelete = async (row) => {
     const title = row.title ?? row.title_ar ?? row.title_en ?? row.searchable_title ?? row.translations?.ar?.title ?? row.translations?.en?.title ?? 'this';
@@ -335,6 +343,7 @@ export function Articles() {
         </select>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'title', header: t('articles.columns.title'), render: (r) => getTitle(r) || '—' },
           { key: 'course', header: t('articles.columns.course'), render: (r) => r.course?.name ?? '—' },
@@ -446,37 +455,19 @@ export function Articles() {
             onChange={(e) => setFormTitleEn(e.target.value)}
             required
           />
+          <RichTextField label={t('articles.contentAr')} value={formContentAr} onChange={setFormContentAr} />
+          <RichTextField label={t('articles.contentEn')} value={formContentEn} onChange={setFormContentEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('articles.contentAr')}
+              {t('articles.course')} ({t('common.optional', 'Optional')})
             </label>
-            <textarea
-              value={formContentAr}
-              onChange={(e) => setFormContentAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('articles.contentEn')}
-            </label>
-            <textarea
-              value={formContentEn}
-              onChange={(e) => setFormContentEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('articles.course')}
-            </label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-1">
+              {t('articles.courseOptionalHint', 'Link the article to a course only if it belongs to one. Standalone mentor articles can leave this empty.')}
+            </p>
             <select
               value={formCourseId}
               onChange={(e) => setFormCourseId(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              required={!editing}
             >
               <option value="">{t('articles.selectCourse')}</option>
               {courses.map((c) => (

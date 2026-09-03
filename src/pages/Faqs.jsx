@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { FaqService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function Faqs() {
   const { t } = useTranslation();
@@ -153,6 +154,16 @@ export function Faqs() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => FaqService.remove(id),
+    confirmTitle: t('faqs.bulkDeleteTitle', 'Delete selected FAQs'),
+    confirmMessage: (count) =>
+      t('faqs.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} FAQs?' }),
+    successMessage: t('faqs.bulkDeleted', 'Selected FAQs deleted'),
+  });
+
   const handleDelete = async (row) => {
     const q = row.question ?? row.translations?.ar?.question ?? row.translations?.en?.question ?? 'this';
     const ok = await confirm({
@@ -186,6 +197,7 @@ export function Faqs() {
         <Button onClick={openCreate}>{t('faqs.add')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           {
             key: 'question',
@@ -257,30 +269,8 @@ export function Faqs() {
             onChange={(e) => setFormQuestionEn(e.target.value)}
             required
           />
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('faqs.answerAr')}
-            </label>
-            <textarea
-              value={formAnswerAr}
-              onChange={(e) => setFormAnswerAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('faqs.answerEn')}
-            </label>
-            <textarea
-              value={formAnswerEn}
-              onChange={(e) => setFormAnswerEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-              required
-            />
-          </div>
+          <RichTextField label={t('faqs.answerAr')} value={formAnswerAr} onChange={setFormAnswerAr} />
+          <RichTextField label={t('faqs.answerEn')} value={formAnswerEn} onChange={setFormAnswerEn} />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               {t('common.cancel')}

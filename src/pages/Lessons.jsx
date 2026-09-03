@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LessonService, CourseService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { LessonVideoUploader } from '@/components/VideoChunkUploader';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function toFormValue(val) {
   if (val == null) return '';
@@ -59,6 +60,7 @@ export function Lessons() {
   const [formCourseId, setFormCourseId] = useState('');
   const [formOrder, setFormOrder] = useState('');
   const [formDuration, setFormDuration] = useState('');
+  const [formEarningPoints, setFormEarningPoints] = useState('0');
   const [submitting, setSubmitting] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const confirm = useConfirm();
@@ -121,6 +123,7 @@ export function Lessons() {
     setFormCourseId('');
     setFormOrder('');
     setFormDuration('');
+    setFormEarningPoints('0');
     setModalOpen(true);
   };
 
@@ -139,6 +142,7 @@ export function Lessons() {
     setFormCourseId(toFormValue(row.course_id ?? row.courseId));
     setFormOrder(String(row.order ?? ''));
     setFormDuration(String(row.duration ?? ''));
+    setFormEarningPoints(row.earning_points != null ? String(row.earning_points) : '0');
     setModalOpen(true);
   };
 
@@ -201,6 +205,7 @@ export function Lessons() {
         setFormCourseId(toFormValue(d.course_id ?? d.courseId));
         setFormOrder(String(d.order ?? ''));
         setFormDuration(String(d.duration ?? ''));
+        setFormEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
       })
       .catch(() => {})
       .finally(() => {
@@ -220,6 +225,7 @@ export function Lessons() {
     fd.append('course_type', 'recorded'); // satisfy backend: "course type must be recorded"
     fd.append('order', formOrder || '1');
     fd.append('duration', formDuration || '0');
+    fd.append('earning_points', formEarningPoints || '0');
     return fd;
   };
 
@@ -241,6 +247,7 @@ export function Lessons() {
           course_id: formCourseId,
           order: formOrder || '1',
           duration: formDuration,
+          earning_points: formEarningPoints || '0',
         };
         await LessonService.update(editing.id, params);
         toast.success(t('lessons.modalEdit'));
@@ -263,6 +270,16 @@ export function Lessons() {
       setSubmitting(false);
     }
   };
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => LessonService.remove(id),
+    confirmTitle: t('lessons.bulkDeleteTitle', 'Delete selected lessons'),
+    confirmMessage: (count) =>
+      t('lessons.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} lessons?' }),
+    successMessage: t('lessons.bulkDeleted', 'Selected lessons deleted'),
+  });
 
   const handleDelete = async (row) => {
     const title = row.title ?? row.translations?.ar?.title ?? row.translations?.en?.title ?? 'this';
@@ -323,6 +340,7 @@ export function Lessons() {
         </select>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'title', header: t('lessons.title'), render: (r) => getTitle(r) },
           {
@@ -402,42 +420,46 @@ export function Lessons() {
           <Input
             label={t('lessons.order')}
             type="number"
+            min="1"
             value={formOrder}
             onChange={(e) => setFormOrder(e.target.value)}
           />
+          <p className="text-xs text-gray-500 -mt-2">
+            {t('lessons.orderHint', 'Order is the lesson sequence number within the course (1 = first lesson, 2 = second, etc.). Must be unique per course.')}
+          </p>
           <Input
             label={t('lessons.duration')}
             type="number"
             value={formDuration}
             onChange={(e) => setFormDuration(e.target.value)}
           />
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('lessons.contentAr')}
-            </label>
-            <textarea
-              value={formContentAr}
-              onChange={(e) => setFormContentAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('lessons.contentEn')}
-            </label>
-            <textarea
-              value={formContentEn}
-              onChange={(e) => setFormContentEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <Input
+            label={t('common.earningPoints', 'Earning points')}
+            type="number"
+            min="0"
+            value={formEarningPoints}
+            onChange={(e) => setFormEarningPoints(e.target.value)}
+            required
+          />
+          <RichTextField label={t('lessons.contentAr')} value={formContentAr} onChange={setFormContentAr} />
+          <RichTextField label={t('lessons.contentEn')} value={formContentEn} onChange={setFormContentEn} />
           {editing && editingCourseIsRecorded && (
             <div className="pt-3 mt-2 border-t border-[var(--color-border)]">
               <p className="text-sm font-medium text-[var(--color-primary)] mb-2">
-                Upload / Replace lesson video
+                {t('lessons.uploadVideo', 'Upload / Replace lesson video')}
               </p>
+              {(editing.video_url || editing.videoUrl) ? (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-1">{t('lessons.currentVideo', 'Current video')}</p>
+                  <video
+                    controls
+                    className="w-full max-h-48 rounded-[var(--radius)] border border-[var(--color-border)] bg-black"
+                    src={editing.video_url ?? editing.videoUrl}
+                  >
+                    <track kind="captions" />
+                  </video>
+                </div>
+              ) : null}
               <LessonVideoUploader
                 lessonId={editing.id}
                 onComplete={() => {

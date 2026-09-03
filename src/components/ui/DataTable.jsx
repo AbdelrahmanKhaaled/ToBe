@@ -25,6 +25,11 @@ export function DataTable({
   searchPlaceholder,
   emptyMessage,
   actions,
+  selectable = false,
+  selectedIds = [],
+  onSelectionChange,
+  bulkActions,
+  getRowId = (row) => row?.id,
 }) {
   const { t } = useTranslation();
   const effectiveSearchPlaceholder = searchPlaceholder ?? t('dataTable.searchPlaceholder');
@@ -33,8 +38,42 @@ export function DataTable({
   const start =
     meta && meta.total !== 0 ? (meta.currentPage - 1) * meta.perPage + 1 : 0;
   const end = meta ? Math.min(meta.currentPage * meta.perPage, meta.total) : 0;
+
+  const selectedSet = new Set((selectedIds ?? []).map(String));
+  const pageRowIds = data.map((row) => String(getRowId(row))).filter(Boolean);
+  const allPageSelected = pageRowIds.length > 0 && pageRowIds.every((id) => selectedSet.has(id));
+
+  const toggleRow = (row) => {
+    if (!onSelectionChange) return;
+    const id = String(getRowId(row));
+    if (!id) return;
+    const next = new Set(selectedSet);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onSelectionChange([...next]);
+  };
+
+  const toggleAllPage = () => {
+    if (!onSelectionChange) return;
+    const next = new Set(selectedSet);
+    if (allPageSelected) {
+      pageRowIds.forEach((id) => next.delete(id));
+    } else {
+      pageRowIds.forEach((id) => next.add(id));
+    }
+    onSelectionChange([...next]);
+  };
+
   return (
     <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] overflow-hidden">
+      {selectable && selectedSet.size > 0 && bulkActions ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-light)]">
+          <span className="text-sm text-gray-700">
+            {t('dataTable.selectedCount', { count: selectedSet.size, defaultValue: '{{count}} selected' })}
+          </span>
+          <div className="flex flex-wrap items-center gap-2">{bulkActions}</div>
+        </div>
+      ) : null}
       {(onSearchChange || search !== undefined) && (
         <div className="p-4 border-b border-[var(--color-border)]">
           <input
@@ -50,6 +89,17 @@ export function DataTable({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[var(--color-primary)] text-white">
+              {selectable ? (
+                <th className="px-4 py-3 text-start align-middle w-10">
+                  <input
+                    type="checkbox"
+                    checked={allPageSelected}
+                    onChange={toggleAllPage}
+                    aria-label={t('dataTable.selectAll', 'Select all on page')}
+                    className="rounded"
+                  />
+                </th>
+              ) : null}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -69,7 +119,7 @@ export function DataTable({
             {data.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length + (actions ? 1 : 0)}
+                  colSpan={columns.length + (actions ? 1 : 0) + (selectable ? 1 : 0)}
                   className="px-4 py-12 text-center text-gray-500"
                 >
                   {effectiveEmptyMessage}
@@ -77,7 +127,18 @@ export function DataTable({
               </tr>
             ) : (
               data.map((row) => (
-                <tr key={row.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-light)]">
+                <tr key={getRowId(row) ?? row.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-light)]">
+                  {selectable ? (
+                    <td className="px-4 py-3 align-middle">
+                      <input
+                        type="checkbox"
+                        checked={selectedSet.has(String(getRowId(row)))}
+                        onChange={() => toggleRow(row)}
+                        aria-label={t('dataTable.selectRow', 'Select row')}
+                        className="rounded"
+                      />
+                    </td>
+                  ) : null}
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3 text-sm text-start align-middle break-words">
                       {col.render ? col.render(row) : String(row[col.key] ?? '')}

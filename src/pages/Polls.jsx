@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CourseService, PollService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function courseTitle(c) {
   if (!c) return '—';
@@ -220,6 +221,16 @@ export function Polls() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => PollService.remove(id),
+    confirmTitle: t('polls.bulkDeleteTitle', 'Delete selected polls'),
+    confirmMessage: (count) =>
+      t('polls.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} polls?' }),
+    successMessage: t('polls.bulkDeleted', 'Selected polls deleted'),
+  });
+
   const handleDelete = async (row) => {
     const ok = await confirm({
       title: t('polls.deleteTitle', 'Delete poll'),
@@ -259,6 +270,7 @@ export function Polls() {
         <Button onClick={openCreate}>{t('polls.add', 'Add poll')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'id', header: t('polls.columns.id', 'ID'), render: (r) => r.id },
           {
@@ -346,18 +358,11 @@ export function Polls() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)] block mb-1">
-              {t('polls.content', 'Content')} *
-            </label>
-            <textarea
-              value={formContent}
-              onChange={(e) => setFormContent(e.target.value)}
-              required
-              rows={editing ? 4 : 3}
-              className="w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-            />
-          </div>
+          <RichTextField
+            label={`${t('polls.content', 'Content')} *`}
+            value={formContent}
+            onChange={setFormContent}
+          />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)] block mb-1">
               {t('polls.visibility', 'Visibility')}

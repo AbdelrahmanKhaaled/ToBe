@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LevelService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function Levels() {
   const { t } = useTranslation();
@@ -149,6 +150,16 @@ export function Levels() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => LevelService.remove(id),
+    confirmTitle: t('levels.bulkDeleteTitle', 'Delete selected levels'),
+    confirmMessage: (count) =>
+      t('levels.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} levels?' }),
+    successMessage: t('levels.bulkDeleted', 'Selected levels deleted'),
+  });
+
   const handleDelete = async (row) => {
     const name = row.name ?? row.name_ar ?? row.name_en ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? t('common.thisItem', 'this');
     const ok = await confirm({
@@ -179,6 +190,7 @@ export function Levels() {
         <Button onClick={openCreate}>{t('levels.add')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[{ key: 'name', header: t('levels.name'), render: (r) => getDisplayName(r) }]}
         data={data}
         meta={meta ?? undefined}
@@ -212,24 +224,8 @@ export function Levels() {
           <form onSubmit={handleSubmit} className="space-y-4">
           <Input label={t('levels.nameAr')} value={formNameAr} onChange={(e) => setFormNameAr(e.target.value)} required />
           <Input label={t('levels.nameEn')} value={formNameEn} onChange={(e) => setFormNameEn(e.target.value)} required />
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('levels.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('levels.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('levels.image')}</label>
             <input

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { AboutService } from '@/api';
-import { Button, Loading } from '@/components/ui';
+import { Button, Loading, RichTextField } from '@/components/ui';
 import { toast } from '@/utils/toast';
+import { toastApiError } from '@/utils/apiErrors';
 import { useTranslation } from 'react-i18next';
 
 function extractAboutFields(raw) {
@@ -41,7 +40,7 @@ export function AboutPage() {
         setAboutUsEn(en || '');
       } catch (err) {
         if (!cancelled) {
-          toast.error(err.message || 'Failed to load about-us content');
+          toastApiError(err, toast, 'Failed to load about-us content');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -58,9 +57,9 @@ export function AboutPage() {
     setSaving(true);
     try {
       await AboutService.update({ aboutUsAr, aboutUsEn });
-      toast.success('About page updated');
+      toast.success(t('about.updated', 'About page updated'));
     } catch (err) {
-      toast.error(err.message || 'Failed to update about-us content');
+      toastApiError(err, toast, 'Failed to update about-us content');
     } finally {
       setSaving(false);
     }
@@ -70,34 +69,24 @@ export function AboutPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-6">
+      <h1 className="text-2xl font-bold text-[var(--color-primary)] mb-2">
         {t('nav.about') || 'About page'}
       </h1>
+      <p className="text-sm text-gray-500 mb-6">
+        {t('about.editHint', 'Edit the About Us content here. Changes appear in the mobile app after saving.')}
+      </p>
       <form onSubmit={handleSubmit} className="space-y-8">
         <section className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-2">
-            المحتوى العربي
-          </h2>
-          <p className="text-xs text-gray-500 mb-3">
-            يمكنك كتابة المحتوى كاملاً (العناوين، الفقرات، القوائم) كما يظهر في صفحة "من نحن" في الموقع،
-            وسيتم حفظه في حقل واحد `about_us_ar` كنص منسَّق (HTML).
-          </p>
-          <ReactQuill
-            theme="snow"
+          <RichTextField
+            label={t('about.contentAr', 'Arabic content')}
             value={aboutUsAr}
             onChange={setAboutUsAr}
           />
         </section>
 
         <section className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow)] p-4">
-          <h2 className="text-lg font-semibold text-[var(--color-primary)] mb-2">
-            English content
-          </h2>
-          <p className="text-xs text-gray-500 mb-3">
-            Write the full English version of the About page here. It will be stored in `about_us_en`.
-          </p>
-          <ReactQuill
-            theme="snow"
+          <RichTextField
+            label={t('about.contentEn', 'English content')}
             value={aboutUsEn}
             onChange={setAboutUsEn}
           />
@@ -105,11 +94,10 @@ export function AboutPage() {
 
         <div className="flex justify-end">
           <Button type="submit" loading={saving}>
-            {saving ? 'Saving...' : 'Save changes'}
+            {saving ? t('common.saving', 'Saving...') : t('common.saveChanges', 'Save changes')}
           </Button>
         </div>
       </form>
     </div>
   );
 }
-

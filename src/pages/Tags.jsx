@@ -6,6 +6,7 @@ import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function tagName(row) {
   const n = row?.name;
@@ -97,6 +98,16 @@ export function Tags() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => TagService.remove(id),
+    confirmTitle: t('tags.bulkDeleteTitle', 'Delete selected tags'),
+    confirmMessage: (count) =>
+      t('tags.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} tags?' }),
+    successMessage: t('tags.bulkDeleted', 'Selected tags deleted'),
+  });
+
   const handleDelete = async (row) => {
     const ok = await confirm({
       title: t('tags.deleteTitle', 'Delete tag'),
@@ -119,10 +130,16 @@ export function Tags() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('tags.title', 'Tags')}</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-primary)]">{t('tags.title', 'Tags')}</h1>
+          <p className="text-sm text-gray-500 mt-1 max-w-2xl">
+            {t('tags.description', 'Tags label community posts by topic (e.g. motivation, nutrition). Users filter posts by tag in the app Community section.')}
+          </p>
+        </div>
         <Button onClick={openCreate}>{t('tags.add', 'Add tag')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'id', header: t('tags.columns.id', 'ID'), render: (r) => r.id },
           { key: 'name', header: t('tags.columns.name', 'Name'), render: (r) => tagName(r) || '—' },

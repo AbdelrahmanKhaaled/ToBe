@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ConsultationSessionService, ConsultationSubCategoryService, MentorService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView, RichTextField } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
 import { useLanguage } from '@/context/LanguageContext';
+import { appendNestedArrayToFormData } from '@/utils/formDataHelpers';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 import { useAuth } from '@/context/AuthContext';
 
 function extractRoleNames(user) {
@@ -311,19 +313,14 @@ export function ConsultationSessions() {
     if (formMentorId) fd.append('mentor_id', formMentorId);
     if (formImage) fd.append('image', formImage);
 
-    // available_dates[n][available_date|available_start_time] (1-based)
+    // available_dates[0][available_date|available_start_time] — optional
     const rows = Array.isArray(formAvailableDates) ? formAvailableDates : [];
-    rows
-      .map((r) => ({
-        available_date: r?.available_date != null ? String(r.available_date).trim() : '',
-        available_start_time: r?.available_start_time != null ? String(r.available_start_time).trim() : '',
-      }))
-      .filter((r) => r.available_date || r.available_start_time)
-      .forEach((r, idx) => {
-        const i = idx + 1;
-        if (r.available_date) fd.append(`available_dates[${i}][available_date]`, r.available_date);
-        if (r.available_start_time) fd.append(`available_dates[${i}][available_start_time]`, r.available_start_time);
-      });
+    appendNestedArrayToFormData(
+      fd,
+      'available_dates',
+      rows.filter((r) => r?.available_date || r?.available_start_time),
+      ['available_date', 'available_start_time']
+    );
     return fd;
   };
 
@@ -346,6 +343,16 @@ export function ConsultationSessions() {
       setSubmitting(false);
     }
   };
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => ConsultationSessionService.remove(id),
+    confirmTitle: t('consultationSessions.bulkDeleteTitle', 'Delete selected sessions'),
+    confirmMessage: (count) =>
+      t('consultationSessions.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} sessions?' }),
+    successMessage: t('consultationSessions.bulkDeleted', 'Selected sessions deleted'),
+  });
 
   const handleDelete = async (row) => {
     const lang = getCurrentLanguage();
@@ -414,6 +421,7 @@ export function ConsultationSessions() {
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('consultationSessions.name'), render: (r) => getDisplayName(r) },
           { key: 'price', header: t('consultationSessions.price'), render: (r) => r.price ?? '-' },
@@ -533,43 +541,10 @@ export function ConsultationSessions() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.contentAr')}</label>
-            <textarea
-              value={formContentAr}
-              onChange={(e) => setFormContentAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.contentEn')}</label>
-            <textarea
-              value={formContentEn}
-              onChange={(e) => setFormContentEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={3}
-            />
-          </div>
+          <RichTextField label={t('consultationSessions.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('consultationSessions.descEn')} value={formDescEn} onChange={setFormDescEn} />
+          <RichTextField label={t('consultationSessions.contentAr')} value={formContentAr} onChange={setFormContentAr} />
+          <RichTextField label={t('consultationSessions.contentEn')} value={formContentEn} onChange={setFormContentEn} />
 
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSessions.image')}</label>
@@ -583,9 +558,14 @@ export function ConsultationSessions() {
 
           <div className="pt-2 border-t border-[var(--color-border)]">
             <div className="flex items-center justify-between gap-3">
-              <label className="text-sm font-medium text-[var(--color-primary)]">
-                {t('consultationSessions.availableDates', 'Available dates')}
-              </label>
+              <div>
+                <label className="text-sm font-medium text-[var(--color-primary)]">
+                  {t('consultationSessions.availableDates', 'Available dates')} ({t('common.optional', 'Optional')})
+                </label>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {t('consultationSessions.availableDatesHint', 'Add dates and times when the mentor is available. Users choose from these slots when booking in the app.')}
+                </p>
+              </div>
               <Button
                 type="button"
                 variant="secondary"

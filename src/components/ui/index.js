@@ -5,4 +5,6 @@ export { ConfirmDialog } from './ConfirmDialog';
 export { Loading } from './Loading';
 export { EmptyState } from './EmptyState';
 export { DataTable } from './DataTable';
+export { RichTextEditor, RichTextField, FONT_SIZES } from './RichTextEditor';
+export { PhoneInput } from './PhoneInput';
 export { IconView, IconEdit, IconTrash, IconCheck, IconX, IconPublish, IconUnpublish, IconArrowLeft } from './Icons';

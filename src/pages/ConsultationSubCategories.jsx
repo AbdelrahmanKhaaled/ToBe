@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ConsultationCategoryService, ConsultationSubCategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView, RichTextField } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function ConsultationSubCategories() {
   const { t } = useTranslation();
@@ -177,6 +178,16 @@ export function ConsultationSubCategories() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => ConsultationSubCategoryService.remove(id),
+    confirmTitle: t('consultationSubCategories.bulkDeleteTitle', 'Delete selected sub-categories'),
+    confirmMessage: (count) =>
+      t('consultationSubCategories.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} sub-categories?' }),
+    successMessage: t('consultationSubCategories.bulkDeleted', 'Selected sub-categories deleted'),
+  });
+
   const handleDelete = async (row) => {
     const lang = getCurrentLanguage();
     const name =
@@ -237,6 +248,7 @@ export function ConsultationSubCategories() {
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('consultationSubCategories.name'), render: (r) => getDisplayName(r) },
           { key: 'category', header: t('consultationSubCategories.category'), render: (r) => getCategoryName(r) },
@@ -299,24 +311,8 @@ export function ConsultationSubCategories() {
             </select>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSubCategories.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSubCategories.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('consultationSubCategories.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('consultationSubCategories.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationSubCategories.image')}</label>
             <input

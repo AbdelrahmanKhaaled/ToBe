@@ -9,6 +9,7 @@ import {
   IconEdit as IconEditSmall,
   IconTrash as IconTrashSmall,
   IconView as IconViewSmall,
+  RichTextField,
 } from '@/components/ui';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -72,8 +73,39 @@ function formatMentorsValue(value) {
   return String(value);
 }
 
+function getCurrencyCodeFromPriceEntry(entry) {
+  const currency = entry?.currency;
+  if (currency && typeof currency === 'object') {
+    return String(currency.code ?? currency.currency_code ?? currency.symbol ?? currency.name ?? '').trim();
+  }
+  return String(entry?.currency_code ?? entry?.currency_id ?? '').trim();
+}
+
+function formatPriceAmount(price) {
+  if (price == null || price === '') return '—';
+  const n = Number(price);
+  if (!Number.isNaN(n)) {
+    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return String(price);
+}
+
+function formatPricesList(value) {
+  const list = Array.isArray(value) ? value : value != null && typeof value === 'object' ? [value] : [];
+  if (!list.length) return '—';
+  return list
+    .map((entry) => {
+      const code = getCurrencyCodeFromPriceEntry(entry) || '—';
+      return `${code} ${formatPriceAmount(entry?.price ?? entry?.amount)}`;
+    })
+    .join(' · ');
+}
+
 function getDisplayValue(key, value, t) {
   if (value === null || value === undefined) return '—';
+  if (key === 'prices' || key === 'course_prices') {
+    return formatPricesList(value);
+  }
   if (key === 'mentors') {
     return formatMentorsValue(value);
   }
@@ -95,6 +127,7 @@ function getDisplayValue(key, value, t) {
 }
 
 const RELATION_KEYS = new Set(['category', 'sub_category', 'level', 'mentor', 'mentors']);
+const CUSTOM_RAW_KEYS = new Set([...RELATION_KEYS, 'prices', 'course_prices']);
 
 function labelForKey(key, t) {
   const map = {
@@ -105,6 +138,8 @@ function labelForKey(key, t) {
     image: t('common.image', 'Image'),
     type: t('common.type', 'Type'),
     price: t('common.price', 'Price'),
+    prices: t('courses.prices', 'Prices'),
+    course_prices: t('courses.prices', 'Prices'),
     url: t('common.url', 'URL'),
     category: t('common.category', 'Category'),
     sub_category: t('common.subCategory', 'Sub Category'),
@@ -129,6 +164,7 @@ function buildDisplayRows(item, t) {
     'image',
     'type',
     'price',
+    'prices',
     'url',
     'category',
     'level',
@@ -150,20 +186,21 @@ function buildDisplayRows(item, t) {
         key,
         label: labelForKey(key, t),
         value: getDisplayValue(key, raw, t),
-        raw: RELATION_KEYS.has(key) ? raw : undefined,
+        raw: CUSTOM_RAW_KEYS.has(key) ? raw : undefined,
       });
     }
   }
   for (const key of Object.keys(item)) {
     if (seen.has(key) || shouldSkipKey(key)) continue;
     if (key === 'lessons' || key === 'posts' || key === 'polls' || key === 'articles') continue;
+    if (key === 'course_prices' && 'prices' in item) continue;
     if (typeof item[key] === 'function') continue;
     const rawVal = item[key];
     rows.push({
       key,
       label: labelForKey(key, t),
       value: getDisplayValue(key, rawVal, t),
-      raw: RELATION_KEYS.has(key) ? rawVal : undefined,
+      raw: CUSTOM_RAW_KEYS.has(key) ? rawVal : undefined,
     });
   }
   return rows;
@@ -224,6 +261,7 @@ export function CourseSingle() {
   const [lessonVideoUrl, setLessonVideoUrl] = useState('');
   const [lessonOrder, setLessonOrder] = useState('');
   const [lessonDuration, setLessonDuration] = useState('');
+  const [lessonEarningPoints, setLessonEarningPoints] = useState('0');
   const [lessonSubmitting, setLessonSubmitting] = useState(false);
 
   useEffect(() => {
@@ -283,6 +321,7 @@ export function CourseSingle() {
     setLessonVideoUrl('');
     setLessonOrder('');
     setLessonDuration('');
+    setLessonEarningPoints('0');
     // Try to fetch next order from API for convenience
     try {
       setLessonsLoading(true);
@@ -320,6 +359,7 @@ export function CourseSingle() {
       setLessonVideoUrl(d.video_url ?? '');
       setLessonOrder(String(d.order ?? ''));
       setLessonDuration(String(d.duration ?? ''));
+      setLessonEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -364,6 +404,7 @@ export function CourseSingle() {
           course_id: item.id,
           order: lessonOrder || '1',
           duration: lessonDuration,
+          earning_points: lessonEarningPoints || '0',
         };
         await LessonService.update(editingLesson.id, params);
         toast.success('Lesson updated');
@@ -380,6 +421,7 @@ export function CourseSingle() {
         fd.append('course_type', item.type || 'recorded');
         fd.append('order', lessonOrder || '1');
         fd.append('duration', lessonDuration || '0');
+        fd.append('earning_points', lessonEarningPoints || '0');
         const created = await LessonService.create(fd);
         const newLesson = created?.lesson ?? created?.data ?? created ?? null;
         toast.success('Lesson created. You can now upload video.');
@@ -474,6 +516,32 @@ export function CourseSingle() {
                       </span>
                     ))}
                   </span>
+                ) : key === 'prices' || key === 'course_prices' ? (
+                  Array.isArray(raw) && raw.length > 0 ? (
+                    <ul className="flex flex-wrap gap-2">
+                      {raw.map((entry, i) => {
+                        const code = getCurrencyCodeFromPriceEntry(entry) || '—';
+                        const amount = formatPriceAmount(entry?.price ?? entry?.amount);
+                        const isDefault = entry?.currency?.is_default === true;
+                        return (
+                          <li
+                            key={entry?.id ?? entry?.currency_id ?? `${code}-${i}`}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius)] bg-[var(--color-bg-light)] border border-[var(--color-border)] text-sm"
+                          >
+                            <span className="font-semibold text-[var(--color-accent)]">{code}</span>
+                            <span className="text-[var(--color-primary)]">{amount}</span>
+                            {isDefault ? (
+                              <span className="text-xs text-gray-500">
+                                ({t('common.default', 'default')})
+                              </span>
+                            ) : null}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    '—'
+                  )
                 ) : key === 'accepted' ? (
                   <span
                     className={`inline-block px-2 py-1 rounded text-sm ${
@@ -715,24 +783,16 @@ export function CourseSingle() {
               value={lessonDuration}
               onChange={(e) => setLessonDuration(e.target.value)}
             />
-            <div>
-              <label className="text-sm font-medium text-[var(--color-primary)]">Content (Arabic)</label>
-              <textarea
-                value={lessonContentAr}
-                onChange={(e) => setLessonContentAr(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-                rows={2}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[var(--color-primary)]">Content (English)</label>
-              <textarea
-                value={lessonContentEn}
-                onChange={(e) => setLessonContentEn(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-                rows={2}
-              />
-            </div>
+            <Input
+              label={t('common.earningPoints', 'Earning points')}
+              type="number"
+              min="0"
+              value={lessonEarningPoints}
+              onChange={(e) => setLessonEarningPoints(e.target.value)}
+              required
+            />
+            <RichTextField label="Content (Arabic)" value={lessonContentAr} onChange={setLessonContentAr} />
+            <RichTextField label="Content (English)" value={lessonContentEn} onChange={setLessonContentEn} />
             {editingLesson?.id && (
               <div className="pt-3 mt-2 border-t border-[var(--color-border)]">
                 <p className="text-sm font-medium text-[var(--color-primary)] mb-2">

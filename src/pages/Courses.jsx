@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CourseService, SubCategoryService, LevelService, MentorService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconCheck, IconX } from '@/components/ui';
+import { CourseService, SubCategoryService, LevelService, MentorService, UserService, CurrencyService } from '@/api';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, IconCheck, IconX, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
@@ -9,6 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { appendArrayToFormData, appendPricesToFormData } from '@/utils/formDataHelpers';
+import { toastApiError } from '@/utils/apiErrors';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function getItemName(item, lang = 'en') {
   if (!item) return '—';
@@ -92,6 +95,41 @@ function toFormValue(val) {
   return String(val);
 }
 
+function currencyLabel(c) {
+  if (!c) return '';
+  const code = c.code ?? c.currency_code ?? c.symbol;
+  const name = c.name ?? c.title;
+  if (code && name && String(name) !== String(code)) return `${code} — ${name}`;
+  return String(code ?? name ?? c.id ?? '');
+}
+
+function pricesMapFromRow(row) {
+  const map = {};
+  const list = row?.prices ?? row?.course_prices ?? [];
+  if (Array.isArray(list)) {
+    list.forEach((p) => {
+      const cid = p?.currency_id ?? p?.currency?.id;
+      const price = p?.price ?? p?.amount;
+      if (cid != null && price != null && String(price).trim() !== '') {
+        map[String(cid)] = String(price);
+      }
+    });
+  }
+  return map;
+}
+
+function buildPriceRows(currencies, formPrices) {
+  return (Array.isArray(currencies) ? currencies : [])
+    .map((c) => {
+      const cid = c?.id;
+      if (cid == null) return null;
+      const price = formPrices[String(cid)];
+      if (price == null || String(price).trim() === '') return null;
+      return { currency_id: String(cid), price: String(price).trim() };
+    })
+    .filter(Boolean);
+}
+
 export function Courses() {
   const { t } = useTranslation();
   const { lang } = useLanguage();
@@ -108,12 +146,16 @@ export function Courses() {
   const [formDescEn, setFormDescEn] = useState('');
   const [formImage, setFormImage] = useState(null);
   const [formType, setFormType] = useState('live');
-  const [formPrice, setFormPrice] = useState('');
+  const [formPrices, setFormPrices] = useState({});
+  const [currencies, setCurrencies] = useState([]);
   const [formPricePoints, setFormPricePoints] = useState('');
   const [formSubCategoryId, setFormSubCategoryId] = useState('');
   const [formLevelId, setFormLevelId] = useState('');
   const [formMentorId, setFormMentorId] = useState('');
   const [formCoMentorIds, setFormCoMentorIds] = useState([]);
+  const [formVisibility, setFormVisibility] = useState('public');
+  const [formPrivateUserIds, setFormPrivateUserIds] = useState([]);
+  const [studentUsers, setStudentUsers] = useState([]);
   const [formEarningPoints, setFormEarningPoints] = useState('0');
   const [submitting, setSubmitting] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -239,12 +281,14 @@ export function Courses() {
     setFormDescEn('');
     setFormImage(null);
     setFormType('live');
-    setFormPrice('');
+    setFormPrices({});
     setFormPricePoints('');
     setFormSubCategoryId('');
     setFormLevelId('');
     setFormMentorId(resolveMentorIdForUser(authUser, mentors));
     setFormCoMentorIds([]);
+    setFormVisibility('public');
+    setFormPrivateUserIds([]);
     setFormEarningPoints('0');
     setModalOpen(true);
   };
@@ -262,7 +306,7 @@ export function Courses() {
     setFormDescEn(toFormValue(descObj?.en ?? row?.description_en ?? en?.description ?? row?.description));
     setFormImage(null);
     setFormType(row.type ?? 'live');
-    setFormPrice(row.price != null ? String(row.price) : '');
+    setFormPrices(pricesMapFromRow(row));
     setFormPricePoints(row.price_points != null ? String(row.price_points) : row.pricePoints != null ? String(row.pricePoints) : '');
     setFormSubCategoryId(
       row.sub_category_id != null
@@ -274,6 +318,9 @@ export function Courses() {
     setFormLevelId(row.level_id != null ? String(row.level_id) : row.level?.id != null ? String(row.level.id) : '');
     setFormMentorId(row.mentor_id != null ? String(row.mentor_id) : row.mentor?.id != null ? String(row.mentor.id) : '');
     setFormCoMentorIds(coMentorIdsFromRow(row));
+    setFormVisibility(row.visibility === 'private' ? 'private' : 'public');
+    const uidList = row.user_ids ?? row.users?.map((u) => u.id) ?? [];
+    setFormPrivateUserIds(Array.isArray(uidList) ? uidList.map(String) : []);
     setFormEarningPoints(row.earning_points != null ? String(row.earning_points) : '0');
     setModalOpen(true);
   };
@@ -301,7 +348,7 @@ export function Courses() {
         setFormDescAr(toFormValue(descObj?.ar ?? d.description_ar ?? ar?.description));
         setFormDescEn(toFormValue(descObj?.en ?? d.description_en ?? en?.description));
         setFormType(d.type ?? 'live');
-        setFormPrice(d.price != null ? String(d.price) : '');
+        setFormPrices(pricesMapFromRow(d));
         setFormPricePoints(d.price_points != null ? String(d.price_points) : d.pricePoints != null ? String(d.pricePoints) : '');
         setFormSubCategoryId(
           d.sub_category_id != null
@@ -313,6 +360,9 @@ export function Courses() {
         setFormLevelId(d.level_id != null ? String(d.level_id) : d.level?.id != null ? String(d.level.id) : '');
         setFormMentorId(d.mentor_id != null ? String(d.mentor_id) : d.mentor?.id != null ? String(d.mentor.id) : '');
         setFormCoMentorIds(coMentorIdsFromRow(d));
+        setFormVisibility(d.visibility === 'private' ? 'private' : 'public');
+        const uidList = d.user_ids ?? d.users?.map((u) => u.id) ?? [];
+        setFormPrivateUserIds(Array.isArray(uidList) ? uidList.map(String) : []);
         setFormEarningPoints(d.earning_points != null ? String(d.earning_points) : '0');
       })
       .catch(() => {})
@@ -322,6 +372,27 @@ export function Courses() {
     return () => { cancelled = true; };
   }, [editing?.id, modalOpen]);
 
+  useEffect(() => {
+    if (!modalOpen) return;
+    let cancelled = false;
+    Promise.all([
+      UserService.getAll({ per_page: 200, page: 1 }),
+      CurrencyService.getAll({ per_page: 100 }),
+    ])
+      .then(([usersRes, currenciesRes]) => {
+        if (cancelled) return;
+        setStudentUsers(Array.isArray(usersRes?.data) ? usersRes.data : []);
+        setCurrencies(Array.isArray(currenciesRes?.data) ? currenciesRes.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStudentUsers([]);
+          setCurrencies([]);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [modalOpen]);
+
   const buildFormData = () => {
     const fd = new FormData();
     fd.append('name_ar', formNameAr || formNameEn || '');
@@ -330,7 +401,7 @@ export function Courses() {
     fd.append('description_en', formDescEn ?? '');
     if (formImage) fd.append('image', formImage);
     fd.append('type', formType || 'live');
-    fd.append('price', formPrice || '0');
+    appendPricesToFormData(fd, buildPriceRows(currencies, formPrices));
     fd.append('price_points', formPricePoints || '0');
     fd.append('sub_category_id', formSubCategoryId || '');
     fd.append('level_id', formLevelId || '');
@@ -339,12 +410,14 @@ export function Courses() {
       (mentorSelectLocked && authUser?.id != null ? String(authUser.id) : '');
     fd.append('mentor_id', mid);
     const midStr = String(mid || '');
-    formCoMentorIds
+    const coIds = formCoMentorIds
       .map((id) => String(id).trim())
-      .filter((id) => id && id !== midStr)
-      .forEach((id, idx) => {
-        fd.append(`mentors[${idx + 1}]`, id);
-      });
+      .filter((id) => id && id !== midStr);
+    appendArrayToFormData(fd, 'mentors', coIds);
+    fd.append('visibility', formVisibility || 'public');
+    if (formVisibility === 'private') {
+      appendArrayToFormData(fd, 'user_ids', formPrivateUserIds);
+    }
     fd.append('earning_points', formEarningPoints || '0');
     return fd;
   };
@@ -356,6 +429,19 @@ export function Courses() {
       (mentorSelectLocked && authUser?.id != null ? String(authUser.id) : '');
     if (!formSubCategoryId || !formLevelId || !mentorOk) {
       toast.error('Please select sub-category, level, and mentor.');
+      return;
+    }
+    if (formVisibility === 'private' && formPrivateUserIds.length === 0) {
+      toast.error(t('courses.privateUsersRequired', 'Select at least one user for a private course.'));
+      return;
+    }
+    const priceRows = buildPriceRows(currencies, formPrices);
+    if (priceRows.length === 0) {
+      toast.error(t('courses.pricesRequired', 'Enter at least one price for a supported currency.'));
+      return;
+    }
+    if (!editing && !formImage) {
+      toast.error(t('courses.imageRequired', 'Course image is required.'));
       return;
     }
     setSubmitting(true);
@@ -370,7 +456,7 @@ export function Courses() {
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message);
+      toastApiError(err, toast, 'Failed to save course');
     } finally {
       setSubmitting(false);
     }
@@ -409,6 +495,16 @@ export function Courses() {
       toast.error(err?.message ?? 'Failed to delete course');
     }
   };
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => CourseService.remove(id),
+    confirmTitle: t('courses.bulkDeleteTitle', 'Delete selected courses'),
+    confirmMessage: (count) =>
+      t('courses.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} courses?' }),
+    successMessage: t('courses.bulkDeleted', 'Selected courses deleted'),
+  });
 
   const handleDelete = async (row) => {
     const courseName = getCourseName(row);
@@ -529,6 +625,7 @@ export function Courses() {
         </select>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('courses.name'), render: (r) => getCourseName(r) },
           { key: 'accepted', header: t('courses.status'), render: (r) => getAcceptedBadge(r) },
@@ -621,32 +718,18 @@ export function Courses() {
             onChange={(e) => setFormNameEn(e.target.value)}
             required
           />
+          <RichTextField label={t('courses.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('courses.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('courses.image')}</label>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('courses.image')} {!editing ? '*' : ''}
+            </label>
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
               onChange={(e) => setFormImage(e.target.files?.[0] ?? null)}
               className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] text-sm file:mr-2 file:rounded file:border-0 file:bg-[var(--color-accent)] file:px-3 file:py-1 file:text-white file:text-sm"
-              aria-required="false"
+              required={!editing}
             />
           </div>
           <div>
@@ -662,14 +745,39 @@ export function Courses() {
               <option value="recorded">{t('courses.filters.recorded')}</option>
             </select>
           </div>
-          <Input
-            type="number"
-            min="0"
-            step="any"
-            label={t('courses.price')}
-            value={formPrice}
-            onChange={(e) => setFormPrice(e.target.value)}
-          />
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('courses.prices', 'Prices')} *
+            </label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">
+              {t('courses.pricesHint', 'Enter the course price for each currency (same as Postman: prices[0][currency_id] + prices[0][price]). At least one currency is required.')}
+            </p>
+            {currencies.length === 0 ? (
+              <p className="text-sm text-gray-500">{t('courses.loadingCurrencies', 'Loading currencies…')}</p>
+            ) : (
+              <div className="space-y-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-bg-light)] p-3">
+                {currencies.map((c) => {
+                  const cid = String(c.id);
+                  return (
+                    <div key={cid} className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-2 items-center">
+                      <span className="text-sm text-[var(--color-primary)]">{currencyLabel(c)}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="0"
+                        value={formPrices[cid] ?? ''}
+                        onChange={(e) =>
+                          setFormPrices((prev) => ({ ...prev, [cid]: e.target.value }))
+                        }
+                        className="w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)] bg-white text-sm"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <Input
             type="number"
             min="0"
@@ -767,6 +875,48 @@ export function Courses() {
             value={formEarningPoints}
             onChange={(e) => setFormEarningPoints(e.target.value)}
           />
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              {t('courses.visibility', 'Visibility')}
+            </label>
+            <select
+              value={formVisibility}
+              onChange={(e) => setFormVisibility(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
+            >
+              <option value="public">{t('courses.visibilityPublic', 'Public — visible to everyone')}</option>
+              <option value="private">{t('courses.visibilityPrivate', 'Private — selected users only')}</option>
+            </select>
+          </div>
+          {formVisibility === 'private' ? (
+            <div>
+              <label className="text-sm font-medium text-[var(--color-primary)]">
+                {t('courses.privateUsers', 'Allowed users')}
+              </label>
+              <p className="text-xs text-gray-500 mt-0.5 mb-2">
+                {t('courses.privateUsersHint', 'Only selected users will see this course in the app.')}
+              </p>
+              <div className="max-h-40 overflow-y-auto rounded-[var(--radius)] border border-[var(--color-border)] p-2 space-y-2 bg-[var(--color-bg-light)]">
+                {studentUsers.map((u) => {
+                  const idStr = String(u.id);
+                  return (
+                    <label key={u.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formPrivateUserIds.includes(idStr)}
+                        onChange={(e) => {
+                          setFormPrivateUserIds((prev) =>
+                            e.target.checked ? [...new Set([...prev, idStr])] : prev.filter((x) => x !== idStr)
+                          );
+                        }}
+                      />
+                      <span>{u.name ?? u.email ?? idStr}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               {t('common.cancel')}

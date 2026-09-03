@@ -6,6 +6,7 @@ import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { Input } from '@/components/ui/Input';
 import { getStoredMentorPhone, setStoredMentorPhone } from '@/utils/mentorPhoneStorage';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 import { useTranslation } from 'react-i18next';
 
 export function Mentors() {
@@ -290,6 +291,16 @@ export function Mentors() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => MentorService.remove(id),
+    confirmTitle: t('mentors.bulkDeleteTitle', 'Delete selected mentors'),
+    confirmMessage: (count) =>
+      t('mentors.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} mentors?' }),
+    successMessage: t('mentors.bulkDeleted', 'Selected mentors deleted'),
+  });
+
   const handleDelete = async (row) => {
     const ok = await confirm({
       title: t('mentors.deleteTitle'),
@@ -316,6 +327,7 @@ export function Mentors() {
         <Button onClick={openCreate}>{t('mentors.add')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('mentors.name'), render: (row) => row.name ?? row.name_ar ?? row.name_en ?? '—' },
           { key: 'email', header: t('mentors.email') },

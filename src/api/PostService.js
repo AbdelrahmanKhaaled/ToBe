@@ -60,6 +60,16 @@ class PostServiceClass extends BaseApiService {
   async remove(id) {
     await this.deleteRequest(`/${id}`);
   }
+
+  /** DELETE /dashboard/posts/bulk-delete — body: { ids: number[] } */
+  async bulkDelete(ids) {
+    const list = (Array.isArray(ids) ? ids : []).map((id) => Number(id)).filter((id) => !Number.isNaN(id));
+    if (!list.length) return;
+    return this.request('/bulk-delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ ids: list }),
+    });
+  }
 }
 
 export const PostService = new PostServiceClass();

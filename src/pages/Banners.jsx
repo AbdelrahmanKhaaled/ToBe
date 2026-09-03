@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BannerService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function Banners() {
   const { t } = useTranslation();
@@ -190,6 +191,16 @@ export function Banners() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => BannerService.remove(id),
+    confirmTitle: t('bannersPage.bulkDeleteTitle', 'Delete selected banners'),
+    confirmMessage: (count) =>
+      t('bannersPage.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} banners?' }),
+    successMessage: t('bannersPage.bulkDeleted', 'Selected banners deleted'),
+  });
+
   const handleDelete = async (row) => {
     const name =
       row.name ??
@@ -240,6 +251,7 @@ export function Banners() {
         <Button onClick={openCreate}>{t('bannersPage.add')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'title', header: t('bannersPage.name'), render: (r) => getDisplayName(r) },
           { key: 'description', header: t('bannersPage.description'), render: (r) => getDisplayDesc(r) },
@@ -307,24 +319,8 @@ export function Banners() {
             onChange={(e) => setFormNameEn(e.target.value)}
             required
           />
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('bannersPage.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('bannersPage.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('bannersPage.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('bannersPage.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <Input
             label={t('bannersPage.buttonTextAr')}
             value={formButtonTextAr}

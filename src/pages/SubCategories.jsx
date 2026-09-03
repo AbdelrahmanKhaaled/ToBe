@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CategoryService, SubCategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView, RichTextField } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function SubCategories() {
   const { t } = useTranslation();
@@ -183,6 +184,16 @@ export function SubCategories() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => SubCategoryService.remove(id),
+    confirmTitle: t('subCategories.bulkDeleteTitle', 'Delete selected sub-categories'),
+    confirmMessage: (count) =>
+      t('subCategories.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} sub-categories?' }),
+    successMessage: t('subCategories.bulkDeleted', 'Selected sub-categories deleted'),
+  });
+
   const handleDelete = async (row) => {
     const name = row.name ?? row.translations?.ar?.name ?? row.translations?.en?.name ?? 'this';
     const ok = await confirm({
@@ -224,6 +235,7 @@ export function SubCategories() {
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('subCategories.name'), render: (r) => getDisplayName(r) },
           { key: 'category', header: t('subCategories.category'), render: (r) => getCategoryName(r) },
@@ -284,24 +296,8 @@ export function SubCategories() {
             </select>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('subCategories.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('subCategories.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('subCategories.image')}</label>
             <input

@@ -4,6 +4,7 @@ import { ConsultationRequestService } from '@/api';
 import { DataTable, Button, Loading, IconView, IconTrash, IconCheck } from '@/components/ui';
 import { toast } from '@/utils/toast';
 import { useConfirm } from '@/utils/confirmDialog';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 import { useTranslation } from 'react-i18next';
 
 export function ConsultationRequests() {
@@ -78,6 +79,38 @@ export function ConsultationRequests() {
     }
   };
 
+  const handleCancel = async (row) => {
+    const id = row?.id;
+    if (!id) return;
+    const ok = await confirm({
+      title: t('consultationRequests.cancelTitle', 'Cancel request'),
+      message: t('consultationRequests.cancelMessage', 'Cancel this consultation request?'),
+      confirmLabel: t('consultationRequests.cancel', 'Cancel request'),
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setUpdatingId(id);
+    try {
+      await ConsultationRequestService.updateStatus(id, 'cancelled');
+      toast.success(t('consultationRequests.cancelled', 'Request cancelled'));
+      fetchData();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => ConsultationRequestService.remove(id),
+    confirmTitle: t('consultationRequests.bulkDeleteTitle', 'Delete selected requests'),
+    confirmMessage: (count) =>
+      t('consultationRequests.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} requests?' }),
+    successMessage: t('consultationRequests.bulkDeleted', 'Selected requests deleted'),
+  });
+
   const handleDelete = async (row) => {
     const id = row?.id;
     if (!id) return;
@@ -101,13 +134,17 @@ export function ConsultationRequests() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-primary)]">
           {t('consultationRequests.title', 'Consultation requests')}
         </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {t('consultationRequests.hint', 'Set mentor available times under Consultation Sessions. Users pick from those slots in the app.')}
+        </p>
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'id', header: t('consultationRequests.columns.id', 'ID'), render: (r) => r.id },
           { key: 'status', header: t('consultationRequests.columns.status', 'Status'), render: (r) => r.status ?? '-' },
@@ -142,6 +179,16 @@ export function ConsultationRequests() {
               <option value="rejected">{t('consultationRequests.statuses.rejected', 'Rejected')}</option>
               <option value="completed">{t('consultationRequests.statuses.completed', 'Completed')}</option>
             </select>
+            <Button
+              type="button"
+              variant="ghost"
+              className="!px-2 !py-1 text-xs"
+              loading={updatingId === row.id}
+              onClick={() => handleCancel(row)}
+              title={t('consultationRequests.cancel', 'Cancel request')}
+            >
+              {t('consultationRequests.cancel', 'Cancel')}
+            </Button>
             <Button
               type="button"
               variant="ghost"

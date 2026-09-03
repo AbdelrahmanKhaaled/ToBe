@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AccessControlService, UserService } from '@/api';
-import { Button, DataTable, IconEdit, IconTrash, IconView, Input, Loading, Modal } from '@/components/ui';
+import { Button, DataTable, IconEdit, IconTrash, IconView, Input, Loading, Modal, PhoneInput } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
+import { toastApiError } from '@/utils/apiErrors';
 import { useTranslation } from 'react-i18next';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 function normalizeListItem(row, idx, fallbackPage) {
   const id = row?.id ?? row?.user_id ?? row?.userId ?? row?._id ?? `${fallbackPage}-${idx}`;
@@ -208,6 +210,16 @@ export function Users() {
     fetchData();
   }, [fetchData]);
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    bulkDelete: (ids) => UserService.bulkDelete(ids),
+    confirmTitle: t('users.bulkDeleteTitle', 'Delete selected users'),
+    confirmMessage: (count) =>
+      t('users.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} users?' }),
+    successMessage: t('users.bulkDeleted', 'Selected users deleted'),
+  });
+
   const openCreate = () => {
     resetForm();
     setModalOpen(true);
@@ -273,7 +285,7 @@ export function Users() {
       resetForm();
       await fetchData();
     } catch (err) {
-      toast.error(err.message);
+      toastApiError(err, toast, t('users.saveFailed', 'Failed to save user'));
     } finally {
       setSubmitting(false);
     }
@@ -350,6 +362,7 @@ export function Users() {
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('users.name'), render: (r) => r.name ?? '—' },
           { key: 'email', header: t('users.email'), render: (r) => r.email ?? '—' },
@@ -418,7 +431,7 @@ export function Users() {
             <Input label={t('users.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
-          <Input label={t('users.phoneNumber')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+          <PhoneInput label={t('users.phoneNumber')} value={phoneNumber} onChange={setPhoneNumber} />
 
           <Input
             label={editingId ? t('users.newPassword', 'New password (leave blank to keep)') : t('users.password', 'Password')}

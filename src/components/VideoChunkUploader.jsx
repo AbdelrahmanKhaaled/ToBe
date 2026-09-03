@@ -57,12 +57,18 @@ export function LessonVideoUploader({ lessonId, onComplete }) {
           const currentProgress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
           setProgress(currentProgress);
 
-          if (response.status === 201) {
-            const finalPath = response.data?.path || response.data?.video_url || response.data;
+          const isLastChunk = chunkIndex === totalChunks - 1;
+          if (response.status === 201 || isLastChunk) {
+            const finalPath =
+              response.data?.path ??
+              response.data?.video_url ??
+              response.data?.data?.video_url;
             if (finalPath && typeof onComplete === 'function') {
               onComplete(finalPath);
             }
-            toast.success(t('lessons.videoUpload.complete', 'Video upload complete'));
+            if (isLastChunk || response.status === 201) {
+              toast.success(t('lessons.videoUpload.complete', 'Video upload complete'));
+            }
           }
         } catch (error) {
           console.error(`Error uploading chunk ${chunkIndex + 1}`, error);

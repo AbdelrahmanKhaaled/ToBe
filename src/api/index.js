@@ -23,3 +23,4 @@ export { WalletService } from './WalletService';
 export { TagService } from './TagService';
 export { PostService } from './PostService';
 export { PollService } from './PollService';
+export { CurrencyService } from './CurrencyService';

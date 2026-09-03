@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CourseService, PostService, TagService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
+import { toastApiError } from '@/utils/apiErrors';
+import { appendArrayToFormData } from '@/utils/formDataHelpers';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 /**
  * Stable id for an existing post image row (API may use id, post_image_id, etc.).
@@ -110,7 +113,8 @@ export function Posts() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formCourseId, setFormCourseId] = useState('');
-  const [formContent, setFormContent] = useState('');
+  const [formContentAr, setFormContentAr] = useState('');
+  const [formContentEn, setFormContentEn] = useState('');
   const [formVisibility, setFormVisibility] = useState('all');
   const [formTagIds, setFormTagIds] = useState([]);
   const [formImages, setFormImages] = useState([]);
@@ -182,9 +186,20 @@ export function Posts() {
     fetchData();
   }, [fetchData]);
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    bulkDelete: (ids) => PostService.bulkDelete(ids),
+    confirmTitle: t('posts.bulkDeleteTitle', 'Delete selected posts'),
+    confirmMessage: (count) =>
+      t('posts.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} posts?' }),
+    successMessage: t('posts.bulkDeleted', 'Selected posts deleted'),
+  });
+
   const resetForm = useCallback(() => {
     setFormCourseId('');
-    setFormContent('');
+    setFormContentAr('');
+    setFormContentEn('');
     setFormVisibility('all');
     setFormTagIds([]);
     setFormImages([]);
@@ -202,8 +217,8 @@ export function Posts() {
     setEditing(row);
     const cid = row.course_id ?? row.course?.id ?? '';
     setFormCourseId(cid != null ? String(cid) : '');
-    const rawContent = row.content;
-    setFormContent(typeof rawContent === 'string' ? rawContent : String(rawContent ?? ''));
+    setFormContentAr(typeof row.content_ar === 'string' ? row.content_ar : typeof row.content === 'string' ? row.content : '');
+    setFormContentEn(typeof row.content_en === 'string' ? row.content_en : '');
     setFormVisibility(row.visibility === 'enrolled' ? 'enrolled' : 'all');
     setFormTagIds(collectTagIdsFromPost(row).map(String));
     setFormImages([]);
@@ -278,16 +293,14 @@ export function Posts() {
    */
   const buildPostFormData = (isUpdate) => {
     const fd = new FormData();
-    fd.append('content', formContent);
+    fd.append('content_ar', formContentAr);
+    fd.append('content_en', formContentEn);
+    fd.append('content', formContentEn || formContentAr);
     fd.append('visibility', formVisibility);
-    if (!isUpdate) {
-      fd.append('course_id', formCourseId);
-    } else if (formCourseId) {
+    if (formCourseId) {
       fd.append('course_id', formCourseId);
     }
-    formTagIds.forEach((tagId, i) => {
-      if (tagId != null && String(tagId).trim() !== '') fd.append(`tags[${i + 1}]`, String(tagId).trim());
-    });
+    appendArrayToFormData(fd, 'tags', formTagIds);
     if (isUpdate) {
       const keepIds = existingImages
         .map((img) => getPostImagePersistId(img))
@@ -296,26 +309,44 @@ export function Posts() {
         fd.append('existing_images[]', id);
       });
       keepIds.forEach((id, i) => {
-        fd.append(`keep_image_ids[${i + 1}]`, id);
+        fd.append(`keep_image_ids[${i}]`, id);
       });
       removedExistingImageIds.forEach((id) => {
         if (id != null && String(id).trim() !== '') fd.append('deleted_images[]', String(id).trim());
       });
-      formImages.forEach((file, i) => {
-        if (file instanceof File) fd.append(`images[${i + 1}]`, file);
-      });
-    } else {
-      formImages.forEach((file, i) => {
-        if (file instanceof File) fd.append(`images[${i + 1}]`, file);
-      });
     }
+    formImages.forEach((file, i) => {
+      if (file instanceof File) fd.append(`images[${i}]`, file);
+    });
     return fd;
   };
 
+  const countKeptExistingImages = () =>
+    existingImages.filter((img) => {
+      const src = img?.image_url ?? img?.url;
+      if (!src) return false;
+      const pid = getPostImagePersistId(img);
+      if (!pid) return true;
+      return !removedExistingImageIds.includes(pid);
+    }).length;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formContentAr.trim()) {
+      toast.error(t('posts.contentArRequired', 'Enter Arabic content.'));
+      return;
+    }
+    if (!formContentEn.trim()) {
+      toast.error(t('posts.contentEnRequired', 'Enter English content.'));
+      return;
+    }
     if (!editing && !String(formCourseId).trim()) {
       toast.error(t('posts.selectCourse', 'Select course'));
+      return;
+    }
+    const totalImages = editing ? countKeptExistingImages() + formImages.length : formImages.length;
+    if (totalImages === 0) {
+      toast.error(t('posts.imagesRequired', 'At least one image is required.'));
       return;
     }
     setSubmitting(true);
@@ -330,7 +361,7 @@ export function Posts() {
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message);
+      toastApiError(err, toast, 'Failed to save post');
     } finally {
       setSubmitting(false);
     }
@@ -367,6 +398,7 @@ export function Posts() {
         <Button onClick={openCreate}>{t('posts.add', 'Add post')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'id', header: t('posts.columns.id', 'ID'), render: (r) => r.id },
           {
@@ -455,18 +487,16 @@ export function Posts() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="text-sm font-medium text-[var(--color-primary)] block mb-1">
-                {t('posts.content', 'Content')} *
-              </label>
-              <textarea
-                value={formContent}
-                onChange={(e) => setFormContent(e.target.value)}
-                required
-                rows={4}
-                className="w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              />
-            </div>
+            <RichTextField
+              label={`${t('posts.contentAr', 'Content (Arabic)')} *`}
+              value={formContentAr}
+              onChange={setFormContentAr}
+            />
+            <RichTextField
+              label={`${t('posts.contentEn', 'Content (English)')} *`}
+              value={formContentEn}
+              onChange={setFormContentEn}
+            />
             <div>
               <label className="text-sm font-medium text-[var(--color-primary)] block mb-1">
                 {t('posts.visibility', 'Visibility')}
@@ -484,9 +514,12 @@ export function Posts() {
               </select>
             </div>
             <div>
-              <span className="text-sm font-medium text-[var(--color-primary)] block mb-2">
+              <span className="text-sm font-medium text-[var(--color-primary)] block mb-1">
                 {t('posts.tags', 'Tags')}
               </span>
+              <p className="text-xs text-gray-500 mb-2">
+                {t('posts.tagsHint', 'Tags group community posts by topic so users can filter and find related content in the app.')}
+              </p>
               <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border border-[var(--color-border)] rounded-[var(--radius)] p-2">
                 {allTags.map((tag) => (
                   <label key={tag.id} className="inline-flex items-center gap-1 text-sm cursor-pointer">
@@ -538,14 +571,20 @@ export function Posts() {
               ) : null}
               <label className="text-sm font-medium text-[var(--color-primary)] block mb-1">
                 {editing
-                  ? t('posts.addMoreImages', 'Add more images (optional)')
-                  : t('posts.images', 'Images (optional)')}
+                  ? t('posts.addMoreImages', 'Add more images')
+                  : `${t('posts.images', 'Images')} *`}
               </label>
-              <p className="text-xs text-gray-500 mb-2">{t('posts.imagesHint')}</p>
+              <p className="text-xs text-gray-500 mb-2">
+                {t(
+                  'posts.imagesHint',
+                  'Upload at least one image. You can select multiple files (JPEG/PNG, max 2MB each).'
+                )}
+              </p>
               <input
                 type="file"
                 accept="image/*"
                 multiple
+                required={!editing && formImages.length === 0}
                 key={editing ? `edit-${editing.id}-img` : 'new-post-img'}
                 onChange={(e) => {
                   const picked = Array.from(e.target.files || []).filter((f) => f instanceof File);

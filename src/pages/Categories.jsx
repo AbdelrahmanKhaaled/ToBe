@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconView, IconEdit, IconTrash, RichTextField } from '@/components/ui';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
+import { toastApiError } from '@/utils/apiErrors';
 import { Input } from '@/components/ui/Input';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/LanguageContext';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function Categories() {
   const { t } = useTranslation();
@@ -60,6 +62,21 @@ export function Categories() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => CategoryService.remove(id),
+    confirmTitle: t('categories.bulkDeleteTitle', 'Delete selected categories'),
+    confirmMessage: (count) =>
+      t('categories.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} categories?' }),
+    successMessage: t('categories.bulkDeleted', 'Selected categories deleted'),
+    partialErrorMessage: (failed) =>
+      t('categories.bulkDeletePartial', {
+        failed,
+        defaultValue: '{{failed}} categories could not be deleted (linked data).',
+      }),
+  });
 
   const openCreate = () => {
     setEditing(null);
@@ -222,7 +239,11 @@ export function Categories() {
       toast.success(t('categories.deleteTitle'));
       fetchData();
     } catch (err) {
-      toast.error(err.message);
+      toastApiError(
+        err,
+        toast,
+        t('categories.deleteFailed', 'Cannot delete this category. It may be linked to sub-categories or courses.')
+      );
     }
   };
 
@@ -243,6 +264,7 @@ export function Categories() {
         <Button onClick={openCreate}>{t('categories.add')}</Button>
       </div>
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('categories.name'), render: (r) => getDisplayName(r) },
           {
@@ -303,28 +325,8 @@ export function Categories() {
             onChange={(e) => setFormTypeSlug(e.target.value)}
             required
           />
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('categories.descAr')}
-            </label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">
-              {t('categories.descEn')}
-            </label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('categories.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('categories.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">
               {t('categories.image')}

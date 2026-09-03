@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ConsultationCategoryService } from '@/api';
-import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView } from '@/components/ui';
+import { DataTable, Button, Modal, Loading, IconEdit, IconTrash, IconView, RichTextField } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { useConfirm } from '@/utils/confirmDialog';
 import { toast } from '@/utils/toast';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { getCurrentLanguage } from '@/utils/language';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchBilingualEdit } from '@/utils/bilingualEdit';
+import { useBulkDelete } from '@/hooks/useBulkDelete';
 
 export function ConsultationCategories() {
   const { t } = useTranslation();
@@ -142,6 +143,16 @@ export function ConsultationCategories() {
     }
   };
 
+  const { tableSelectionProps } = useBulkDelete({
+    confirm,
+    onDeleted: fetchData,
+    removeOne: (id) => ConsultationCategoryService.remove(id),
+    confirmTitle: t('consultationCategories.bulkDeleteTitle', 'Delete selected categories'),
+    confirmMessage: (count) =>
+      t('consultationCategories.bulkDeleteMessage', { count, defaultValue: 'Delete {{count}} categories?' }),
+    successMessage: t('consultationCategories.bulkDeleted', 'Selected categories deleted'),
+  });
+
   const handleDelete = async (row) => {
     const lang = getCurrentLanguage();
     const name =
@@ -191,6 +202,7 @@ export function ConsultationCategories() {
       </div>
 
       <DataTable
+        {...tableSelectionProps}
         columns={[
           { key: 'name', header: t('consultationCategories.name'), render: (r) => getDisplayName(r) },
           { key: 'slug', header: t('consultationCategories.slug'), render: (r) => r.slug ?? '-' },
@@ -245,24 +257,8 @@ export function ConsultationCategories() {
           />
           <Input label={t('consultationCategories.slug')} value={formSlug} onChange={(e) => setFormSlug(e.target.value)} />
 
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationCategories.descAr')}</label>
-            <textarea
-              value={formDescAr}
-              onChange={(e) => setFormDescAr(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationCategories.descEn')}</label>
-            <textarea
-              value={formDescEn}
-              onChange={(e) => setFormDescEn(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-[var(--radius)] border border-[var(--color-border)]"
-              rows={2}
-            />
-          </div>
+          <RichTextField label={t('consultationCategories.descAr')} value={formDescAr} onChange={setFormDescAr} />
+          <RichTextField label={t('consultationCategories.descEn')} value={formDescEn} onChange={setFormDescEn} />
           <div>
             <label className="text-sm font-medium text-[var(--color-primary)]">{t('consultationCategories.image')}</label>
             <input
